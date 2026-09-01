@@ -535,6 +535,122 @@
     <string name="install_mod_workshop_downloaded">Mod 已下载，点击安装。</string>
     <string name="install_mod_workshop_download_failed">下载失败，请重试。</string>
 
+    <!-- ===== Official Steam Workshop catalog ===== -->
+    <string-array name="workshop_sort_options">
+        <item>热门</item>
+        <item>最新发布</item>
+        <item>最近更新</item>
+        <item>订阅最多</item>
+    </string-array>
+    <string name="workshop_title">Project Zomboid 创意工坊</string>
+    <string name="workshop_detail_title">创意工坊项目</string>
+    <string name="workshop_search_hint">搜索创意工坊</string>
+    <string name="workshop_search">搜索</string>
+    <string name="workshop_previous">上一页</string>
+    <string name="workshop_next">下一页</string>
+    <string name="workshop_page_format">第 %1$d 页</string>
+    <string name="workshop_loading">正在加载创意工坊…</string>
+    <string name="workshop_loaded">加载完成</string>
+    <string name="workshop_empty">没有找到创意工坊项目。</string>
+    <string name="workshop_cover">创意工坊封面</string>
+    <string name="workshop_author_format">作者：%1$s</string>
+    <string name="workshop_details">详情</string>
+    <string name="workshop_open_steam">打开 Steam 页面</string>
+    <string name="workshop_open_steam_failed">没有可用的浏览器。</string>
+    <string name="workshop_download">下载</string>
+    <string name="workshop_enqueued">已加入下载中心。</string>
+    <string name="workshop_download_dependencies">下载依赖项</string>
+    <string name="workshop_dependencies_confirm">要将 %1$d 个依赖项加入下载中心吗？</string>
+    <string name="workshop_meta_format">大小：%1$s · 订阅：%2$s · 浏览：%3$s</string>
+    <string name="workshop_change_notes">更新日志</string>
+    <string name="workshop_dependencies">依赖项</string>
+    <string name="workshop_comments">评论</string>
+    <string name="workshop_comments_unavailable">此响应未包含评论。</string>
+    <string name="workshop_detail_missing">缺少创意工坊项目信息。</string>
+    <string name="install_mod_official_workshop_btn">浏览官方创意工坊</string>
+
+    <string name="workshop_download_notification_channel">创意工坊下载</string>
+    <string name="workshop_download_notification_title">创意工坊下载</string>
+    <string name="workshop_download_notification_idle">正在准备创意工坊队列</string>
+    <string name="workshop_download_notification_item">正在下载创意工坊项目 %1$d</string>
+    <string name="workshop_download_notification_failed_title">创意工坊下载失败</string>
+    <string name="workshop_download_notification_failed">创意工坊任务失败。</string>
+    <string name="workshop_download_center_title">创意工坊下载中心</string>
+    <string name="workshop_download_center_note">下载任务会保存在应用中。下载完成后，可将文件安装到 Zomboid 实例。</string>
+    <string name="workshop_download_center_resume">继续队列</string>
+    <string name="workshop_download_center_empty">暂时没有创意工坊任务。</string>
+    <string name="workshop_download_center_item">创意工坊项目 %1$d</string>
+    <string name="workshop_download_pause">暂停</string>
+    <string name="workshop_download_resume">继续</string>
+    <string name="workshop_download_retry">重试</string>
+    <string name="workshop_download_cancel">取消</string>
+    <string name="workshop_download_delete">删除</string>
+    <string name="workshop_download_install">安装</string>
+    <string name="workshop_download_fallback">第三方重试</string>
+    <string name="workshop_download_center_no_instance">请先创建 Zomboid 游戏实例，再安装创意工坊文件。</string>
+    <string name="workshop_download_center_choose_instance">选择 Zomboid 实例</string>
+    <string name="workshop_download_center_install_error">无法开始安装：%1$s</string>
+    <string name="workshop_download_center_fallback_title">第三方下载</string>
+    <string name="workshop_download_center_fallback_message">此备用方式使用现有第三方服务，可能显示广告；它不会接收 Steam 凭据。</string>
+    <string name="workshop_download_center_fallback_confirm">我了解</string>
+    <string name="workshop_download_center_fallback_pending">第三方重试将在备用客户端阶段接入。</string>
+    <string name="workshop_download_center_auth_title">需要登录 Steam</string>
+    <string name="workshop_download_center_auth_message">官方创意工坊任务无法使用当前 Steam 账号。请重新登录或切换账号后重试，也可以继续使用现有的第三方选项。</string>
+    <string name="workshop_download_center_open_accounts">打开 Steam 账号</string>
+    <string name="workshop_download_center_keep_third_party">第三方选项</string>
+    <string name="workshop_download_center_fallback_started">确认后已开始第三方下载。</string>
+    <string name="workshop_download_center_fallback_complete">第三方下载完成，已加入 Mod 库。</string>
+
+    <string name="workshop_account_title">Steam 创意工坊账号</string>
+    <string name="workshop_account_note">登录后可下载私有或绑定账号的创意工坊内容。凭据仅用于 Steam 身份验证；未选择账号时仍使用匿名访问。</string>
+    <string name="workshop_account_username">Steam 账号名</string>
+    <string name="workshop_account_password">Steam 密码</string>
+    <string name="workshop_account_sign_in">添加 Steam 账号</string>
+    <string name="workshop_account_remove">移除</string>
+    <string name="workshop_account_anonymous">未选择 Steam 账号；下载将使用匿名访问。</string>
+    <string name="workshop_account_ready">账号状态正常。</string>
+    <string name="workshop_account_signing_in">正在连接 Steam…</string>
+    <string name="workshop_account_missing_credentials">请输入账号名和密码。</string>
+    <string name="workshop_account_error">Steam 登录失败。</string>
+    <string name="workshop_account_guard_title">Steam Guard</string>
+    <string name="workshop_account_guard_message">请输入发送到邮箱或验证器的 Steam Guard 验证码。</string>
+    <string name="workshop_account_confirmation_message">请在 Steam 手机应用中批准本次登录，然后继续等待。</string>
+    <string name="workshop_account_guard_code">Steam Guard 验证码</string>
+    <string name="workshop_account_guard_code_required">请输入 Steam Guard 验证码。</string>
+    <string name="workshop_account_submit_code">提交验证码</string>
+    <string name="workshop_account_wait">等待批准</string>
+    <string name="workshop_account_waiting_confirmation">正在等待 Steam Guard 批准…</string>
+    <string name="workshop_account_submitting_code">正在验证 Steam Guard 验证码…</string>
+    <string name="workshop_account_guard_required">需要 Steam Guard 验证码。</string>
+    <string name="workshop_account_confirmation_required">需要 Steam Guard 确认。</string>
+    <string name="workshop_account_reauth_required">需要重新验证身份</string>
+    <string name="workshop_account_menu">Steam 账号</string>
+
+    <string name="workshop_library_title">Mod 库</string>
+    <string name="workshop_library_note">已完成的创意工坊文件会保存在这里，供多个 Zomboid 实例复用。更新检查是手动的，不会自动开始下载。</string>
+    <string name="workshop_library_cleanup">清理旧版本</string>
+    <string name="workshop_library_empty">Mod 库中没有已完成的创意工坊文件。</string>
+    <string name="workshop_library_meta">创意工坊 %1$d · %2$s · 已安装到 %3$d 个实例</string>
+    <string name="workshop_library_install">安装</string>
+    <string name="workshop_library_check_update">检查更新</string>
+    <string name="workshop_library_share">分享</string>
+    <string name="workshop_library_delete">删除</string>
+    <string name="workshop_library_choose_instance">选择 Zomboid 实例</string>
+    <string name="workshop_library_overwrite_title">替换现有 Mod？</string>
+    <string name="workshop_library_overwrite_message">如果存在同名文件夹，将以原子方式替换。请选择是否保留安装前的备份。</string>
+    <string name="workshop_library_install_without_backup">替换</string>
+    <string name="workshop_library_install_with_backup">替换并保留备份</string>
+    <string name="workshop_library_install_started">已开始安装。</string>
+    <string name="workshop_library_check_later">最近已检查过，请稍后再试。</string>
+    <string name="workshop_library_update_available">有更新版本的创意工坊内容，请从创意工坊页面手动下载。</string>
+    <string name="workshop_library_up_to_date">Mod 库条目已是最新版本。</string>
+    <string name="workshop_library_delete_title">删除 Mod 库条目？</string>
+    <string name="workshop_library_delete_message">如果没有其他版本引用，已完成的压缩包及其 Mod 库记录都会被删除。</string>
+    <string name="workshop_library_cleanup_title">清理旧版本？</string>
+    <string name="workshop_library_cleanup_message">每个创意工坊项目仅保留最新记录，并删除较旧的压缩包。</string>
+    <string name="workshop_library_cleanup_done">已删除 %1$d 个旧版本。</string>
+    <string name="workshop_library_menu">Mod 库</string>
+
     <!-- ===== Native Libs strings ===== -->
     <string name="native_libs_menu">导入多人游戏库 (B41)</string>
     <string name="native_libs_hint">🎮 在这里可以安装额外的本机库 libRakNet64.so 和 libZNetNoSteam64.so，用于 Build 41 的多人游戏支持。\n\n这些库最早出现在 Build 42.12+ 中。如需在 Build 41 上使用，请从 Build 42 实例文件夹复制：game/android/arm64-v8a — 这不是错误。</string>

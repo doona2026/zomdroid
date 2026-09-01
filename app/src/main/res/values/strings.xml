@@ -692,6 +692,12 @@
     <string name="install_mod_workshop_download_failed">Download failed. Try again.</string>
 
     <!-- ===== Official Steam Workshop catalog ===== -->
+    <string-array name="workshop_sort_options">
+        <item>Most popular</item>
+        <item>Newest published</item>
+        <item>Recently updated</item>
+        <item>Most subscribed</item>
+    </string-array>
     <string name="workshop_title">Project Zomboid Workshop</string>
     <string name="workshop_detail_title">Workshop item</string>
     <string name="workshop_search_hint">Search Workshop</string>

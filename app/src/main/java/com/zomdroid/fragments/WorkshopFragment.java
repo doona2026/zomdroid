@@ -1,7 +1,6 @@
 package com.zomdroid.fragments;
 
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +41,12 @@ public class WorkshopFragment extends Fragment {
     private WorkshopAdapter adapter;
     private int page = 1;
     private boolean hasNext;
+    private final List<WorkshopBrowseItem> cachedItems = new ArrayList<>();
+
+    private static final String STATE_SEARCH = "workshop_search";
+    private static final String STATE_SORT = "workshop_sort";
+    private static final String STATE_PAGE = "workshop_page";
+    private static final String STATE_HAS_NEXT = "workshop_has_next";
 
     @Nullable
     @Override
@@ -59,13 +64,41 @@ public class WorkshopFragment extends Fragment {
         list.setLayoutManager(new LinearLayoutManager(requireContext()));
         list.setAdapter(adapter);
         sort.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item,
-                new String[]{"热门", "最新发布", "最近更新", "订阅最多"}));
-        view.findViewById(R.id.workshop_search_btn).setOnClickListener(v -> load(1));
+                getResources().getStringArray(R.array.workshop_sort_options)));
+        if (state != null) {
+            search.setText(state.getString(STATE_SEARCH, ""));
+            sort.setSelection(Math.max(0, Math.min(
+                    state.getInt(STATE_SORT, 0),
+                    sort.getCount() - 1
+            )));
+            page = Math.max(1, state.getInt(STATE_PAGE, 1));
+            hasNext = state.getBoolean(STATE_HAS_NEXT, false);
+        }
+        view.findViewById(R.id.workshop_search_btn).setOnClickListener(v -> {
+            cachedItems.clear();
+            hasNext = false;
+            load(1);
+        });
         previous.setOnClickListener(v -> load(page - 1));
         next.setOnClickListener(v -> load(page + 1));
-        updatePaging();
-        load(1);
+        if (cachedItems.isEmpty()) {
+            updatePaging();
+            load(page);
+        } else {
+            adapter.setItems(cachedItems);
+            status.setText(R.string.workshop_loaded);
+            updatePaging();
+        }
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(STATE_SEARCH, search == null ? "" : search.getText().toString());
+        outState.putInt(STATE_SORT, sort == null ? 0 : sort.getSelectedItemPosition());
+        outState.putInt(STATE_PAGE, page);
+        outState.putBoolean(STATE_HAS_NEXT, hasNext);
     }
 
     private void load(int requestedPage) {
@@ -79,6 +112,8 @@ public class WorkshopFragment extends Fragment {
                     @Override public void onSuccess(WorkshopBrowsePage result) {
                         if (!isAdded()) return;
                         progress.setVisibility(View.GONE);
+                        cachedItems.clear();
+                        cachedItems.addAll(result.getItems());
                         adapter.setItems(result.getItems());
                         page = result.getPage();
                         hasNext = result.getHasNextPage();

@@ -40,7 +40,7 @@ internal object SteamHtmlDecoder {
                 .replace(Regex("""(?i)</p\s*>"""), "\n\n")
                 .replace(Regex("""(?i)</div\s*>"""), "\n")
                 .replace(bbCodeMediaTagRegex, " ")
-                .replace(Regex("""(?i)\[\*\]"""), "\n閳?")
+                .replace(Regex("""(?i)\[\*\]"""), "\n• ")
                 .replace(Regex("""(?i)\[/?(?:h[1-6]|list|olist|quote|p|center|left|right)\]"""), "\n")
                 .replace(htmlTagRegex, " ")
                 .replace(bbCodeGenericTagRegex, " "),
@@ -55,7 +55,7 @@ internal object SteamHtmlDecoder {
         return decodePreservingLineBreaks(
             value
                 .replace(Regex("""(?i)<br\s*/?>"""), "\n")
-                .replace(Regex("""(?i)<li[^>]*>"""), "閳?")
+                .replace(Regex("""(?i)<li[^>]*>"""), "\n• ")
                 .replace(Regex("""(?i)</li\s*>"""), "\n")
                 .replace(Regex("""(?i)</p\s*>"""), "\n\n")
                 .replace(Regex("""(?i)</div\s*>"""), "\n")
@@ -117,5 +117,4 @@ internal object SteamHtmlDecoder {
             .replace("&gt;", ">")
     }
 }
-
 
