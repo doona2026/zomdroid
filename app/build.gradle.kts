@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.protobuf)
 }
@@ -42,7 +43,8 @@ val hasSigningConfig = listOf(
 
 android {
     namespace = "com.zomdroid"
-    compileSdk = 35
+    // Compose Backdrop/Shapes require API 36 at compile time; target/minSdk remain unchanged.
+    compileSdk = 36
 
     signingConfigs {
         if (hasSigningConfig) {
@@ -114,6 +116,7 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        compose = true
         viewBinding = true
         buildConfig = true
     }
@@ -159,6 +162,22 @@ protobuf {
 }
 
 dependencies {
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.coil.compose)
+    implementation(libs.kyant.backdrop)
+    implementation(libs.kyant.shapes)
+
     implementation(platform(libs.okhttp.bom))
     implementation(libs.coroutines.android)
     implementation(libs.serialization.json)
@@ -169,8 +188,6 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
-    implementation(libs.navigation.fragment)
-    implementation(libs.navigation.ui)
     implementation(libs.commons.io)
     implementation(libs.commons.compress)
     implementation(libs.xz)
@@ -189,4 +206,8 @@ dependencies {
     testImplementation(libs.mockwebserver3)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

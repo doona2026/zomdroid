@@ -317,11 +317,13 @@ class WorkshopDetailRepository(
 
     private fun extractCommentThreadContext(payload: String): WorkshopCommentThreadContext? {
         val commentInit = commentInitDataRegex.find(payload)?.groupValues?.getOrNull(1) ?: return null
-        val commentInitObject = runCatching { json.parseToJsonElement(commentInit).jsonObject }.getOrNull() ?: return null
-        val ownerId = commentInitObject.stringValue("owner").ifBlank { return null }
-        val featureId = commentInitObject.stringValue("feature").ifBlank { return null }
-        val feature2 = commentInitObject.stringValue("feature2").ifBlank { null }
-        val extendedData = commentInitObject.stringValue("extended_data").ifBlank { null }
+        val commentInitObject = runCatching { json.parseToJsonElement(commentInit).jsonObject }.getOrNull()
+        fun field(name: String): String = commentInitObject?.stringValue(name).orEmpty()
+            .ifBlank { extractJavascriptObjectField(commentInit, name) }
+        val ownerId = field("owner").ifBlank { return null }
+        val featureId = field("feature").ifBlank { return null }
+        val feature2 = field("feature2").ifBlank { null }
+        val extendedData = field("extended_data").ifBlank { null }
         val sessionId = sessionIdRegex.find(payload)?.groupValues?.getOrNull(1).orEmpty().ifBlank { null }
         return WorkshopCommentThreadContext(
             ownerId = ownerId,
@@ -331,6 +333,12 @@ class WorkshopDetailRepository(
             sessionId = sessionId,
         )
     }
+
+    private fun extractJavascriptObjectField(value: String, field: String): String =
+        Regex("""[\"']?$field[\"']?\s*:\s*(?:\"([^\"]*)\"|'([^']*)'|(-?\d+))""")
+            .find(value)
+            ?.let { match -> match.groupValues.drop(1).firstOrNull(String::isNotEmpty).orEmpty() }
+            .orEmpty()
 
     private fun resolveCommentTotalPages(
         commentCount: Long?,
@@ -478,15 +486,15 @@ class WorkshopDetailRepository(
             setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE),
         )
         val commentInitDataRegex = Regex(
-            """InitializeCommentThread\(\s*"PublishedFile_Public"\s*,\s*"[^"]+"\s*,\s*(\{.*?\})\s*,\s*'https://steamcommunity\.com/comment/PublishedFile_Public/'""",
+            """InitializeCommentThread\s*\(\s*['"]PublishedFile_Public['"]\s*,\s*['"][^'"]+['"]\s*,\s*(\{.*?\})\s*,\s*['"][^'"]*/comment/PublishedFile_Public/[^'"]*['"]""",
             setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE),
         )
         val sessionIdRegex = Regex(
-            """g_sessionID\s*=\s*"([^"]+)"""",
+            """g_sessionID\s*=\s*['"]([^'"]+)['"]""",
             RegexOption.IGNORE_CASE,
         )
         val totalCommentCountRegex = Regex(
-            """"total_count"\s*:\s*(\d+)""",
+            """[\"']total_count[\"']\s*:\s*(\d+)""",
             RegexOption.IGNORE_CASE,
         )
         val totalCommentCountLabelRegex = Regex(

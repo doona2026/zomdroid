@@ -633,6 +633,8 @@
     <string name="controls_editor_open_group">Editor</string>
     <string name="controls_editor_open_hint">Open the controls editor to drag, resize and configure on-screen buttons.</string>
     <string name="controls_editor_open_btn">Open editor</string>
+    <string name="controls_editor_add_binding">Add binding</string>
+    <string name="common_retry">Retry</string>
 
     <!-- ===== ETO + collapsible strings ===== -->
     <string name="optimization_group_eto">Every Texture Optimized</string>
@@ -786,4 +788,39 @@
     <string name="native_libs_installed">Native libraries installed</string>
 
     <string name="control_element_opacity_all">To all</string>
+    <string name="app_module_launcher">Launcher</string>
+    <string name="app_module_workshop">Workshop</string>
+    <string name="app_module_downloads">Downloads</string>
+    <string name="app_module_mod_library">Mod library</string>
+    <string name="app_module_settings">Settings</string>
+    <string name="app_shell_compat_title">This section is being migrated</string>
+    <string name="app_shell_compat_message">The existing page remains available while this section is rebuilt with the new interface.</string>
+    <string name="app_shell_back">Back</string>
+    <string name="app_shell_menu">Menu</string>
+    <string name="app_shell_more">More actions</string>
+    <string name="launcher_title">Your games</string>
+    <string name="launcher_subtitle">Instances, saves and launch actions in one place</string>
+    <string name="launcher_refresh">Refresh instances</string>
+    <string name="launcher_add_instance">Add game instance</string>
+    <string name="launcher_empty_title">No game instances yet</string>
+    <string name="launcher_empty_message">Add a Project Zomboid archive to create your first playable instance.</string>
+    <string name="launcher_launch">Launch</string>
+    <string name="launcher_build_label">%1$s · Project Zomboid</string>
+    <string name="launcher_status_installing">Installation in progress</string>
+    <string name="launcher_status_missing_files">Game files missing</string>
+    <string name="launcher_status_wrong_files">Unsupported game files</string>
+    <string name="launcher_status_ready">Ready to play</string>
+    <string name="backup_restore_failed_generic">Could not restore the backup</string>
+    <string name="frontend_appearance_label">Management UI appearance</string>
+    <string name="settings_jvm_args">JVM arguments</string>
+    <string name="tools_section_title">Tools and help</string>
+    <string name="gamepad_mapper_protocol_note">Mapping is saved through the existing controller JSON format.</string>
+    <string name="frontend_mode_liquid">Liquid Glass</string>
+    <string name="frontend_mode_lite">Lite Liquid</string>
+    <string name="frontend_mode_classic">Classic</string>
+    <string name="settings_value_off">Off</string>
+    <string name="settings_theme_system">System default</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="workshop_download_logs">Download logs</string>
 </resources>

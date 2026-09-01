@@ -41,6 +41,10 @@
         <activity
             android:name=".ControlsEditorActivity">
         </activity>
+        <activity
+            android:name=".GamepadMapperActivity"
+            android:screenOrientation="sensor">
+        </activity>
         <service
             android:name=".InstallerService"
             android:exported="false"

@@ -481,6 +481,8 @@
     <string name="controls_editor_open_group">Редактор</string>
     <string name="controls_editor_open_hint">Откройте редактор управления, чтобы перемещать, масштабировать и настраивать экранные кнопки.</string>
     <string name="controls_editor_open_btn">Открыть редактор</string>
+    <string name="controls_editor_add_binding">Добавить привязку</string>
+    <string name="common_retry">Повторить</string>
 
     <!-- ===== ETO + collapsible strings ===== -->
     <string name="optimization_group_eto">Every Texture Optimized</string>
@@ -595,4 +597,39 @@
     <string name="new_game_instance_detect_failed">Не удалось прочитать ZIP игры. Убедитесь, что это корректный архив Project Zomboid, и попробуйте снова.</string>
 
     <!-- NG_GL4ES renderer offer dialog -->
+    <string name="app_module_launcher">Лаунчер</string>
+    <string name="app_module_workshop">Мастерская</string>
+    <string name="app_module_downloads">Загрузки</string>
+    <string name="app_module_mod_library">Библиотека модов</string>
+    <string name="app_module_settings">Настройки</string>
+    <string name="app_shell_compat_title">Раздел находится в разработке</string>
+    <string name="app_shell_compat_message">Сейчас этот раздел использует старую страницу, пока новая версия интерфейса ещё переносится.</string>
+    <string name="app_shell_back">Назад</string>
+    <string name="app_shell_menu">Меню</string>
+    <string name="app_shell_more">Дополнительные действия</string>
+    <string name="launcher_title">Мои игры</string>
+    <string name="launcher_subtitle">Экземпляры, сохранения и запуск в одном месте</string>
+    <string name="launcher_refresh">Обновить экземпляры</string>
+    <string name="launcher_add_instance">Добавить экземпляр</string>
+    <string name="launcher_empty_title">Экземпляров пока нет</string>
+    <string name="launcher_empty_message">Добавьте архив Project Zomboid, чтобы создать первый игровой экземпляр.</string>
+    <string name="launcher_launch">Запустить</string>
+    <string name="launcher_build_label">%1$s · Project Zomboid</string>
+    <string name="launcher_status_installing">Идёт установка</string>
+    <string name="launcher_status_missing_files">Файлы игры отсутствуют</string>
+    <string name="launcher_status_wrong_files">Неподдерживаемые файлы игры</string>
+    <string name="launcher_status_ready">Готов к запуску</string>
+    <string name="backup_restore_failed_generic">Не удалось восстановить резервную копию</string>
+    <string name="frontend_appearance_label">Внешний вид интерфейса</string>
+    <string name="settings_jvm_args">Параметры JVM</string>
+    <string name="tools_section_title">Инструменты и помощь</string>
+    <string name="gamepad_mapper_protocol_note">Раскладка сохраняется в существующем формате JSON контроллера.</string>
+    <string name="frontend_mode_liquid">Жидкое стекло</string>
+    <string name="frontend_mode_lite">Лёгкое жидкое</string>
+    <string name="frontend_mode_classic">Классический</string>
+    <string name="settings_value_off">Выкл.</string>
+    <string name="settings_theme_system">Системная</string>
+    <string name="settings_theme_light">Светлая</string>
+    <string name="settings_theme_dark">Тёмная</string>
+    <string name="workshop_download_logs">Журнал загрузки</string>
 </resources>

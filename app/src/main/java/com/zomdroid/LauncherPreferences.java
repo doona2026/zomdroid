@@ -342,6 +342,16 @@ public class LauncherPreferences {
     public ThemeMode getThemeMode() { return themeMode != null ? themeMode : ThemeMode.SYSTEM; }
     public void setThemeMode(ThemeMode mode) { themeMode = mode; saveToPreferences(); }
 
+    // Compose UI frontend. Stored as a string so adding/reordering enum values cannot corrupt
+    // existing JSON; unknown values are normalized by UiSettingsRepository.
+    private String frontendMode = "liquid_glass";
+
+    public String getFrontendMode() { return frontendMode; }
+    public void setFrontendMode(String mode) {
+        frontendMode = mode != null ? mode : "liquid_glass";
+        saveToPreferences();
+    }
+
     private boolean touchControlsEnabled = false;
 
     public boolean isTouchControlsEnabled() {

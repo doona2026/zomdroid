@@ -35,7 +35,7 @@ class WorkshopDetailParserTest {
             MockResponse.Builder().body(
                 """<div class="workshopItemTitle">Community title</div>
 <div class="workshopItemDescription" id="highlightContent"><div class="bb_h1">Community description</div><br><img src="https://example.com/community.jpg">Details</div>
-<script>var rgFullScreenshotURLs = [{ 'previewid' : '1', 'url': 'https://example.com/gallery-1.jpg' }, { 'previewid' : '2', 'url': 'https://example.com/gallery-2.jpg' }]; var g_sessionID = "session-1"; InitializeCommentThread("PublishedFile_Public","PublishedFile_Public_123_42",{"feature":"42","feature2":-1,"owner":"76561198000000001","total_count":12,"start":0,"pagesize":10},'https://steamcommunity.com/comment/PublishedFile_Public/',40);</script>""",
+<script>var rgFullScreenshotURLs = [{ 'previewid' : '1', 'url': 'https://example.com/gallery-1.jpg' }, { 'previewid' : '2', 'url': 'https://example.com/gallery-2.jpg' }]; var g_sessionID = 'session-1'; InitializeCommentThread('PublishedFile_Public','PublishedFile_Public_123_42',{'feature':'42','feature2':-1,'owner':'76561198000000001','total_count':12,'start':0,'pagesize':10},'https://example.com/comment/PublishedFile_Public/',40);</script>""",
             ).build(),
         )
 

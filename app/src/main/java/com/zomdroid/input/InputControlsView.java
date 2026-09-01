@@ -55,6 +55,15 @@ public class InputControlsView extends View {
     private float renderScale = 1f;
 
     private ElementSettingsController elementSettingsController;
+    private EditorListener editorListener;
+
+    /** Host callbacks used by the Compose editor shell without changing canvas input behavior. */
+    public interface EditorListener {
+        void onElementSelected(@NonNull AbstractControlElement element);
+        void onElementDeselected();
+        void onAddElementRequested();
+        void onElementDeleted();
+    }
 
     public InputControlsView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -101,6 +110,10 @@ public class InputControlsView extends View {
     }
 
     private void showAddElementDialog() {
+        if (editorListener != null) {
+            editorListener.onAddElementRequested();
+            return;
+        }
         java.util.List<AbstractControlElement.Type> palette = new java.util.ArrayList<>();
         for (AbstractControlElement.Type t : AbstractControlElement.Type.values()) {
             if (isCreatable(t)) palette.add(t);
@@ -233,6 +246,7 @@ public class InputControlsView extends View {
             this.elementSettingsController.fromLeft = this.selectedElement.getCenterX() > (float) this.getWidth() / 2;
             this.elementSettingsController.open();
         }
+        if (editorListener != null) editorListener.onElementSelected(element);
     }
 
     private void deselectElement() {
@@ -240,6 +254,7 @@ public class InputControlsView extends View {
         if (this.elementSettingsController != null) this.elementSettingsController.close();
         this.selectedElement.setHighlighted(false);
         this.selectedElement = null;
+        if (editorListener != null) editorListener.onElementDeselected();
     }
 
     private void moveSelectedElement(float x, float y) {
@@ -263,6 +278,7 @@ public class InputControlsView extends View {
         this.controlElements.remove(this.selectedElement);
         this.selectedElement = null;
         invalidate();
+        if (editorListener != null) editorListener.onElementDeleted();
     }
 
     public void setEditMode(boolean value) {
@@ -343,6 +359,21 @@ public class InputControlsView extends View {
 
     public void setElementSettingsController(ElementSettingsController elementSettingsController) {
         this.elementSettingsController = elementSettingsController;
+    }
+
+    public void setEditorListener(@Nullable EditorListener editorListener) {
+        this.editorListener = editorListener;
+    }
+
+    /** Adds one palette element for the Compose editor; regular touch editing remains unchanged. */
+    public void addControlElementForEditor(@NonNull AbstractControlElement.Type type) {
+        if (type == AbstractControlElement.Type.DPAD_UP
+                || type == AbstractControlElement.Type.DPAD_RIGHT
+                || type == AbstractControlElement.Type.DPAD_DOWN
+                || type == AbstractControlElement.Type.DPAD_LEFT) return;
+        controlElements.add(AbstractControlElement.fromDescription(
+                this, ControlElementDescription.getDefaultForType(type)));
+        invalidate();
     }
 
     @Override
