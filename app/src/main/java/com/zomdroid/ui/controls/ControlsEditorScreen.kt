@@ -21,23 +21,21 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import com.zomdroid.ui.component.ZomdroidLiquidAlertDialog as AlertDialog
+import com.zomdroid.ui.component.ZomdroidLiquidButton as Button
+import com.zomdroid.ui.component.ZomdroidLiquidCheckbox as Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import com.zomdroid.ui.component.ZomdroidLiquidIconButton as IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
+import com.zomdroid.ui.component.ZomdroidLiquidOutlinedButton as OutlinedButton
+import com.zomdroid.ui.component.ZomdroidLiquidOutlinedTextField as OutlinedTextField
+import com.zomdroid.ui.component.ZomdroidLiquidSlider as Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.zomdroid.ui.component.ZomdroidLiquidTextButton as TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.Switch
+import com.zomdroid.ui.component.ZomdroidLiquidToggle as Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -68,6 +66,9 @@ import com.zomdroid.input.StickControlElement
 import com.zomdroid.input.TouchpadControlElement
 import com.zomdroid.ui.component.ZomdroidGlassCard
 import com.zomdroid.ui.component.ZomdroidGlassSurface
+import com.zomdroid.ui.component.ZomdroidLiquidOutlinedButton
+import com.zomdroid.ui.component.ZomdroidPopupMenu
+import com.zomdroid.ui.component.ZomdroidPopupMenuItem
 
 interface ControlsEditorHost {
     fun onPickCustomIcon()
@@ -251,9 +252,13 @@ private fun DropdownSetting(label: String, value: String, options: List<String>,
     Column {
         Text(label, style = MaterialTheme.typography.labelLarge)
         Box {
-            OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) { Text(value.ifBlank { stringResource(R.string.control_element_text_empty) }) }
-            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                options.forEach { option -> DropdownMenuItem(text = { Text(option) }, onClick = { expanded = false; onSelected(option) }) }
+            ZomdroidLiquidOutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) {
+                Text(value.ifBlank { stringResource(R.string.control_element_text_empty) })
+            }
+            ZomdroidPopupMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                options.forEach { option ->
+                    ZomdroidPopupMenuItem(text = { Text(option) }, onClick = { expanded = false; onSelected(option) })
+                }
             }
         }
     }

@@ -35,7 +35,7 @@ import com.zomdroid.ui.model.glassRenderingStrategy
 
 // Adapted from WorkshopAndroidDownloader's Backdrop surfaces under Apache-2.0.
 @Composable
-fun ZomdroidGlassSurface(modifier: Modifier = Modifier, shape: Shape = RoundedCornerShape(24.dp), blurRadius: Dp = 18.dp, lensHeight: Dp = 10.dp, lensAmount: Dp = 12.dp, surfaceColor: Color = MaterialTheme.colorScheme.surface.copy(alpha = .18f), borderColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = .1f), contentColor: Color = MaterialTheme.colorScheme.onSurface, content: @Composable BoxScope.() -> Unit) {
+fun ZomdroidGlassSurface(modifier: Modifier = Modifier, shape: Shape = RoundedCornerShape(24.dp), blurRadius: Dp = 18.dp, lensHeight: Dp = 10.dp, lensAmount: Dp = 12.dp, enableLens: Boolean = true, chromaticAberration: Boolean = true, surfaceColor: Color = MaterialTheme.colorScheme.surface.copy(alpha = .18f), borderColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = .1f), contentColor: Color = MaterialTheme.colorScheme.onSurface, content: @Composable BoxScope.() -> Unit) {
     val appearance = LocalZomdroidAppearanceMode.current
     val backdrop = LocalZomdroidBackdrop.current
     val dark = MaterialTheme.colorScheme.background.luminance() < .35f
@@ -49,7 +49,7 @@ fun ZomdroidGlassSurface(modifier: Modifier = Modifier, shape: Shape = RoundedCo
         }
         return
     }
-    Box(modifier.drawBackdrop(backdrop = backdrop!!, shape = { shape }, effects = { vibrancy(); blur(blurRadius.toPx()); lens(lensHeight.toPx(), lensAmount.toPx()) }, highlight = { Highlight.Ambient.copy(alpha = if (dark) .24f else .16f) }, shadow = { Shadow(radius = 28.dp, alpha = if (dark) .72f else .22f, color = Color.Black.copy(alpha = if (dark) .28f else .12f)) }, innerShadow = { InnerShadow(radius = 14.dp, alpha = if (dark) .32f else .18f, color = Color.Black.copy(alpha = if (dark) .2f else .08f)) }, onDrawSurface = { drawRect(surfaceColor) }).border(1.dp, borderColor, shape).clip(shape)) { content() }
+    Box(modifier.drawBackdrop(backdrop = backdrop!!, shape = { shape }, effects = { vibrancy(); blur(blurRadius.toPx()); if (enableLens) lens(lensHeight.toPx(), lensAmount.toPx(), chromaticAberration = chromaticAberration) }, highlight = { Highlight.Ambient.copy(alpha = if (dark) .24f else .16f) }, shadow = { Shadow(radius = 28.dp, alpha = if (dark) .72f else .22f, color = Color.Black.copy(alpha = if (dark) .28f else .12f)) }, innerShadow = { InnerShadow(radius = 14.dp, alpha = if (dark) .32f else .18f, color = Color.Black.copy(alpha = if (dark) .2f else .08f)) }, onDrawSurface = { drawRect(surfaceColor) }).border(1.dp, borderColor, shape).clip(shape)) { content() }
 }
 
 @Composable

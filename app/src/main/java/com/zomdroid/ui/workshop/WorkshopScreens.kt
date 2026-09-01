@@ -18,13 +18,13 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.FilterChip
+import com.zomdroid.ui.component.ZomdroidLiquidButton as Button
+import com.zomdroid.ui.component.ZomdroidLiquidChip as FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
+import com.zomdroid.ui.component.ZomdroidLiquidIconButton as IconButton
+import com.zomdroid.ui.component.ZomdroidLinearProgressIndicator as LinearProgressIndicator
+import com.zomdroid.ui.component.ZomdroidLiquidOutlinedButton as OutlinedButton
+import com.zomdroid.ui.component.ZomdroidLiquidOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable

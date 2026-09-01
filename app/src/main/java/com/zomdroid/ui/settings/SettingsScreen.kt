@@ -1,31 +1,27 @@
 package com.zomdroid.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import com.zomdroid.ui.component.ZomdroidLiquidAlertDialog as AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.zomdroid.ui.component.ZomdroidLiquidTextButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -33,6 +29,13 @@ import com.zomdroid.LauncherPreferences
 import com.zomdroid.R
 import com.zomdroid.game.SuggestedPreset
 import com.zomdroid.ui.component.ZomdroidGlassCard
+import com.zomdroid.ui.component.ZomdroidLiquidButton
+import com.zomdroid.ui.component.ZomdroidLiquidOutlinedButton
+import com.zomdroid.ui.component.ZomdroidLiquidSlider
+import com.zomdroid.ui.component.ZomdroidLiquidTextField
+import com.zomdroid.ui.component.ZomdroidLiquidToggle
+import com.zomdroid.ui.component.ZomdroidPopupMenu
+import com.zomdroid.ui.component.ZomdroidPopupMenuItem
 import com.zomdroid.ui.component.ZomdroidSectionLabel
 import com.zomdroid.ui.model.AppearanceMode
 
@@ -55,7 +58,7 @@ fun SettingsScreen(viewModel: SettingsViewModel, onAppearanceChanged: (Appearanc
                 ChoiceRow(stringResource(R.string.settings_renderer), state.renderer.name) { EnumMenu(LauncherPreferences.Renderer.entries.toList(), state.renderer, viewModel::setRenderer) }
                 if (state.renderer.name.startsWith("ZINK")) ChoiceRow(stringResource(R.string.settings_vulkan_driver), state.vulkanDriver.name) { EnumMenu(LauncherPreferences.VulkanDriver.entries.toList(), state.vulkanDriver, viewModel::setVulkanDriver) }
                 Text(stringResource(R.string.settings_resolution_scale))
-                Slider(value = state.renderScale, onValueChange = viewModel::setRenderScale, valueRange = .25f..1f)
+                ZomdroidLiquidSlider(value = state.renderScale, onValueChange = viewModel::setRenderScale, valueRange = .25f..1f)
                 Text(stringResource(R.string.percentage_format, (state.renderScale * 100).toInt()), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
@@ -63,13 +66,13 @@ fun SettingsScreen(viewModel: SettingsViewModel, onAppearanceChanged: (Appearanc
         ZomdroidGlassCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 ZomdroidSectionLabel(stringResource(R.string.settings_group_advanced))
-                OutlinedTextField(state.jvmArgs, viewModel::setJvmArgs, Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.settings_jvm_args)) })
+                ZomdroidLiquidTextField(state.jvmArgs, viewModel::setJvmArgs, stringResource(R.string.settings_jvm_args), Modifier.fillMaxWidth())
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    OutlinedButton({ viewModel.setJvmArgs(LauncherPreferences.DEFAULT_JVM_ARGS) }) { Text(stringResource(R.string.settings_jvm_args_reset)) }
-                    OutlinedButton({ viewModel.setJvmArgs("") }) { Text(stringResource(R.string.settings_jvm_args_clear)) }
-                    OutlinedButton({ viewModel.setJvmArgs(LauncherPreferences.BUILD_42_JVM_ARGS) }) { Text(stringResource(R.string.settings_jvm_args_apply)) }
+                    ZomdroidLiquidOutlinedButton({ viewModel.setJvmArgs(LauncherPreferences.DEFAULT_JVM_ARGS) }) { Text(stringResource(R.string.settings_jvm_args_reset)) }
+                    ZomdroidLiquidOutlinedButton({ viewModel.setJvmArgs("") }) { Text(stringResource(R.string.settings_jvm_args_clear)) }
+                    ZomdroidLiquidOutlinedButton({ viewModel.setJvmArgs(LauncherPreferences.BUILD_42_JVM_ARGS) }) { Text(stringResource(R.string.settings_jvm_args_apply)) }
                 }
-                OutlinedTextField(state.envVars, viewModel::setEnvVars, Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.settings_env_vars)) })
+                ZomdroidLiquidTextField(state.envVars, viewModel::setEnvVars, stringResource(R.string.settings_env_vars), Modifier.fillMaxWidth())
                 ChoiceRow(stringResource(R.string.settings_texture_shrink_title), shrinkLabel(state.textureShrink)) { EnumMenu(listOf(null, SuggestedPreset.SHRINK_BALANCED, "1"), state.textureShrink, viewModel::setTextureShrink) }
                 SettingSwitch(stringResource(R.string.settings_memory_saver), state.memorySaver, viewModel::setMemorySaver)
                 SettingSwitch(stringResource(R.string.settings_debug_mode), state.debug, viewModel::setDebug)
@@ -122,9 +125,9 @@ fun AppearanceModePicker(selected: AppearanceMode, onSelected: (AppearanceMode) 
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         AppearanceMode.entries.forEach { mode ->
             if (selected == mode) {
-                Button(onClick = { onSelected(mode) }, modifier = Modifier.weight(1f)) { Text(mode.label()) }
+                ZomdroidLiquidButton(onClick = { onSelected(mode) }, modifier = Modifier.weight(1f), filled = true) { Text(mode.label()) }
             } else {
-                OutlinedButton(onClick = { onSelected(mode) }, modifier = Modifier.weight(1f)) { Text(mode.label()) }
+                ZomdroidLiquidOutlinedButton(onClick = { onSelected(mode) }, modifier = Modifier.weight(1f)) { Text(mode.label()) }
             }
         }
     }
@@ -134,15 +137,41 @@ fun AppearanceModePicker(selected: AppearanceMode, onSelected: (AppearanceMode) 
     ZomdroidGlassCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         ZomdroidSectionLabel(stringResource(R.string.preset_card_title))
         Text(stringResource(R.string.preset_card_subtitle), color = MaterialTheme.colorScheme.onSurfaceVariant)
-        SuggestedPreset.entries.forEach { preset -> OutlinedButton({ viewModel.requestPreset(preset) }, Modifier.fillMaxWidth()) { Text(stringResource(preset.labelRes())) } }
+        SuggestedPreset.entries.forEach { preset -> ZomdroidLiquidOutlinedButton({ viewModel.requestPreset(preset) }, Modifier.fillMaxWidth()) { Text(stringResource(preset.labelRes())) } }
         Text(stringResource(R.string.preset_current_none))
     } }
 }
 
 @Composable private fun ChoiceRow(label: String, value: String, menu: @Composable () -> Unit) { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(label); menu() }; Text(value, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall) }
-@Composable private fun <T> EnumMenu(options: List<T>, selected: T, onSelected: (T) -> Unit) { var expanded by remember { mutableStateOf(false) }; OutlinedButton({ expanded = true }) { Text(selected?.toString() ?: stringResource(R.string.settings_value_off)) }; DropdownMenu(expanded, { expanded = false }) { options.forEach { option -> DropdownMenuItem(text = { Text(option?.toString() ?: stringResource(R.string.settings_value_off)) }, onClick = { expanded = false; onSelected(option) }) } } }
-@Composable private fun SettingSwitch(label: String, checked: Boolean, onChanged: (Boolean) -> Unit) { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(label); Switch(checked, onChanged) } }
-@Composable private fun ToolLink(label: String, onClick: () -> Unit) { OutlinedButton(onClick, Modifier.fillMaxWidth()) { Text(label) } }
+@Composable private fun <T> EnumMenu(options: List<T>, selected: T, onSelected: (T) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        ZomdroidLiquidOutlinedButton(
+            onClick = { expanded = true },
+            modifier = Modifier.widthIn(min = 128.dp, max = 260.dp),
+        ) {
+            Text(
+                selected?.toString() ?: stringResource(R.string.settings_value_off),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        ZomdroidPopupMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.widthIn(min = 220.dp, max = 320.dp),
+        ) {
+            options.forEach { option ->
+                ZomdroidPopupMenuItem(
+                    text = { Text(option?.toString() ?: stringResource(R.string.settings_value_off)) },
+                    onClick = { expanded = false; onSelected(option) },
+                )
+            }
+        }
+    }
+}
+@Composable private fun SettingSwitch(label: String, checked: Boolean, onChanged: (Boolean) -> Unit) { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(label); ZomdroidLiquidToggle(checked, onChanged) } }
+@Composable private fun ToolLink(label: String, onClick: () -> Unit) { ZomdroidLiquidOutlinedButton(onClick, Modifier.fillMaxWidth()) { Text(label) } }
 @Composable private fun AppearanceMode.label() = stringResource(when (this) { AppearanceMode.LiquidGlass -> R.string.frontend_mode_liquid; AppearanceMode.LiteLiquidGlass -> R.string.frontend_mode_lite; AppearanceMode.Classic -> R.string.frontend_mode_classic })
 @Composable private fun LauncherPreferences.ThemeMode.label() = stringResource(when (this) { LauncherPreferences.ThemeMode.SYSTEM -> R.string.settings_theme_system; LauncherPreferences.ThemeMode.LIGHT -> R.string.settings_theme_light; LauncherPreferences.ThemeMode.DARK -> R.string.settings_theme_dark })
 @Composable private fun String?.label() = this ?: stringResource(R.string.settings_value_off)

@@ -10,33 +10,34 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import com.zomdroid.ui.component.ZomdroidLiquidIconButton as IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zomdroid.R
 import com.zomdroid.ui.component.ZomdroidGlassCard
+import com.zomdroid.ui.component.ZomdroidGlassSurface
+import com.zomdroid.ui.component.LocalZomdroidPopupHostState
+import com.zomdroid.ui.component.ZomdroidPopupHost
+import com.zomdroid.ui.component.rememberZomdroidPopupHostState
 import com.zomdroid.ui.model.AppModule
 import com.zomdroid.ui.model.AppUiState
-import kotlinx.coroutines.launch
+import com.zomdroid.ui.theme.isLiquidGlassFrontendEnabled
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,61 +45,58 @@ fun AppScaffold(
     state: AppUiState,
     onModuleSelected: (AppModule) -> Unit,
     onBack: () -> Unit,
-    onMenuClick: () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     content: @Composable (AppUiState) -> Unit = { currentState ->
         CompatModuleContent(currentState.selectedModule, Modifier.fillMaxSize())
     },
 ) {
     val hasDetails = state.backStack.size > 1
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        gesturesEnabled = !hasDetails,
-        drawerContent = {
-            ModalDrawerSheet {
-                Column(Modifier.padding(vertical = 18.dp)) {
-                    Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(20.dp))
-                    AppModule.values().forEach { module ->
-                        NavigationDrawerItem(
-                            label = { Text(moduleTitle(module)) },
-                            selected = module == state.selectedModule,
-                            onClick = { onModuleSelected(module); scope.launch { drawerState.close() } },
-                            modifier = Modifier.padding(horizontal = 12.dp),
-                        )
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val isWide = maxWidth >= 600.dp && maxWidth > maxHeight
+        val popupHostState = rememberZomdroidPopupHostState()
+        CompositionLocalProvider(LocalZomdroidPopupHostState provides popupHostState) {
+            Box(Modifier.fillMaxSize()) {
+                Scaffold(
+                    containerColor = if (isLiquidGlassFrontendEnabled()) Color.Transparent else MaterialTheme.colorScheme.background,
+                    topBar = {
+                        ZomdroidGlassSurface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RectangleShape,
+                            blurRadius = 24.dp,
+                            enableLens = false,
+                            surfaceColor = MaterialTheme.colorScheme.surface.copy(alpha = .16f),
+                        ) {
+                            Row(
+                                Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                if (hasDetails) {
+                                    IconButton(onClick = onBack) {
+                                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.app_shell_back))
+                                    }
+                                }
+                                Text(moduleTitle(state.selectedModule), Modifier.padding(horizontal = 8.dp), style = MaterialTheme.typography.titleLarge)
+                            }
+                        }
+                    },
+                    bottomBar = {
+                        if (!isWide && !hasDetails) {
+                            AdaptiveNavigation(
+                                selected = state.selectedModule,
+                                onSelected = onModuleSelected,
+                                wide = false,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    },
+                    snackbarHost = { SnackbarHost(snackbarHostState) },
+                ) { innerPadding ->
+                    Row(Modifier.fillMaxSize().padding(innerPadding)) {
+                        if (!hasDetails && isWide) AdaptiveNavigation(selected = state.selectedModule, onSelected = onModuleSelected, wide = true)
+                        Box(Modifier.fillMaxSize().weight(1f)) { content(state) }
                     }
                 }
-            }
-        },
-    ) {
-        BoxWithConstraints(Modifier.fillMaxSize()) {
-            val isWide = maxWidth >= 600.dp
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text(moduleTitle(state.selectedModule)) },
-                        navigationIcon = {
-                            IconButton(onClick = if (hasDetails) onBack else {
-                                { scope.launch { drawerState.open() }; onMenuClick() }
-                            }) {
-                                Icon(
-                                    if (hasDetails) Icons.AutoMirrored.Filled.ArrowBack else Icons.Default.Menu,
-                                    contentDescription = stringResource(if (hasDetails) R.string.app_shell_back else R.string.app_shell_menu),
-                                )
-                            }
-                        },
-                    )
-                },
-                bottomBar = {
-                    if (!hasDetails && !isWide) AdaptiveNavigation(selected = state.selectedModule, onSelected = onModuleSelected)
-                },
-                snackbarHost = { SnackbarHost(snackbarHostState) },
-            ) { innerPadding ->
-                Row(Modifier.fillMaxSize().padding(innerPadding)) {
-                    if (!hasDetails && isWide) AdaptiveNavigation(selected = state.selectedModule, onSelected = onModuleSelected)
-                    Box(Modifier.fillMaxSize().weight(1f)) { content(state) }
-                }
+                ZomdroidPopupHost(popupHostState)
             }
         }
     }

@@ -13,9 +13,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.OutlinedButton
+import com.zomdroid.ui.component.ZomdroidLiquidButton as Button
+import com.zomdroid.ui.component.ZomdroidCircularProgressIndicator as CircularProgressIndicator
+import com.zomdroid.ui.component.ZomdroidLiquidOutlinedButton as OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -49,7 +49,7 @@ fun DownloadCenterScreen(viewModel: DownloadViewModel, onOpenTask: (String) -> U
             Text("${task.state.name} · ${task.phase}", color = if (task.state == DownloadCenterTaskState.Failed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
             if (task.totalBytes != null && task.totalBytes > 0) {
                 val progress = (task.writtenBytes * 100 / task.totalBytes).toInt().coerceIn(0, 100)
-                androidx.compose.material3.LinearProgressIndicator(progress / 100f, Modifier.fillMaxWidth())
+                com.zomdroid.ui.component.ZomdroidLinearProgressIndicator(progress / 100f, Modifier.fillMaxWidth())
                 Text(stringResource(R.string.workshop_download_progress_format, progress, formatBytes(task.writtenBytes), formatBytes(task.totalBytes)))
             }
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -68,7 +68,7 @@ fun DownloadCenterScreen(viewModel: DownloadViewModel, onOpenTask: (String) -> U
     val task = state.tasks.firstOrNull { it.id == taskId }
     if (task == null) { Column(Modifier.padding(24.dp)) { Text(stringResource(R.string.workshop_download_center_empty)); OutlinedButton(onClick = onBack) { Text(stringResource(R.string.app_shell_back)) } }; return }
     LazyColumn(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item { Row { androidx.compose.material3.IconButton(onClick = onBack) { androidx.compose.material3.Icon(Icons.Default.ArrowBack, null) }; Text(task.title ?: stringResource(R.string.workshop_download_center_item, task.publishedFileId), style = MaterialTheme.typography.headlineSmall) } }
+        item { Row { com.zomdroid.ui.component.ZomdroidLiquidIconButton(onClick = onBack) { androidx.compose.material3.Icon(Icons.Default.ArrowBack, null) }; Text(task.title ?: stringResource(R.string.workshop_download_center_item, task.publishedFileId), style = MaterialTheme.typography.headlineSmall) } }
         item { Text("${task.state.name} · ${task.phase}") }
         if (task.errorMessage != null) item { Text(task.errorMessage, color = MaterialTheme.colorScheme.error) }
         item { ZomdroidGlassCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(12.dp)) { ZomdroidSectionLabel(logsTitle); Text(task.logs.joinToString("\n").ifBlank { "—" }); OutlinedButton(onClick = { context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, task.logs.joinToString("\n")), logsTitle)) }) { Text(stringResource(R.string.workshop_library_share)) } } } }
@@ -93,8 +93,8 @@ fun DownloadCenterScreen(viewModel: DownloadViewModel, onOpenTask: (String) -> U
 @Composable private fun InstancePickerDialog(context: Context, onDismiss: () -> Unit, onChosen: (String, Boolean) -> Unit) {
     val instances = runCatching { com.zomdroid.game.GameInstanceManager.requireSingleton().instances }.getOrDefault(emptyList())
     var selected by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
-    androidx.compose.material3.AlertDialog(onDismissRequest = onDismiss, title = { Text(stringResource(R.string.workshop_library_choose_instance)) }, text = { Column { instances.forEach { instance -> Row(Modifier.fillMaxWidth().clickable { selected = instance.name }.padding(12.dp)) { Text(instance.name) } } } }, confirmButton = { OutlinedButton(onClick = onDismiss) { Text(stringResource(android.R.string.cancel)) } })
-    selected?.let { name -> androidx.compose.material3.AlertDialog(onDismissRequest = { selected = null }, title = { Text(stringResource(R.string.workshop_library_overwrite_title)) }, text = { Text(stringResource(R.string.workshop_library_overwrite_message)) }, dismissButton = { OutlinedButton(onClick = { onChosen(name, false) }) { Text(stringResource(R.string.workshop_library_install_without_backup)) } }, confirmButton = { Button(onClick = { onChosen(name, true) }) { Text(stringResource(R.string.workshop_library_install_with_backup)) } }) }
+    com.zomdroid.ui.component.ZomdroidLiquidAlertDialog(onDismissRequest = onDismiss, title = { Text(stringResource(R.string.workshop_library_choose_instance)) }, text = { Column { instances.forEach { instance -> Row(Modifier.fillMaxWidth().clickable { selected = instance.name }.padding(12.dp)) { Text(instance.name) } } } }, confirmButton = { OutlinedButton(onClick = onDismiss) { Text(stringResource(android.R.string.cancel)) } })
+    selected?.let { name -> com.zomdroid.ui.component.ZomdroidLiquidAlertDialog(onDismissRequest = { selected = null }, title = { Text(stringResource(R.string.workshop_library_overwrite_title)) }, text = { Text(stringResource(R.string.workshop_library_overwrite_message)) }, dismissButton = { OutlinedButton(onClick = { onChosen(name, false) }) { Text(stringResource(R.string.workshop_library_install_without_backup)) } }, confirmButton = { Button(onClick = { onChosen(name, true) }) { Text(stringResource(R.string.workshop_library_install_with_backup)) } }) }
 }
 
 @Composable private fun IconDownload() { androidx.compose.material3.Icon(Icons.Default.Download, null) }

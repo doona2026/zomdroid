@@ -149,7 +149,6 @@ fun ZomdroidApp(
                     viewModel.dispatch(AppAction.NavigateToModule(module))
                 },
                 onBack = { viewModel.dispatch(AppAction.Back) },
-                onMenuClick = {},
                 content = { currentState ->
                     when (val destination = currentState.backStack.lastOrNull()) {
                         AppDestination.NewGameInstance -> NewGameInstanceScreen(

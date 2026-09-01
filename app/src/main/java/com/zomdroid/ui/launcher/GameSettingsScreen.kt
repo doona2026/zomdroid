@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,12 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.LinearProgressIndicator
+import com.zomdroid.ui.component.ZomdroidLiquidButton as Button
+import com.zomdroid.ui.component.ZomdroidLinearProgressIndicator as LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import com.zomdroid.ui.component.ZomdroidLiquidOutlinedButton as OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,6 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zomdroid.R
 import com.zomdroid.ui.component.ZomdroidGlassCard
+import com.zomdroid.ui.component.ZomdroidLiquidOutlinedButton
+import com.zomdroid.ui.component.ZomdroidPopupMenu
+import com.zomdroid.ui.component.ZomdroidPopupMenuItem
 import com.zomdroid.ui.viewmodel.GameSettingsError
 import com.zomdroid.ui.viewmodel.GameSettingsViewModel
 
@@ -81,10 +83,14 @@ fun GameSettingsScreen(viewModel: GameSettingsViewModel, onBack: () -> Unit) {
 @Composable
 private fun InstancePicker(options: List<String>, selected: String?, onSelected: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
-    Column {
-        OutlinedButton(onClick = { expanded = true }, enabled = options.isNotEmpty(), modifier = Modifier.fillMaxWidth()) { Text(selected ?: stringResource(R.string.select_instance)) }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            options.forEach { option -> DropdownMenuItem(text = { Text(option) }, onClick = { expanded = false; onSelected(option) }) }
+    Box(Modifier.fillMaxWidth()) {
+        ZomdroidLiquidOutlinedButton(onClick = { expanded = true }, enabled = options.isNotEmpty(), modifier = Modifier.fillMaxWidth()) {
+            Text(selected ?: stringResource(R.string.select_instance))
+        }
+        ZomdroidPopupMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            options.forEach { option ->
+                ZomdroidPopupMenuItem(text = { Text(option) }, onClick = { expanded = false; onSelected(option) })
+            }
         }
     }
 }

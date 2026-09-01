@@ -160,4 +160,56 @@
 - Automated validation: `testDebugUnitTest`, `compileDebugKotlin`, `compileDebugJavaWithJavac`, `compileDebugAndroidTestKotlin`, `assembleDebug` and `git diff --check` pass. Production reference scan found only the intentionally retained hardware mapper XML. `GameActivity` has no diff.
 - Lint: `lintDebug` was executed and remains red on the existing project-wide baseline (197 errors, 542 warnings; first error is the pre-existing duplicate `android:background` in `keyboard_styles.xml`). This was not hidden with a new baseline and did not prevent resource processing or APK assembly.
 - Device boundary: `adb` is unavailable in this workspace, so `connectedDebugAndroidTest`, API 30/API 35, low-performance rendering, background service/notification, rotation, process restart and real-device end-to-end checks were not run. The executable checklist is `docs/superpowers/stage7-device-validation.md` for the user-owned device pass.
-- Deliverable: `app/build/outputs/apk/debug/zomdroid-debug-1.4.8.apk`, 222,562,402 bytes, SHA-256 `D2BDE60ED196E0085FCDA95041A2861014640DAD0454F12D9D38A5F684904A29`.
+- Deliverable: `app/build/outputs/apk/debug/zomdroid-debug-1.4.8.apk`, 222,564,054 bytes, SHA-256 `879562D0269856898F7CC3224EDA7D16E610A92123CF6B5885964D9E62F79CDC`.
+### Navigation duplication fix
+
+- Completed at: 2026-09-01
+- Finding: `AppScaffold` created a `ModalNavigationDrawer` for every width and also rendered `AdaptiveNavigation` as a `NavigationRail` on wide containers, so the same primary navigation could appear as both an overlay drawer and a persistent rail.
+- Change: Wide layouts now render only the persistent rail; narrow layouts now render only the drawer. The narrow bottom navigation bar was removed from this shell so the primary navigation has one presentation at a time. Detail destinations retain only the back action.
+- Regression coverage: Added navigation surface test tags and assertions for the narrow drawer/wide rail split, all five module labels, all three appearance modes, 360/600/840dp UI matrix and detail back navigation.
+- Validation: `testDebugUnitTest`, `compileDebugKotlin`, `compileDebugJavaWithJavac`, `compileDebugAndroidTestKotlin` and `assembleDebug` pass. Instrumentation execution remains user/device-side because `adb` is unavailable.
+### Navigation orientation and liquid shell fix
+
+- Completed at: 2026-09-01
+- Finding: Width-only `600dp` detection classified some portrait devices as wide; `Scaffold` also kept opaque Material chrome, so only explicit cards exposed the Backdrop effect.
+- Change: Primary navigation now uses the drawer in portrait and only uses the persistent glass rail in landscape at 600dp or wider. The shell `Scaffold`, top app bar, drawer sheet and navigation surfaces now use transparent/Backdrop-aware containers; Lite and Classic continue through their low-cost surface paths.
+- Regression coverage: Navigation tests now inject portrait/landscape configurations and assert the mutually exclusive drawer/rail behavior; the Stage 7 matrix follows the same orientation rule.
+- Validation: `testDebugUnitTest`, `compileDebugKotlin`, `compileDebugJavaWithJavac`, `compileDebugAndroidTestKotlin` and `assembleDebug` pass. Device rendering validation remains user-side because `adb` is unavailable.
+
+### Startup crash regression fix
+
+- Completed at: 2026-09-01
+- Reproduction: Connected to MuMu at `127.0.0.1:5555`, installed the debug APK and launched `com.zomdroid/.LauncherActivity`. The process crashed during composition with `UnsupportedOperationException: Only RoundedRectangularShape or CornerBasedShape is supported in lens effects`, originating from `GlassComponents.kt` while rendering a rectangular shell surface.
+- Root cause: The new full-width top bar, drawer sheet and navigation rail/bar intentionally use `RectangleShape`, but `ZomdroidGlassSurface` unconditionally applied Backdrop's `lens` effect. Backdrop rejects that shape before the first frame.
+- Change: Added the explicit `enableLens` capability flag to `ZomdroidGlassSurface`; rectangular shell surfaces disable only `lens` while retaining blur, vibrancy, borders and surface rendering. Rounded cards keep the full liquid-glass effect.
+- Validation: Build/test/assemble pass. Reinstalled the APK on MuMu and launched it successfully three times; `pidof com.zomdroid` remained present and no `FATAL EXCEPTION`/`AndroidRuntime` output was produced. `git diff --check` passes. APK: `app/build/outputs/apk/debug/zomdroid-debug-1.4.8.apk`.
+
+### Portrait bottom navigation and shared glass controls
+
+- Completed at: 2026-09-01
+- Finding: The portrait shell still opened a modal drawer, contrary to the requested mobile layout. In addition, `AdaptiveNavigation` reclassified the bottom-bar host by width alone; MuMu's 1080px/280dpi portrait window is about 617dp wide and was incorrectly rendered as a rail.
+- Change: Removed the portrait drawer and menu action. The shell now renders a bottom navigation bar in portrait and a persistent rail only when the outer shell explicitly selects wide layout. The bottom bar is a rounded glass capsule.
+- Shared controls: Settings appearance choices, preset actions, enum selectors, sliders, switches and text fields now use the shared liquid controls instead of opaque Material button/switch/text-field defaults. Full-liquid mode retains Backdrop; Lite and Classic use the corresponding low-cost surface path.
+- Validation: Build, unit tests, Android-test compilation and APK assembly pass. MuMu ADB `127.0.0.1:5555` installed and launched the APK without crashes; UIAutomator confirmed the five navigation destinations occupy bounds at the bottom (`y=1766..1906`) and no drawer is present. A settings screenshot confirmed the glass capsule controls. No temporary `[DEBUG-*]` instrumentation remains.
+
+### Global popup glass and selector sizing fix
+
+- Completed at: 2026-09-01
+- Review: Compared the local `WorkshopAndroidDownloader` implementation, especially its shared glass components and `WorkshopPopupMenu` host. Confirmed that its global effect comes from a page Backdrop plus an in-window popup host that measures anchor bounds, rather than from Material `DropdownMenu` styling alone.
+- Change: Replaced Zomdroid's Material popup wrapper with an in-content `ZomdroidPopupHost`/`ZomdroidPopupMenu` pair. Popups now use the same Backdrop, rounded glass surface, bounded width (220–320dp), right-edge clamping and above/below placement. Migrated Settings, launcher, tools and controls-editor selectors/actions to the shared popup items.
+- Change: Removed the unconstrained inner `fillMaxSize()` from liquid buttons so selectors without `fillMaxWidth()` measure to their content; full-width callers still explicitly retain full width.
+- Validation: Build, unit tests, Android-test compilation and APK assembly pass. Installed on MuMu `127.0.0.1:5555`, launched successfully, opened Settings and verified a selector popup is right-anchored with the shared translucent Backdrop. No app fatal exception was found in the post-launch log.
+
+### Liquid control parity correction
+
+- Completed at: 2026-09-01
+- Finding: The previous migration stopped at glass containers around Material controls. Toggle, Slider and portrait navigation therefore retained Material interaction geometry and did not implement WAD's component-level backdrop composition, chromatic lens edges or press/drag deformation.
+- Change: Liquid mode now uses custom Backdrop-rendered Toggle, Slider and BottomNavigation components. Toggle and Slider compose a local track layer with the page backdrop and render a refractive thumb; BottomNavigation uses a moving refractive indicator and full-width tab hit targets. Liquid buttons now use WAD-style Backdrop lens, highlight, inner-shadow and press scaling. Wide liquid navigation uses a custom glass rail; Material navigation remains only in Classic mode.
+- Validation: MuMu `127.0.0.1:5555` installed and launched the new APK with `pidof com.zomdroid` present and no app fatal exception in the sampled log. Settings screenshot confirms custom glass slider/thumb, liquid appearance controls and custom bottom navigation. Build, Android-test compilation and unit tests pass.
+
+### Full Material control leakage audit
+
+- Completed at: 2026-09-01
+- Finding: A source audit still found page-level Material buttons, fields, dialogs, icon buttons, chips and progress indicators outside Settings. They made the global liquid mode inconsistent even though the main settings controls had already been custom-rendered.
+- Change: Routed all page-level instances through the shared liquid component layer, including custom text/outlined buttons, text fields with placeholder/trailing/error content, dialogs, icon buttons, chips, checkboxes, progress indicators and the launcher action button. Replaced the Material top app bar with a glass-shell row. Material navigation remains only in the explicitly selected Classic appearance branch.
+- Validation: No direct Material control imports or fully-qualified calls remain in `app/src/main/java/com/zomdroid/ui` for Button, Switch, Slider, TextField, AlertDialog, IconButton or progress indicators. Full build, unit tests, Android-test compilation, APK assembly and diff check pass. MuMu install/launch succeeds with `pidof com.zomdroid`; no sampled fatal exception. APK SHA-256: `A4259CB412CE8FB835B49C02D49D4E634F643B702A68E479F7111F73CEA5A4E7`.

@@ -10,7 +10,7 @@ import java.util.Locale
 
 @Composable fun WikiScreen(onBack: () -> Unit) {
     androidx.compose.foundation.layout.Column(Modifier.fillMaxSize()) {
-        androidx.compose.material3.TextButton(onClick = onBack) { androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(R.string.app_shell_back)) }
+        com.zomdroid.ui.component.ZomdroidLiquidTextButton(onClick = onBack) { androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(R.string.app_shell_back)) }
         AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
             WebView(context).apply {
                 val file = when (Locale.getDefault().language) { "ru" -> "index_ru.html"; "zh" -> "index_zh.html"; else -> "index.html" }

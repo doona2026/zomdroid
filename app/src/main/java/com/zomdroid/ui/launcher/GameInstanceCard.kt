@@ -15,7 +15,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import com.zomdroid.ui.component.ZomdroidLiquidIconButton as IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -65,7 +65,7 @@ fun GameInstanceCard(
                     leadingIcon = { Icon(Icons.Default.Settings, null, Modifier.size(16.dp)) },
                 )
                 Spacer(Modifier.weight(1f))
-                androidx.compose.material3.Button(onClick = { onAction(LauncherAction.Launch(instance.name)) }) {
+                com.zomdroid.ui.component.ZomdroidLiquidButton(onClick = { onAction(LauncherAction.Launch(instance.name)) }) {
                     Icon(Icons.Default.PlayArrow, null)
                     Text(stringResource(R.string.launcher_launch), Modifier.padding(start = 6.dp))
                 }

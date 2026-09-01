@@ -5,11 +5,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.zomdroid.R
@@ -41,16 +43,21 @@ class Stage7UiMatrixTest {
             widths.forEach { width ->
                 composeRule.setContent {
                     ZomdroidTheme(appearanceMode = appearance) {
-                        Box(Modifier.size(width = width, height = 640.dp)) {
-                            AppScaffold(
-                                state = AppUiState(),
-                                onModuleSelected = {},
-                                onBack = {},
-                                onMenuClick = {},
-                                snackbarHostState = SnackbarHostState(),
-                            )
+                        Box(Modifier.size(width = width, height = if (width < 600.dp) 640.dp else 420.dp)) {
+                                AppScaffold(
+                                    state = AppUiState(),
+                                    onModuleSelected = {},
+                                    onBack = {},
+                                    snackbarHostState = SnackbarHostState(),
+                                )
                         }
                     }
+                }
+                if (width < 600.dp) {
+                    composeRule.onAllNodesWithTag("primary_navigation_bar").assertCountEquals(1)
+                    composeRule.onAllNodesWithTag("primary_navigation_drawer").assertCountEquals(0)
+                } else {
+                    composeRule.onAllNodesWithTag("primary_navigation_rail").assertCountEquals(1)
                 }
                 moduleLabels.forEach { label ->
                     composeRule.onNodeWithText(label).assertIsDisplayed()
@@ -68,7 +75,6 @@ class Stage7UiMatrixTest {
                     state = AppUiState(backStack = listOf(AppDestination.ModuleHome(AppModule.Workshop), AppDestination.WorkshopDetail(42L))),
                     onModuleSelected = {},
                     onBack = { backPressed = true },
-                    onMenuClick = {},
                     snackbarHostState = SnackbarHostState(),
                 )
             }

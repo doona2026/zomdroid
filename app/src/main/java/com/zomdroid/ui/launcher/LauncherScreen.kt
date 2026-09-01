@@ -12,12 +12,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.FloatingActionButton
+import com.zomdroid.ui.component.ZomdroidCircularProgressIndicator as CircularProgressIndicator
+import com.zomdroid.ui.component.ZomdroidLiquidAlertDialog as AlertDialog
+import com.zomdroid.ui.component.ZomdroidLiquidTextButton as TextButton
+import com.zomdroid.ui.component.ZomdroidLiquidFloatingActionButton as FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import com.zomdroid.ui.component.ZomdroidLiquidIconButton as IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -112,7 +112,7 @@ private fun EmptyLauncherState(onAdd: () -> Unit, modifier: Modifier = Modifier)
             Column(Modifier.padding(28.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(stringResource(R.string.launcher_empty_title), style = MaterialTheme.typography.titleLarge)
                 Text(stringResource(R.string.launcher_empty_message), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                androidx.compose.material3.Button(onClick = onAdd) { Text(stringResource(R.string.launcher_add_instance)) }
+                com.zomdroid.ui.component.ZomdroidLiquidButton(onClick = onAdd) { Text(stringResource(R.string.launcher_add_instance)) }
             }
         }
     }
@@ -125,7 +125,7 @@ private fun TaskBanner(task: LauncherTaskUiState) {
             Text(task.title, style = MaterialTheme.typography.titleMedium)
             task.message?.let { Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             if (task.progress < 0) CircularProgressIndicator(Modifier.padding(top = 10.dp))
-            else androidx.compose.material3.LinearProgressIndicator(
+            else com.zomdroid.ui.component.ZomdroidLinearProgressIndicator(
                 progress = { if (task.progressMax > 0) task.progress.toFloat() / task.progressMax else 0f },
                 Modifier.fillMaxWidth().padding(top = 10.dp),
             )
