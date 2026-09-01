@@ -582,6 +582,8 @@
     <string name="workshop_download_center_resume">继续队列</string>
     <string name="workshop_download_center_empty">暂时没有创意工坊任务。</string>
     <string name="workshop_download_center_item">创意工坊项目 %1$d</string>
+    <string name="workshop_download_progress_format">%1$d%% · %2$s / %3$s</string>
+    <string name="workshop_download_progress_unknown_format">已下载 %1$s · 总大小未知</string>
     <string name="workshop_download_pause">暂停</string>
     <string name="workshop_download_resume">继续</string>
     <string name="workshop_download_retry">重试</string>

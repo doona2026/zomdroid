@@ -55,6 +55,7 @@ class DownloadCenterManager(
     private val activeJobs = ConcurrentHashMap<String, Job>()
     private val _tasks = MutableStateFlow(store.load().tasks)
     val tasks: StateFlow<List<DownloadCenterTask>> = _tasks.asStateFlow()
+    private var lastProgressPersistAtMillis = 0L
 
     init {
         require(maxConcurrentTasks > 0) { "maxConcurrentTasks must be positive" }
@@ -332,11 +333,17 @@ class DownloadCenterManager(
                 is DownloadEvent.StateChanged -> replaceLocked(taskId) {
                     it.copy(phase = event.state.name)
                 }
-                is DownloadEvent.Progress -> replaceLocked(taskId) {
-                    it.copy(
-                        writtenBytes = event.writtenBytes,
-                        totalBytes = event.totalBytes?.takeIf { total -> total >= 0L },
-                    )
+                is DownloadEvent.Progress -> {
+                    val now = clock()
+                    val shouldPersist = lastProgressPersistAtMillis == 0L
+                        || now - lastProgressPersistAtMillis >= PROGRESS_PERSIST_INTERVAL_MILLIS
+                    replaceLocked(taskId, persist = shouldPersist) {
+                        it.copy(
+                            writtenBytes = event.writtenBytes,
+                            totalBytes = event.totalBytes?.takeIf { total -> total >= 0L },
+                        )
+                    }
+                    if (shouldPersist) lastProgressPersistAtMillis = now
                 }
                 is DownloadEvent.LogAppended -> replaceLocked(taskId) {
                     it.copy(logs = (it.logs + event.line).takeLast(MAX_LOG_LINES))
@@ -354,15 +361,19 @@ class DownloadCenterManager(
     private fun findLocked(taskId: String): DownloadCenterTask? =
         _tasks.value.firstOrNull { it.id == taskId }
 
-    private fun replaceLocked(taskId: String, transform: (DownloadCenterTask) -> DownloadCenterTask) {
+    private fun replaceLocked(
+        taskId: String,
+        persist: Boolean = true,
+        transform: (DownloadCenterTask) -> DownloadCenterTask,
+    ) {
         val updated = _tasks.value.map { task ->
             if (task.id == taskId) transform(task).copy(updatedAtMillis = clock()) else task
         }
-        publishLocked(updated)
+        publishLocked(updated, persist)
     }
 
-    private fun publishLocked(tasks: List<DownloadCenterTask>) {
-        store.save(tasks)
+    private fun publishLocked(tasks: List<DownloadCenterTask>, persist: Boolean = true) {
+        if (persist) store.save(tasks)
         _tasks.value = tasks
     }
 
@@ -381,6 +392,7 @@ class DownloadCenterManager(
 
     companion object {
         private const val MAX_LOG_LINES = 200
+        private const val PROGRESS_PERSIST_INTERVAL_MILLIS = 2_000L
 
         fun forContext(context: Context): DownloadCenterManager {
             val appContext = context.applicationContext

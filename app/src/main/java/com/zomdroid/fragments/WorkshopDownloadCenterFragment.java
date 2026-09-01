@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +35,7 @@ import com.zomdroid.workshop.thirdparty.GgntwFallbackRuntime;
 import com.zomdroid.workshop.auth.SteamAuthRuntime;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -44,6 +47,13 @@ public class WorkshopDownloadCenterFragment extends Fragment {
     private DownloadCenterManager manager;
     private ModLibraryRepository library;
     private Job observation;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private List<DownloadCenterTask> latestTasks = java.util.Collections.emptyList();
+    private boolean renderScheduled;
+    private final Runnable scheduledRender = () -> {
+        renderScheduled = false;
+        if (tasksContainer != null) render(latestTasks);
+    };
 
     @Nullable
     @Override
@@ -63,11 +73,7 @@ public class WorkshopDownloadCenterFragment extends Fragment {
         observation = manager.observe(new DownloadCenterTaskObserver() {
             @Override
             public void onTasksChanged(List<DownloadCenterTask> tasks) {
-                if (!isAdded()) return;
-                android.app.Activity activity = getActivity();
-                if (activity != null) activity.runOnUiThread(() -> {
-                    if (tasksContainer != null) render(tasks);
-                });
+                mainHandler.post(() -> scheduleRender(tasks));
             }
         });
     }
@@ -76,8 +82,19 @@ public class WorkshopDownloadCenterFragment extends Fragment {
     public void onDestroyView() {
         if (observation != null) observation.cancel(null);
         observation = null;
+        mainHandler.removeCallbacks(scheduledRender);
+        renderScheduled = false;
+        latestTasks = java.util.Collections.emptyList();
         tasksContainer = null;
         super.onDestroyView();
+    }
+
+    private void scheduleRender(List<DownloadCenterTask> tasks) {
+        if (tasksContainer == null) return;
+        latestTasks = new ArrayList<>(tasks);
+        if (renderScheduled) return;
+        renderScheduled = true;
+        mainHandler.postDelayed(scheduledRender, 150L);
     }
 
     private void render(List<DownloadCenterTask> tasks) {
@@ -98,18 +115,27 @@ public class WorkshopDownloadCenterFragment extends Fragment {
         TextView title = row.findViewById(R.id.workshop_task_title);
         TextView status = row.findViewById(R.id.workshop_task_status);
         TextView log = row.findViewById(R.id.workshop_task_log);
+        TextView progressText = row.findViewById(R.id.workshop_task_progress_text);
         ProgressBar progress = row.findViewById(R.id.workshop_task_progress);
         title.setText(task.getTitle() == null || task.getTitle().trim().isEmpty()
                 ? getString(R.string.workshop_download_center_item, task.getPublishedFileId())
                 : task.getTitle());
         status.setText(formatStatus(task));
         log.setText(String.join("\n", task.getLogs()));
-        if (task.getTotalBytes() != null && task.getTotalBytes() > 0) {
+        Long totalBytes = task.getTotalBytes();
+        long writtenBytes = Math.max(0L, task.getWrittenBytes());
+        if (totalBytes != null && totalBytes > 0) {
+            long boundedWrittenBytes = Math.min(writtenBytes, totalBytes);
+            int percent = (int) Math.min(100L, Math.round(
+                    boundedWrittenBytes * 100.0d / totalBytes));
             progress.setIndeterminate(false);
-            progress.setProgress((int) Math.min(100L,
-                    task.getWrittenBytes() * 100L / task.getTotalBytes()));
+            progress.setProgress(percent);
+            progressText.setText(getString(R.string.workshop_download_progress_format,
+                    percent, formatBytes(boundedWrittenBytes), formatBytes(totalBytes)));
         } else {
             progress.setIndeterminate(task.getState() == DownloadCenterTaskState.Running);
+            progressText.setText(getString(R.string.workshop_download_progress_unknown_format,
+                    formatBytes(writtenBytes)));
         }
 
         Button pause = row.findViewById(R.id.workshop_task_pause);
@@ -145,6 +171,15 @@ public class WorkshopDownloadCenterFragment extends Fragment {
             return task.getState().name() + " — " + task.getErrorMessage();
         }
         return String.format(Locale.US, "%s · %s", task.getState().name(), task.getPhase());
+    }
+
+    private static String formatBytes(long bytes) {
+        if (bytes < 1024L) return bytes + " B";
+        if (bytes < 1024L * 1024L) return String.format(Locale.US, "%.1f KB", bytes / 1024.0d);
+        if (bytes < 1024L * 1024L * 1024L) {
+            return String.format(Locale.US, "%.1f MB", bytes / (1024.0d * 1024.0d));
+        }
+        return String.format(Locale.US, "%.2f GB", bytes / (1024.0d * 1024.0d * 1024.0d));
     }
 
     private void command(String action, String taskId) {

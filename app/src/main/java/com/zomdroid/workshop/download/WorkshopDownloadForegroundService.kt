@@ -8,7 +8,9 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.zomdroid.R
@@ -22,8 +24,15 @@ import kotlinx.coroutines.launch
 /** Runs and observes the persistent queue while Android gives the app foreground priority. */
 class WorkshopDownloadForegroundService : Service() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val notificationHandler = Handler(Looper.getMainLooper())
     private lateinit var manager: DownloadCenterManager
     private var serviceStarted = false
+    private var notificationScheduled = false
+    private var latestTasks: List<DownloadCenterTask> = emptyList()
+    private val scheduledNotification = Runnable {
+        notificationScheduled = false
+        if (serviceStarted) publishTaskNotification(latestTasks)
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -32,7 +41,16 @@ class WorkshopDownloadForegroundService : Service() {
         serviceScope.launch {
             manager.tasks.collect { tasks ->
                 if (!serviceStarted) return@collect
-                val active = tasks.filter { it.state.isActive() }
+                latestTasks = tasks
+                if (notificationScheduled) return@collect
+                notificationScheduled = true
+                notificationHandler.postDelayed(scheduledNotification, NOTIFICATION_UPDATE_INTERVAL_MILLIS)
+            }
+        }
+    }
+
+    private fun publishTaskNotification(tasks: List<DownloadCenterTask>) {
+        val active = tasks.filter { it.state.isActive() }
                 if (active.isEmpty()) {
                     tasks.lastOrNull { it.state == DownloadCenterTaskState.Failed }
                         ?.let(::publishFailureNotification)
@@ -41,8 +59,6 @@ class WorkshopDownloadForegroundService : Service() {
                 } else {
                     publishNotification(active)
                 }
-            }
-        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -63,6 +79,8 @@ class WorkshopDownloadForegroundService : Service() {
     }
 
     override fun onDestroy() {
+        notificationHandler.removeCallbacks(scheduledNotification)
+        notificationScheduled = false
         manager.stop()
         serviceScope.cancel()
         super.onDestroy()
@@ -148,6 +166,7 @@ class WorkshopDownloadForegroundService : Service() {
 
     companion object {
         const val ACTION_START = "com.zomdroid.workshop.download.START"
+        private const val NOTIFICATION_UPDATE_INTERVAL_MILLIS = 500L
         const val ACTION_PAUSE = "com.zomdroid.workshop.download.PAUSE"
         const val ACTION_RESUME = "com.zomdroid.workshop.download.RESUME"
         const val ACTION_RETRY = "com.zomdroid.workshop.download.RETRY"

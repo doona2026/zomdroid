@@ -121,6 +121,8 @@
     <string name="workshop_download_center_resume">Resume queue</string>
     <string name="workshop_download_center_empty">No Workshop tasks yet.</string>
     <string name="workshop_download_center_item">Workshop item %1$d</string>
+    <string name="workshop_download_progress_format">%1$d%% · %2$s / %3$s</string>
+    <string name="workshop_download_progress_unknown_format">%1$s downloaded · total size unknown</string>
     <string name="workshop_download_pause">Pause</string>
     <string name="workshop_download_resume">Resume</string>
     <string name="workshop_download_retry">Retry</string>
