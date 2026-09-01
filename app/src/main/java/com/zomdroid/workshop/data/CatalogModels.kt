@@ -55,6 +55,13 @@ data class WorkshopItemDetail(
     val hasPreviousCommentPage: Boolean = false,
     val hasNextCommentPage: Boolean = false,
     val comments: List<WorkshopComment> = emptyList(),
+    val galleryImageUrls: List<String> = emptyList(),
+    val descriptionBlocks: List<WorkshopDescriptionBlock> = emptyList(),
+)
+
+data class WorkshopDescriptionBlock(
+    val text: String,
+    val imageUrl: String? = null,
 )
 
 data class WorkshopCommentThreadContext(
@@ -103,4 +110,3 @@ data class WorkshopRequiredItem(
             descriptionSnippet = descriptionSnippet,
         )
 }
-

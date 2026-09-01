@@ -709,6 +709,8 @@
     <string name="workshop_loaded">Loaded</string>
     <string name="workshop_empty">No Workshop items found.</string>
     <string name="workshop_cover">Workshop cover</string>
+    <string name="workshop_image_page_format">Image %1$d of %2$d</string>
+    <string name="workshop_description_image">Workshop description image</string>
     <string name="workshop_author_format">Author: %1$s</string>
     <string name="workshop_details">Details</string>
     <string name="workshop_open_steam">Open Steam page</string>

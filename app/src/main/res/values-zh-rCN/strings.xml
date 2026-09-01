@@ -553,6 +553,8 @@
     <string name="workshop_loaded">加载完成</string>
     <string name="workshop_empty">没有找到创意工坊项目。</string>
     <string name="workshop_cover">创意工坊封面</string>
+    <string name="workshop_image_page_format">第 %1$d / %2$d 张图片</string>
+    <string name="workshop_description_image">创意工坊介绍图片</string>
     <string name="workshop_author_format">作者：%1$s</string>
     <string name="workshop_details">详情</string>
     <string name="workshop_open_steam">打开 Steam 页面</string>

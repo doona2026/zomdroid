@@ -17,6 +17,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.zomdroid.R;
@@ -24,6 +27,7 @@ import com.zomdroid.workshop.data.WorkshopBrowseItem;
 import com.zomdroid.workshop.data.WorkshopCatalogRuntime;
 import com.zomdroid.workshop.data.WorkshopComment;
 import com.zomdroid.workshop.data.WorkshopCommentPage;
+import com.zomdroid.workshop.data.WorkshopDescriptionBlock;
 import com.zomdroid.workshop.data.WorkshopItemDetail;
 import com.zomdroid.workshop.data.WorkshopRequiredItem;
 import com.zomdroid.workshop.auth.SteamAuthRuntime;
@@ -37,7 +41,10 @@ import java.util.List;
 public class WorkshopDetailFragment extends Fragment {
     private WorkshopItemDetail detail;
     private TextView status;
-    private ImageView image;
+    private RecyclerView image;
+    private TextView imagePage;
+    private LinearLayoutManager imageLayoutManager;
+    private WorkshopImageAdapter imageAdapter;
     private Button download;
     private Button dependencyDownload;
 
@@ -47,6 +54,17 @@ public class WorkshopDetailFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_workshop_detail, container, false);
         status = view.findViewById(R.id.workshop_detail_status);
         image = view.findViewById(R.id.workshop_detail_image);
+        imagePage = view.findViewById(R.id.workshop_detail_image_page);
+        imageLayoutManager = new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
+        imageAdapter = new WorkshopImageAdapter();
+        image.setLayoutManager(imageLayoutManager);
+        image.setAdapter(imageAdapter);
+        new PagerSnapHelper().attachToRecyclerView(image);
+        image.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                updateImagePage();
+            }
+        });
         download = view.findViewById(R.id.workshop_detail_download);
         dependencyDownload = view.findViewById(R.id.workshop_detail_download_dependencies);
         download.setEnabled(false);
@@ -65,7 +83,9 @@ public class WorkshopDetailFragment extends Fragment {
                 args.getString("title", "Workshop item"), args.getString("author", ""),
                 args.getString("preview_url", ""), args.getString("description", ""));
         status.setText(R.string.workshop_loading);
-        WorkshopCatalogRuntime.loadImage(requireContext(), item.getPreviewImageUrl(), image);
+        imageAdapter.setItems(item.getPreviewImageUrl().isBlank()
+                ? java.util.Collections.emptyList()
+                : java.util.Collections.singletonList(item.getPreviewImageUrl()));
         WorkshopCatalogRuntime.detail(requireContext(), item, true, new WorkshopCatalogRuntime.DetailCallback() {
             @Override public void onSuccess(WorkshopItemDetail result) {
                 if (!isAdded()) return;
@@ -89,8 +109,13 @@ public class WorkshopDetailFragment extends Fragment {
                 value.getViews() == null ? "?" : value.getViews().toString());
         ((TextView) requireView().findViewById(R.id.workshop_detail_meta)).setText(stats);
         ((TextView) requireView().findViewById(R.id.workshop_detail_tags)).setText(TextUtils.join(" · ", value.getTags()));
-        ((TextView) requireView().findViewById(R.id.workshop_detail_description)).setText(value.getDescription());
+        renderDescription(value);
         ((TextView) requireView().findViewById(R.id.workshop_detail_changes)).setText(value.getChangeNotes());
+        List<String> galleryImageUrls = value.getGalleryImageUrls();
+        if (galleryImageUrls.isEmpty() && !value.getPreviewImageUrl().isBlank()) {
+            galleryImageUrls = java.util.Collections.singletonList(value.getPreviewImageUrl());
+        }
+        imageAdapter.setItems(galleryImageUrls);
         download.setEnabled(true);
         dependencyDownload.setVisibility(value.getRequiredItems().isEmpty() ? View.GONE : View.VISIBLE);
         renderDependencies(value.getRequiredItems());
@@ -102,6 +127,114 @@ public class WorkshopDetailFragment extends Fragment {
             });
         }
         status.setText(R.string.workshop_loaded);
+    }
+
+    private void renderDescription(WorkshopItemDetail value) {
+        LinearLayout container = requireView().findViewById(R.id.workshop_detail_description);
+        container.removeAllViews();
+        List<WorkshopDescriptionBlock> blocks = value.getDescriptionBlocks();
+        if (blocks.isEmpty()) {
+            addDescriptionText(container, value.getDescription());
+            return;
+        }
+        for (WorkshopDescriptionBlock block : blocks) {
+            if (!block.getText().isBlank()) {
+                addDescriptionText(container, block.getText());
+            }
+            if (block.getImageUrl() != null && !block.getImageUrl().isBlank()) {
+                ImageView imageView = new ImageView(requireContext());
+                imageView.setLayoutParams(new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+                imageView.setAdjustViewBounds(true);
+                imageView.setMaxHeight(dp(420));
+                imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                imageView.setContentDescription(getString(R.string.workshop_description_image));
+                container.addView(imageView);
+                WorkshopCatalogRuntime.loadImage(requireContext(), block.getImageUrl(), imageView);
+            }
+        }
+    }
+
+    private void addDescriptionText(LinearLayout container, String text) {
+        TextView textView = new TextView(requireContext());
+        textView.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+        textView.setTextSize(15);
+        textView.setLineSpacing(dp(4), 1f);
+        textView.setText(text);
+        container.addView(textView);
+    }
+
+    private void updateImagePage() {
+        if (imageAdapter == null || imagePage == null || imageLayoutManager == null) return;
+        int count = imageAdapter.getItemCount();
+        image.setVisibility(count == 0 ? View.GONE : View.VISIBLE);
+        imagePage.setVisibility(count > 1 ? View.VISIBLE : View.GONE);
+        if (count > 1) {
+            int position = imageLayoutManager.findFirstCompletelyVisibleItemPosition();
+            if (position == RecyclerView.NO_POSITION) {
+                position = imageLayoutManager.findFirstVisibleItemPosition();
+            }
+            imagePage.setText(getString(
+                    R.string.workshop_image_page_format,
+                    Math.max(0, position) + 1,
+                    count));
+        }
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
+    }
+
+    private final class WorkshopImageAdapter extends RecyclerView.Adapter<WorkshopImageHolder> {
+        private final List<String> urls = new ArrayList<>();
+
+        void setItems(List<String> nextUrls) {
+            urls.clear();
+            for (String url : nextUrls) {
+                if (url != null && !url.isBlank() && !urls.contains(url)) {
+                    urls.add(url);
+                }
+            }
+            notifyDataSetChanged();
+            if (!urls.isEmpty()) {
+                image.scrollToPosition(0);
+            }
+            updateImagePage();
+        }
+
+        @NonNull @Override public WorkshopImageHolder onCreateViewHolder(@NonNull ViewGroup parent, int type) {
+            ImageView imageView = new ImageView(parent.getContext());
+            imageView.setLayoutParams(new RecyclerView.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    dp(300)));
+            imageView.setAdjustViewBounds(true);
+            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            return new WorkshopImageHolder(imageView);
+        }
+
+        @Override public void onBindViewHolder(@NonNull WorkshopImageHolder holder, int position) {
+            holder.bind(urls.get(position));
+        }
+
+        @Override public int getItemCount() { return urls.size(); }
+    }
+
+    private final class WorkshopImageHolder extends RecyclerView.ViewHolder {
+        private final ImageView imageView;
+
+        WorkshopImageHolder(View view) {
+            super(view);
+            imageView = (ImageView) view;
+        }
+
+        void bind(String url) {
+            imageView.setTag(url);
+            imageView.setImageDrawable(null);
+            WorkshopCatalogRuntime.loadImage(requireContext(), url, imageView);
+        }
     }
 
     private void renderDependencies(List<WorkshopRequiredItem> dependencies) {

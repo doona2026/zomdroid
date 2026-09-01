@@ -8,6 +8,18 @@ internal object SteamHtmlDecoder {
     private val bbCodeMediaTagRegex = Regex(
         """(?is)\[(?:img|previewyoutube|previewyoutubehd)[^\]]*].*?\[/(?:img|previewyoutube|previewyoutubehd)]""",
     )
+    private val bbCodeImageRegex = Regex(
+        """(?is)\[img[^\]]*]\s*(.*?)\s*\[/img]""",
+    )
+    private val htmlImageRegex = Regex(
+        """(?is)<img\b[^>]*\bsrc\s*=\s*[\"']([^\"']+)[\"'][^>]*>""",
+    )
+    private val fullScreenshotRegex = Regex(
+        """(?is)\{\s*['\"]previewid['\"]\s*:\s*['\"][^'\"]+['\"]\s*,\s*['\"]url['\"]\s*:\s*['\"]([^'\"]+)['\"]""",
+    )
+    private val screenshotMapRegex = Regex(
+        """(?is)['\"]\d+['\"]\s*:\s*['\"]([^'\"]+)['\"]""",
+    )
     private val whitespaceRegex = Regex("""\s+""")
     private val inlineWhitespaceRegex = Regex("""[^\S\n]+""")
 
@@ -61,6 +73,73 @@ internal object SteamHtmlDecoder {
                 .replace(Regex("""(?i)</div\s*>"""), "\n")
                 .replace(htmlTagRegex, " "),
         )
+    }
+
+    fun extractWorkshopImageUrls(value: String): List<String> = buildList {
+        imageMatches(value).forEach { add(it.url) }
+    }.distinct()
+
+    fun extractWorkshopGalleryImageUrls(value: String): List<String> {
+        val fullUrls = fullScreenshotRegex.findAll(value)
+            .map { normalizeImageUrl(decodeEntities(it.groupValues[1])) }
+            .filter(String::isNotBlank)
+            .distinct()
+            .toList()
+        if (fullUrls.isNotEmpty()) {
+            return fullUrls
+        }
+        return screenshotMapRegex.findAll(value)
+            .map { normalizeImageUrl(decodeEntities(it.groupValues[1])) }
+            .filter(String::isNotBlank)
+            .distinct()
+            .toList()
+    }
+
+    fun decodeWorkshopDescriptionParts(value: String, isHtml: Boolean): List<WorkshopDescriptionPart> {
+        if (value.isBlank()) return emptyList()
+        val matches = imageMatches(value)
+        if (matches.isEmpty()) {
+            return listOf(WorkshopDescriptionPart(decodeDescriptionText(value, isHtml), null))
+        }
+        val parts = mutableListOf<WorkshopDescriptionPart>()
+        var cursor = 0
+        matches.forEach { match ->
+            val text = decodeDescriptionText(value.substring(cursor, match.start), isHtml)
+            if (text.isNotBlank()) parts += WorkshopDescriptionPart(text, null)
+            parts += WorkshopDescriptionPart("", match.url)
+            cursor = match.end
+        }
+        val trailingText = decodeDescriptionText(value.substring(cursor), isHtml)
+        if (trailingText.isNotBlank()) parts += WorkshopDescriptionPart(trailingText, null)
+        return parts
+    }
+
+    private fun imageMatches(value: String): List<ImageMatch> {
+        val bbCodeMatches = bbCodeImageRegex.findAll(value).mapNotNull { match ->
+            normalizeImageUrl(decodeEntities(match.groupValues[1])).takeIf(String::isNotBlank)?.let {
+                ImageMatch(match.range.first, match.range.last + 1, it)
+            }
+        }
+        val htmlMatches = htmlImageRegex.findAll(value).mapNotNull { match ->
+            normalizeImageUrl(decodeEntities(match.groupValues[1])).takeIf(String::isNotBlank)?.let {
+                ImageMatch(match.range.first, match.range.last + 1, it)
+            }
+        }
+        return (bbCodeMatches + htmlMatches).sortedBy { it.start }.distinctBy { it.start }.toList()
+    }
+
+    private fun decodeDescriptionText(value: String, isHtml: Boolean): String =
+        if (isHtml) decodeWorkshopHtmlDescription(value) else decodeWorkshopApiDescription(value)
+
+    private data class ImageMatch(val start: Int, val end: Int, val url: String)
+
+    private fun normalizeImageUrl(value: String): String {
+        val url = value.trim()
+        return when {
+            url.startsWith("https://", ignoreCase = true) || url.startsWith("http://", ignoreCase = true) -> url
+            url.startsWith("//") -> "https:$url"
+            else -> ""
+        }
     }
 
     fun decodeWorkshopChangeNotes(value: String): String {
@@ -118,3 +197,4 @@ internal object SteamHtmlDecoder {
     }
 }
 
+internal data class WorkshopDescriptionPart(val text: String, val imageUrl: String?)

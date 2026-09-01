@@ -28,14 +28,14 @@ class WorkshopDetailParserTest {
     fun loadWorkshopItemDetail_parsesApiCommunityMetadataAndCommentsContext() = runBlocking {
         server.enqueue(
             MockResponse.Builder().body(
-                """{"response":{"publishedfiledetails":[{"publishedfileid":"42","title":"API title","description":"[h1]API description[/h1]","preview_url":"https://example.com/preview.png","file_size":"1024","time_updated":"1700000000","subscriptions":"7","views":"8","tags":[{"tag":"Maps"}]}]}}""",
+                """{"response":{"publishedfiledetails":[{"publishedfileid":"42","title":"API title","description":"[h1]API description[/h1][img]https://example.com/api.png[/img]","preview_url":"https://example.com/preview.png","file_size":"1024","time_updated":"1700000000","subscriptions":"7","views":"8","tags":[{"tag":"Maps"}]}]}}""",
             ).build(),
         )
         server.enqueue(
             MockResponse.Builder().body(
                 """<div class="workshopItemTitle">Community title</div>
-<div class="workshopItemDescription" id="highlightContent"><div class="bb_h1">Community description</div><br>Details</div>
- <script>var g_sessionID = "session-1"; InitializeCommentThread("PublishedFile_Public","PublishedFile_Public_123_42",{"feature":"42","feature2":-1,"owner":"76561198000000001","total_count":12,"start":0,"pagesize":10},'https://steamcommunity.com/comment/PublishedFile_Public/',40);</script>""",
+<div class="workshopItemDescription" id="highlightContent"><div class="bb_h1">Community description</div><br><img src="https://example.com/community.jpg">Details</div>
+<script>var rgFullScreenshotURLs = [{ 'previewid' : '1', 'url': 'https://example.com/gallery-1.jpg' }, { 'previewid' : '2', 'url': 'https://example.com/gallery-2.jpg' }]; var g_sessionID = "session-1"; InitializeCommentThread("PublishedFile_Public","PublishedFile_Public_123_42",{"feature":"42","feature2":-1,"owner":"76561198000000001","total_count":12,"start":0,"pagesize":10},'https://steamcommunity.com/comment/PublishedFile_Public/',40);</script>""",
             ).build(),
         )
 
@@ -58,6 +58,15 @@ class WorkshopDetailParserTest {
 
         assertThat(result.title).isEqualTo("Community title")
         assertThat(result.description).contains("Community description")
+        assertThat(result.galleryImageUrls).containsExactly(
+            "https://example.com/gallery-1.jpg",
+            "https://example.com/gallery-2.jpg",
+        ).inOrder()
+        assertThat(result.descriptionBlocks.map { it.text to it.imageUrl }).containsExactly(
+            "Community description" to null,
+            "" to "https://example.com/community.jpg",
+            "Details" to null,
+        ).inOrder()
         assertThat(result.fileSizeBytes).isEqualTo(1024)
         assertThat(result.tags).containsExactly("Maps")
         assertThat(result.commentCount).isEqualTo(12)

@@ -45,7 +45,8 @@ class WorkshopDetailRepository(
             ""
         }
         val apiTitle = detail.stringValue("title")
-        val apiDescription = SteamHtmlDecoder.decodeWorkshopApiDescription(detail.stringValue("description")).ifBlank {
+        val apiRawDescription = detail.stringValue("description")
+        val apiDescription = SteamHtmlDecoder.decodeWorkshopApiDescription(apiRawDescription).ifBlank {
             item.descriptionSnippet.ifBlank { "No description" }
         }
         val requiredItems = runCatching {
@@ -88,6 +89,11 @@ class WorkshopDetailRepository(
             commentCount = localizedDetail?.commentCount,
             commentTotalPages = localizedDetail?.commentCount?.let(::resolveAppCommentTotalPages),
             hasNextCommentPage = localizedDetail?.commentCount?.let { count -> count > COMMENT_PAGE_SIZE } == true,
+            galleryImageUrls = localizedDetail?.galleryImageUrls.orEmpty(),
+            descriptionBlocks = (localizedDetail?.descriptionBlocks
+                ?.takeIf { it.isNotEmpty() }
+                ?: SteamHtmlDecoder.decodeWorkshopDescriptionParts(apiRawDescription, isHtml = false)
+                    .map { WorkshopDescriptionBlock(it.text, it.imageUrl) }),
         )
     }
 
@@ -168,12 +174,16 @@ class WorkshopDetailRepository(
                 error("Workshop community detail request failed: ${response.code}")
             }
             val payload = response.body?.string().orEmpty()
+            val descriptionHtml = extractDivInnerHtml(
+                payload = payload,
+                openingTag = """<div class="workshopItemDescription" id="highlightContent">""",
+            ).orEmpty()
             return LocalizedWorkshopDetail(
                 title = workshopTitleRegex.find(payload)?.groupValues?.getOrNull(1)?.let(SteamHtmlDecoder::stripTagsAndDecode).orEmpty(),
-                description = extractDivInnerHtml(
-                    payload = payload,
-                    openingTag = """<div class="workshopItemDescription" id="highlightContent">""",
-                )?.let(SteamHtmlDecoder::decodeWorkshopHtmlDescription).orEmpty(),
+                description = SteamHtmlDecoder.decodeWorkshopHtmlDescription(descriptionHtml),
+                galleryImageUrls = SteamHtmlDecoder.extractWorkshopGalleryImageUrls(payload),
+                descriptionBlocks = SteamHtmlDecoder.decodeWorkshopDescriptionParts(descriptionHtml, isHtml = true)
+                    .map { WorkshopDescriptionBlock(it.text, it.imageUrl) },
                 requiredItems = extractRequiredItems(payload),
                 commentThreadContext = extractCommentThreadContext(payload),
                 commentCount = extractCommentCount(payload),
@@ -269,6 +279,8 @@ class WorkshopDetailRepository(
     private data class LocalizedWorkshopDetail(
         val title: String,
         val description: String,
+        val galleryImageUrls: List<String>,
+        val descriptionBlocks: List<WorkshopDescriptionBlock>,
         val requiredItems: List<ParsedRequiredItem>,
         val commentThreadContext: WorkshopCommentThreadContext? = null,
         val commentCount: Long? = null,
@@ -634,4 +646,3 @@ private fun kotlinx.serialization.json.JsonElement?.tagNames(): List<String> =
             (tag as? JsonObject)?.get("tag")?.jsonPrimitive?.contentOrNull
         }
         .orEmpty()
-
