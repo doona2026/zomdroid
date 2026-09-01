@@ -64,6 +64,26 @@
             android:title="@string/steam_dl_menu"
             android:icon="@drawable/ic_steam"
             app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_open_workshop_download_center"
+            android:title="@string/workshop_download_center_title"
+            android:icon="@drawable/ic_workshop_download"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_open_workshop"
+            android:title="@string/workshop_title"
+            android:icon="@drawable/ic_workshop"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_open_workshop_account"
+            android:title="@string/workshop_account_menu"
+            android:icon="@drawable/ic_steam"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_open_workshop_library"
+            android:title="@string/workshop_library_menu"
+            android:icon="@drawable/ic_workshop_download"
+            app:showAsAction="never"/>
     </group>
 
     <group android:id="@+id/group_mods" android:checkableBehavior="none">

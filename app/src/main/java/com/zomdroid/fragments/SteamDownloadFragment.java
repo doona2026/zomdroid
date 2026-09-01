@@ -30,7 +30,6 @@ import com.zomdroid.steam.SteamDownloadState;
 import com.zomdroid.steam.SteamGameDownloader;
 import com.zomdroid.steam.SteamModDownloader;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
@@ -202,11 +201,7 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
 
     private void startMods() {
         if (SteamDownloadState.get().isDownloading()) return;
-        List<Long> ids = new ArrayList<>();
-        for (String tok : text(etModsIds).split("[\\s,]+")) {
-            if (tok.isEmpty()) continue;
-            try { ids.add(Long.parseLong(tok)); } catch (NumberFormatException ignored) {}
-        }
+        List<Long> ids = SteamModDownloader.parseWorkshopIds(text(etModsIds));
         if (ids.isEmpty()) {
             Toast.makeText(requireContext(), R.string.steam_dl_mods_empty, Toast.LENGTH_SHORT).show();
             return;
@@ -214,7 +209,7 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
         if (!ensureAllFilesAccess()) return;
 
         SteamDownloadState st = SteamDownloadState.get();
-        SteamModDownloader dl = new SteamModDownloader(ids, st);
+        SteamModDownloader dl = new SteamModDownloader(appCtx, ids, st);
         Thread th = new Thread(dl, "zd-anon-mod");
         st.begin(appCtx);
         st.setActive(dl, th);

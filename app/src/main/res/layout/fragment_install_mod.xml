@@ -219,6 +219,14 @@
                     android:minWidth="200dp"
                     android:text="@string/install_mod_workshop_btn"/>
 
+                <Button
+                    android:id="@+id/install_mod_browse_official_workshop_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:minWidth="200dp"
+                    android:text="@string/install_mod_official_workshop_btn"/>
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

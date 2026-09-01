@@ -81,6 +81,11 @@ These components are dynamically loaded and are not linked into Zomdroid's own c
 
 ### Open-source components
 
+The migrated Steam Workshop protocol and core files adapted from
+[WorkshopAndroidDownloader](https://github.com/apricityx/WorkshopAndroidDownloader) are licensed
+under Apache-2.0. The adapted files are marked with modification notices, and the complete licence
+text is included at `THIRD_PARTY_LICENSES/Apache-2.0-WorkshopAndroidDownloader.txt`.
+
 | Component | Version / revision | Licence | Source |
 |---|---|---|---|
 | Box64 | submodule `zomdroid-box64` | MIT | <https://github.com/ptitSeb/box64> |
@@ -108,6 +113,7 @@ These components are dynamically loaded and are not linked into Zomdroid's own c
 | liblinkernsbypass | as built | see project | <https://github.com/bylaws/liblinkernsbypass> |
 | AndroidX, Material Components | see `gradle/libs.versions.toml` | Apache-2.0 | <https://developer.android.com/jetpack/androidx> |
 | Android NDK runtime — `libc++_shared.so` | NDK | Apache-2.0 with LLVM Exception | <https://llvm.org/> |
+| WorkshopAndroidDownloader Steam Workshop protocol/core (adapted files) | current source revision | Apache-2.0 | <https://github.com/apricityx/WorkshopAndroidDownloader> |
 
 Some components carry an Apache-2.0 `NOTICE` of their own; those notices are preserved inside the
 artefacts we redistribute and are reproduced by their upstream projects at the links above.

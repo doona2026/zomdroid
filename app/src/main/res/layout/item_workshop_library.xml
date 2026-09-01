@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="16dp">
+        <TextView android:id="@+id/workshop_library_title" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceTitleMedium" />
+        <TextView android:id="@+id/workshop_library_meta" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <TextView android:id="@+id/workshop_library_description" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" android:maxLines="3" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+            <Button android:id="@+id/workshop_library_install" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/workshop_library_install" />
+            <Button android:id="@+id/workshop_library_update" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/workshop_library_check_update" />
+            <Button android:id="@+id/workshop_library_share" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/workshop_library_share" />
+            <Button android:id="@+id/workshop_library_delete" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/workshop_library_delete" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

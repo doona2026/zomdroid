@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -79,6 +80,31 @@ public class InstallerService extends Service implements TaskProgressListener {
     public static final String EXTRA_RLZ_LEVEL = "com.zomdroid.InstallerService.EXTRA_RLZ_LEVEL";
     public static final String EXTRA_INSTALL_PRESET_NAME = "com.zomdroid.InstallerService.EXTRA_INSTALL_PRESET_NAME";
     public static final String EXTRA_GPU_VENDOR = "com.zomdroid.InstallerService.EXTRA_GPU_VENDOR";
+    public static final String EXTRA_KEEP_WORKSHOP_BACKUP = "com.zomdroid.InstallerService.EXTRA_KEEP_WORKSHOP_BACKUP";
+
+    /** Builds the existing mod-fix install command for a completed Workshop ZIP. */
+    public static Intent createWorkshopInstallIntent(
+            Context context,
+            String instanceName,
+            String buildVersion,
+            Uri workshopZipUri) {
+        return createWorkshopInstallIntent(context, instanceName, buildVersion, workshopZipUri, true);
+    }
+
+    public static Intent createWorkshopInstallIntent(
+            Context context,
+            String instanceName,
+            String buildVersion,
+            Uri workshopZipUri,
+            boolean keepBackup) {
+        Intent intent = new Intent(context, InstallerService.class);
+        intent.putExtra(EXTRA_COMMAND, Task.INSTALL_MOD_WITH_FIX.ordinal());
+        intent.putExtra(EXTRA_GAME_INSTANCE_NAME, instanceName);
+        intent.putExtra(EXTRA_BUILD_VERSION, buildVersion);
+        intent.putExtra(EXTRA_MODS_URI, workshopZipUri);
+        intent.putExtra(EXTRA_KEEP_WORKSHOP_BACKUP, keepBackup);
+        return intent;
+    }
 
     private final IBinder binder = new LocalBinder();
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -513,6 +539,7 @@ public class InstallerService extends Service implements TaskProgressListener {
             finishWithError(taskTitle, "Mods archive URI is missing");
             return;
         }
+        boolean keepWorkshopBackup = intent.getBooleanExtra(EXTRA_KEEP_WORKSHOP_BACKUP, true);
 
         executorService.submit(() -> {
             try {
@@ -549,7 +576,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                     // 3) Install each mod folder
                     for (File modDir : mods) {
                         File target = new File(modsRootDir, modDir.getName());
-                        moveOrReplace(modDir, target);
+                        moveOrReplace(modDir, target, keepWorkshopBackup);
                     }
 
                 } finally {
@@ -1566,16 +1593,23 @@ public class InstallerService extends Service implements TaskProgressListener {
         return (dirs == null) ? new File[0] : dirs;
     }
 
-    private static void moveOrReplace(File srcDir, File dstDir) throws Exception {
+    private static void moveOrReplace(File srcDir, File dstDir, boolean keepBackup) throws Exception {
+        File backup = null;
         if (dstDir.exists()) {
-            FileUtils.deleteDirectory(dstDir);
+            backup = new File(dstDir.getParentFile(), dstDir.getName() + ".backup-" + System.currentTimeMillis());
+            java.nio.file.Files.move(dstDir.toPath(), backup.toPath());
         }
-        // Fast atomic move if on same storage partition
-        java.nio.file.Files.move(
-                srcDir.toPath(),
-                dstDir.toPath(),
-                java.nio.file.StandardCopyOption.REPLACE_EXISTING
-        );
+        try {
+            // Move the new mod into place only after the previous version is safely backed up.
+            java.nio.file.Files.move(srcDir.toPath(), dstDir.toPath());
+            if (backup != null && !keepBackup) FileUtils.deleteDirectory(backup);
+        } catch (Exception error) {
+            if (dstDir.exists()) FileUtils.deleteDirectory(dstDir);
+            if (backup != null && backup.exists()) {
+                java.nio.file.Files.move(backup.toPath(), dstDir.toPath());
+            }
+            throw error;
+        }
     }
 
     // Copy directory recursively

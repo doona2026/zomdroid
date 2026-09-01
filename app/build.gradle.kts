@@ -2,6 +2,9 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.protobuf)
 }
 
 val localProperties = Properties().apply {
@@ -107,6 +110,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
     buildFeatures {
         viewBinding = true
         buildConfig = true
@@ -137,7 +143,27 @@ android {
   ndkVersion = "27.3.13750724"
 }
 
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:4.31.1"
+    }
+    generateProtoTasks {
+        all().configureEach {
+            builtins {
+                maybeCreate("java").apply {
+                    option("lite")
+                }
+            }
+        }
+    }
+}
+
 dependencies {
+    implementation(platform(libs.okhttp.bom))
+    implementation(libs.coroutines.android)
+    implementation(libs.serialization.json)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
     implementation(libs.gson)
     implementation(files("jars/fmod.jar"))
     implementation(libs.appcompat)
@@ -149,6 +175,7 @@ dependencies {
     implementation(libs.commons.compress)
     implementation(libs.xz)
     implementation(libs.legacy.support.v4)
+    implementation(libs.androidx.security.crypto)
 
     // --- In-app Steam downloader (ported from RimDroid, MIT). JavaSteam = SteamKit2 port. ---
     implementation("in.dragonbra:javasteam:1.8.0")
@@ -158,6 +185,8 @@ dependencies {
     implementation("com.github.luben:zstd-jni:1.5.7-6@aar")    // zstd depot-chunk decompression (arm64 .so)
 
     testImplementation(libs.junit)
+    testImplementation(libs.truth)
+    testImplementation(libs.mockwebserver3)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 }

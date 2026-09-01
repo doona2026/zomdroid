@@ -51,6 +51,11 @@
             android:exported="false"
             android:foregroundServiceType="dataSync">
         </service>
+        <service
+            android:name=".workshop.download.WorkshopDownloadForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync">
+        </service>
         <provider
             android:name=".AppStorageProvider"
             android:authorities="com.zomdroid.STORAGE_PROVIDER_AUTHORITY"

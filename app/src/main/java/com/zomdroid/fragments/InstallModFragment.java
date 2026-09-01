@@ -23,6 +23,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.zomdroid.C;
@@ -213,6 +214,19 @@ public class InstallModFragment extends Fragment {
         binding.installModDownloadWorkshopBtn.setOnClickListener(v ->
                 showWorkshopDownloadDialog()
         );
+
+        binding.installModBrowseOfficialWorkshopBtn.setOnClickListener(v -> {
+            int index = instances.size() > 1
+                    ? binding.installModInstanceSpinner.getSelectedItemPosition() - 1
+                    : binding.installModInstanceSpinner.getSelectedItemPosition();
+            Bundle args = new Bundle();
+            if (index >= 0 && index < instances.size()) {
+                GameInstance selected = instances.get(index);
+                args.putString(WorkshopFragment.ARG_TARGET_INSTANCE_NAME, selected.getName());
+                args.putString(WorkshopFragment.ARG_TARGET_BUILD_VERSION, selected.getBuildVersion());
+            }
+            NavHostFragment.findNavController(this).navigate(R.id.action_open_workshop, args);
+        });
 
         // Install button (ZIP)
         binding.installModInstallBtn.setOnClickListener(v -> {

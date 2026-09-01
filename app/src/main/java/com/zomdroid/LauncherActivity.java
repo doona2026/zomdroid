@@ -139,6 +139,22 @@ public class LauncherActivity extends AppCompatActivity {
                 binding.drawerLayout.close();
                 navController.navigate(R.id.action_download_steam);
                 return true;
+            } else if (item.getItemId() == R.id.action_open_workshop_download_center) {
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_open_workshop_download_center);
+                return true;
+            } else if (item.getItemId() == R.id.action_open_workshop) {
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_open_workshop);
+                return true;
+            } else if (item.getItemId() == R.id.action_open_workshop_account) {
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_open_workshop_account);
+                return true;
+            } else if (item.getItemId() == R.id.action_open_workshop_library) {
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_open_workshop_library);
+                return true;
             } else if (item.getItemId() == R.id.action_bug_report) {
                 binding.drawerLayout.close();
                 sendBugReport();
