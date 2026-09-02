@@ -1,6 +1,8 @@
 # Zomdroid Miuix UI 重构实施计划
 
-> 状态：已批准；阶段 1 已完成
+> 阶段 2 状态：已完成严格复核与 MuMu 验证；阶段 3–7 尚未执行。
+
+> 状态：已批准；阶段 2 已完成
 >
 > 对应设计文档：[2026-09-02-zomdroid-miuix-ui-design.md](../specs/2026-09-02-zomdroid-miuix-ui-design.md)
 >

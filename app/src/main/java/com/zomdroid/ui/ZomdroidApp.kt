@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -19,10 +20,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zomdroid.R
 import com.zomdroid.ui.common.UiTokens
+import com.zomdroid.ui.common.GlobalTaskEntry
 import com.zomdroid.ui.navigation.AppRoute
 import com.zomdroid.ui.navigation.RootDestination
 import com.zomdroid.ui.navigation.rootDestination
 import com.zomdroid.ui.navigation.selectRoot
+import com.zomdroid.ui.startup.StartupDialogActions
+import com.zomdroid.ui.startup.StartupDialogs
+import com.zomdroid.ui.startup.StartupUiAdapter
+import com.zomdroid.ui.startup.StartupUiState
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
@@ -41,12 +47,23 @@ import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
 
 @Composable
-fun ZomdroidApp() {
+fun ZomdroidApp(startupUiAdapter: StartupUiAdapter? = null) {
     ZomdroidTheme {
         val backStack = rememberNavBackStack<AppRoute>(AppRoute.Instances)
         val currentDestination = backStack.lastOrNull()?.rootDestination()
             ?: RootDestination.Instances
         val isWide = LocalConfiguration.current.screenWidthDp >= 600
+        val startupState = startupUiAdapter?.state?.collectAsState()?.value ?: StartupUiState()
+        val startupActions = startupUiAdapter?.let {
+            StartupDialogActions(
+                onAcceptLegalNotice = it::acceptLegalNotice,
+                onAcknowledgeDependencyTask = it::acknowledgeDependencyTask,
+                onRetryDependencyTask = it::retryDependencyTask,
+                onExitAfterDependencyFailure = it::exitAfterDependencyFailure,
+                onDismissReleaseNotes = it::dismissReleaseNotes,
+                onOpenReleaseNotesLink = it::openReleaseNotesLink,
+            )
+        }
 
         BackHandler(enabled = backStack.size > 1) {
             backStack.removeLastOrNull()
@@ -57,12 +74,16 @@ fun ZomdroidApp() {
                 currentDestination = currentDestination,
                 onDestinationSelected = backStack::selectRoot,
                 backStack = backStack,
+                startupState = startupState,
+                startupActions = startupActions,
             )
         } else {
             CompactShell(
                 currentDestination = currentDestination,
                 onDestinationSelected = backStack::selectRoot,
                 backStack = backStack,
+                startupState = startupState,
+                startupActions = startupActions,
             )
         }
     }
@@ -73,9 +94,17 @@ private fun CompactShell(
     currentDestination: RootDestination,
     onDestinationSelected: (RootDestination) -> Unit,
     backStack: NavBackStack,
+    startupState: StartupUiState,
+    startupActions: StartupDialogActions?,
 ) {
     Scaffold(
-        topBar = { AppTopBar(currentDestination) },
+        topBar = {
+            AppTopBar(
+                destination = currentDestination,
+                task = startupState.globalTask,
+                onTaskClick = { onDestinationSelected(RootDestination.Workshop) },
+            )
+        },
         bottomBar = {
             NavigationBar {
                 RootDestination.values().forEach { destination ->
@@ -89,7 +118,10 @@ private fun CompactShell(
             }
         },
     ) { paddingValues ->
-        ShellContent(backStack, paddingValues)
+        Box(modifier = Modifier.fillMaxSize()) {
+            ShellContent(backStack, paddingValues)
+            startupActions?.let { StartupDialogs(startupState, it) }
+        }
     }
 }
 
@@ -98,34 +130,54 @@ private fun WideShell(
     currentDestination: RootDestination,
     onDestinationSelected: (RootDestination) -> Unit,
     backStack: NavBackStack,
+    startupState: StartupUiState,
+    startupActions: StartupDialogActions?,
 ) {
-    Scaffold(topBar = { AppTopBar(currentDestination) }) { paddingValues ->
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-        ) {
-            NavigationRail {
-                RootDestination.values().forEach { destination ->
-                    NavigationRailItem(
-                        selected = currentDestination == destination,
-                        onClick = { onDestinationSelected(destination) },
-                        icon = destination.icon,
-                        label = destination.label(),
-                    )
+    Scaffold(
+        topBar = {
+            AppTopBar(
+                destination = currentDestination,
+                task = startupState.globalTask,
+                onTaskClick = { onDestinationSelected(RootDestination.Workshop) },
+            )
+        },
+    ) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+            ) {
+                NavigationRail {
+                    RootDestination.values().forEach { destination ->
+                        NavigationRailItem(
+                            selected = currentDestination == destination,
+                            onClick = { onDestinationSelected(destination) },
+                            icon = destination.icon,
+                            label = destination.label(),
+                        )
+                    }
                 }
+                ShellContent(backStack, PaddingValues(0.dp))
             }
-            ShellContent(backStack, PaddingValues(0.dp))
+            startupActions?.let { StartupDialogs(startupState, it) }
         }
     }
 }
 
 @Composable
-private fun AppTopBar(destination: RootDestination) {
+private fun AppTopBar(
+    destination: RootDestination,
+    task: com.zomdroid.ui.state.TaskUiState,
+    onTaskClick: () -> Unit,
+) {
     TopAppBar(
         title = destination.label(),
         largeTitle = destination.label(),
         subtitle = stringResource(R.string.ui_shell_subtitle),
+        actions = {
+            GlobalTaskEntry(task = task, onClick = onTaskClick)
+        },
     )
 }
 

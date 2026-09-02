@@ -338,39 +338,6 @@ public class LauncherFragment extends Fragment {
             }
         }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
 
-        taskProgressDialogBinding = TaskProgressDialogBinding.inflate(getLayoutInflater());
-
-        taskProgressDialog = new MaterialAlertDialogBuilder(requireContext())
-                .setView(taskProgressDialogBinding.getRoot())
-                .setCancelable(false)
-                .create();
-
-        taskProgressDialogBinding.progressDialogOkMb.setOnClickListener(v -> {
-            taskProgressDialog.dismiss();
-            adapter.notifyDataSetChanged();
-        });
-
-        taskProgressReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (action == null) return;
-                if (action.equals(InstallerService.ACTION_STARTED)) {
-                    postInstallDialogShown = false;
-                    bindInstallerService();
-                }
-            }
-        };
-
-        SharedPreferences prefs = requireContext().getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE);
-        if (!prefs.getBoolean(C.shprefs.keys.IS_LEGAL_NOTICE_ACCEPTED, false)) {
-            showLegalNoticeDialog();
-            requireActivity().findViewById(android.R.id.content).setVisibility(View.GONE);
-        } else {
-            updateDependencies();
-            maybeShowReleaseNotes(prefs);
-        }
-
     }
 
     /**
@@ -619,23 +586,4 @@ public class LauncherFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        bindInstallerService();
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(InstallerService.ACTION_STARTED);
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(taskProgressReceiver, filter);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        unbindInstallerService();
-
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(taskProgressReceiver);
-    }
 }

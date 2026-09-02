@@ -49,6 +49,12 @@
     <string name="dialog_button_close">Close</string>
     <string name="dialog_button_confirm">Confirm</string>
     <string name="dialog_button_cancel">Cancel</string>
+    <string name="dependency_install_retry">Retry</string>
+    <string name="dependency_install_exit">Exit</string>
+    <string name="dependency_install_start_failed">Could not start dependency installation: %1$s</string>
+    <string name="release_notes_open_changelog">Open full changelog</string>
+    <string name="ui_global_task_entry">Open download tasks</string>
+    <string name="ui_global_task_failed">Open failed download tasks</string>
     <string name="dialog_title_delete_game_instance">Delete game instance?</string>
     <string name="dialog_title_info">Info</string>
     <string name="dialog_title_fatal_error">Fatal error</string>

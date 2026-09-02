@@ -37,6 +37,7 @@ import com.zomdroid.input.AbstractControlElement;
 import com.zomdroid.input.ControlElementDescription;
 import com.zomdroid.input.GamepadManager;
 import com.zomdroid.ui.ZomdroidComposeHost;
+import com.zomdroid.ui.startup.StartupUiAdapter;
 
 import org.json.JSONObject;
 
@@ -53,6 +54,7 @@ public class LauncherActivity extends AppCompatActivity {
     ActivityLauncherBinding binding;
     private NavController navController;
     private AppBarConfiguration appBarConfiguration;
+    private StartupUiAdapter startupUiAdapter;
     private boolean inited = false;
 
     @Override
@@ -181,7 +183,9 @@ public class LauncherActivity extends AppCompatActivity {
         // Silent, at-most-once-a-day check so the GitHub icon can badge a newer release without
         // the user having to tap it. A manual tap still runs checkForUpdate() and shows a dialog.
         maybeDailyUpdateCheck();
-        ZomdroidComposeHost.attach(binding.miuixContent);
+        startupUiAdapter = new StartupUiAdapter(this);
+        startupUiAdapter.initialize();
+        ZomdroidComposeHost.attach(binding.miuixContent, startupUiAdapter);
 
         // Keep the legacy XML tree as a migration container, but do not render its old toolbar or
         // warm-orange drawer once the Miuix shell is attached.
@@ -189,6 +193,12 @@ public class LauncherActivity extends AppCompatActivity {
         binding.drawerContainer.setVisibility(View.GONE);
         binding.drawerLayout.setDrawerLockMode(
                 androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (startupUiAdapter != null) startupUiAdapter.dispose();
+        super.onDestroy();
     }
 
     private void showDonateDialog() {

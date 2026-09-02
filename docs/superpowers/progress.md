@@ -14,6 +14,17 @@
 - Validation: `:app:testDebugUnitTest` and `:app:assembleDebug` passed; installed and exercised on MuMu `127.0.0.1:5555` with no fatal app log.
 - Protected-code audit: no changes under InstallerService, Workshop core, instance model/persistence, GameActivity/game input, ControlsEditor Canvas, JNI/C++, native libraries, or unrelated tests.
 
+## Stage 2 Startup and Global Task UI (2026-09-02)
+
+- Strict review completed against the full design and implementation plan. Only Stage 2 tasks 2.1–2.3 were executed; Stages 3–7 remain pending.
+- Legal notice: existing preference key, text, acceptance timing, and blocking behavior are preserved in a Miuix `OverlayDialog`.
+- Dependency installation: existing `InstallerService` progress/status is mapped by a UI-only adapter into a non-dismissible Miuix progress dialog with completion, retry, and exit states. No initialization page was added.
+- Release notes: existing version gate and content source are preserved in a Miuix dialog.
+- Global task entry: observes the existing Workshop download manager, remains hidden when there are no tasks, shows an Miuix download affordance when active/failed tasks exist, and routes to Workshop Downloads.
+- UI host compatibility: the Compose root provides the navigation event owner required by the local Miuix overlay implementation; this is UI host wiring only.
+- Validation: JVM unit tests and `:app:assembleDebug` pass with JDK 21; MuMu `127.0.0.1:5555` clear-data flow verified legal notice → dependency progress → dependency success → release notes, with no fatal app log.
+- Protected-code audit: no changes to `InstallerService`, Workshop core, game/instance bottom layer, rendering/input, ControlsEditor Canvas, JNI/C++, native libraries, or unrelated tests.
+
 ## Miuix UI 重构设计（2026-09-02）
 
 - Stage 1 Requirement Exploration：设计文档已生成，待用户审批。
