@@ -1,5 +1,27 @@
 # Development Progress
 
+## Miuix UI Refactor (2026-09-02)
+
+- Stage 1 Requirement Exploration: completed; design approved by user.
+- Design doc: `docs/superpowers/specs/2026-09-02-zomdroid-miuix-ui-design.md`
+- Stage 2 Implementation Planning: plan approved; strict stage-by-stage review completed.
+- Plan doc: `docs/superpowers/plans/2026-09-02-zomdroid-miuix-ui-plan.md`
+- Scope guard: only UI layout, UI interaction, UI state adapters, UI tests, and Miuix-required build configuration may change.
+- Protected code: installer, Workshop core, instance persistence/model, game rendering/input, ControlsEditor Canvas, JNI/C++, native libraries, and unrelated tests.
+- Startup decision: legal notice Dialog -> existing dependency-install progress Dialog restyled with Miuix -> Instances; no separate initialization page.
+- Stage 1 execution: completed tasks 1.1-1.3 (Miuix theme/tokens, UI route/state model, Compose launcher shell).
+- Local Miuix integration: consumed locally built core/squircle/ui/icons/nav/shader AARs from `miuix.path`; no Miuix source changes.
+- Validation: `:app:testDebugUnitTest` and `:app:assembleDebug` passed; installed and exercised on MuMu `127.0.0.1:5555` with no fatal app log.
+- Protected-code audit: no changes under InstallerService, Workshop core, instance model/persistence, GameActivity/game input, ControlsEditor Canvas, JNI/C++, native libraries, or unrelated tests.
+
+## Miuix UI 重构设计（2026-09-02）
+
+- Stage 1 Requirement Exploration：设计文档已生成，待用户审批。
+- Design doc：`docs/superpowers/specs/2026-09-02-zomdroid-miuix-ui-design.md`
+- 关键边界：主应用管理页面使用 Compose/Miuix；游戏渲染、自定义输入 Canvas 和底层业务保持不变。
+- 强制限制：只允许修改 UI、UI 交互、UI 状态适配和接入 Miuix 所需的构建配置。
+- 下一门槛：用户批准设计后，进入 Stage 2 生成实施计划。
+
 ## Stage 1 Requirement Exploration
 
 - Started at: 2026-09-01

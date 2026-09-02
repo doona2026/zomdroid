@@ -712,4 +712,19 @@
     <string name="settings_features_title">功能</string>
     <string name="settings_backup_switch">快速存档（F10，Build 42）</string>
     <string name="game_instance_restore_backup">恢复快速存档备份…</string>
+    <!-- Miuix application shell -->
+    <string name="ui_shell_subtitle">Miuix 管理工作区</string>
+    <string name="ui_nav_instances">实例</string>
+    <string name="ui_nav_workshop">Workshop</string>
+    <string name="ui_nav_tools">工具</string>
+    <string name="ui_nav_settings">设置</string>
+    <string name="ui_instances_title">实例</string>
+    <string name="ui_workshop_title">Workshop</string>
+    <string name="ui_tools_title">工具</string>
+    <string name="ui_settings_title">设置</string>
+    <string name="ui_instances_stage1_body">Miuix 应用壳已启用，实例管理将在下一阶段迁移。</string>
+    <string name="ui_workshop_stage1_body">Miuix 应用壳已启用，Workshop 浏览将在下一阶段迁移。</string>
+    <string name="ui_tools_stage1_body">Miuix 应用壳已启用，工具入口将在下一阶段迁移。</string>
+    <string name="ui_settings_stage1_body">Miuix 应用壳已启用，设置分类将在下一阶段迁移。</string>
+    <string name="ui_stage1_ready">Miuix 应用壳已启用</string>
 </resources>

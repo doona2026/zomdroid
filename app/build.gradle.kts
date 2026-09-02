@@ -2,8 +2,8 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.protobuf)
 }
 
@@ -13,6 +13,11 @@ val localProperties = Properties().apply {
         file.inputStream().use { load(it) }
     }
 }
+
+val miuixSourcePath = localProperties.getProperty("miuix.path")
+    ?: error("Set miuix.path in local.properties to the local Miuix source tree")
+
+fun miuixAar(module: String) = file("$miuixSourcePath/$module/build/outputs/aar/$module.aar")
 
 // Short commit hash of the working tree, with a "+" appended when there are uncommitted changes.
 // versionName alone cannot identify a build: 1.4.7 and 1.4.7v4 both reported as "1.4.7 (147)" in
@@ -42,7 +47,7 @@ val hasSigningConfig = listOf(
 
 android {
     namespace = "com.zomdroid"
-    compileSdk = 35
+    compileSdk = 37
 
     signingConfigs {
         if (hasSigningConfig) {
@@ -107,11 +112,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures {
         viewBinding = true
@@ -176,6 +178,27 @@ dependencies {
     implementation(libs.xz)
     implementation(libs.legacy.support.v4)
     implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.compose.foundation)
+    // Built from the local Miuix source tree using its Gradle 9.7.1 wrapper.
+    implementation(files(
+        miuixAar("miuix-core"),
+        miuixAar("miuix-squircle"),
+        miuixAar("miuix-ui"),
+        miuixAar("miuix-icons"),
+        miuixAar("miuix-nav"),
+        miuixAar("miuix-shader"),
+    ))
+    implementation("org.jetbrains.compose.foundation:foundation-android:1.12.0")
+    implementation("androidx.navigationevent:navigationevent-compose-android:1.1.2")
+    implementation("org.jetbrains.compose.material3:material3-window-size-class-android:1.12.0-alpha03")
+    implementation("com.materialkolor:material-color-utilities-android:5.0.1")
+    implementation("org.jetbrains.androidx.lifecycle:lifecycle-runtime-android:2.11.0")
+    implementation("org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose-android:2.11.0")
+    implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-android:2.11.0")
+    implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose-android:2.11.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable-jvm:0.5.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.11.0")
 
     // --- In-app Steam downloader (ported from RimDroid, MIT). JavaSteam = SteamKit2 port. ---
     implementation("in.dragonbra:javasteam:1.8.0")
