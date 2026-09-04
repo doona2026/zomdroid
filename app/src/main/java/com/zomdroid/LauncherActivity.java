@@ -249,13 +249,22 @@ public class LauncherActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
-        menu.clear();
+        // LauncherFragment contributes its own lifecycle-scoped menu (the "+" button). Clearing
+        // the whole menu here removes that item as well, so only replace the Workshop actions
+        // owned by this activity.
+        removeWorkshopToolbarItems(menu);
         workshopToolbarActionsVisible = isWorkshopListDestination();
         if (workshopToolbarActionsVisible) {
             getMenuInflater().inflate(R.menu.menu_workshop_toolbar, menu);
         }
         binding.appbar.post(this::updateWorkshopToolbarPosition);
         return super.onPrepareOptionsMenu(menu);
+    }
+
+    private void removeWorkshopToolbarItems(@NonNull Menu menu) {
+        menu.removeItem(R.id.action_open_workshop_favorites);
+        menu.removeItem(R.id.action_open_workshop_download_center);
+        menu.removeItem(R.id.action_open_workshop_account);
     }
 
     private boolean isWorkshopListDestination() {
@@ -281,7 +290,10 @@ public class LauncherActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_open_workshop_download_center) {
+        if (item.getItemId() == R.id.action_open_workshop_favorites) {
+            navController.navigate(R.id.workshop_favorites_fragment, null, workshopForwardNavOptions());
+            return true;
+        } else if (item.getItemId() == R.id.action_open_workshop_download_center) {
             navController.navigate(R.id.workshop_download_center_fragment, null, workshopForwardNavOptions());
             return true;
         } else if (item.getItemId() == R.id.action_open_workshop_account) {

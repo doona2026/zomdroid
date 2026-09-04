@@ -53,6 +53,13 @@
             android:id="@+id/action_download_steam"
             app:destination="@id/steam_download_fragment" />
         <action
+            android:id="@+id/action_open_workshop_favorites"
+            app:destination="@id/workshop_favorites_fragment"
+            app:enterAnim="@anim/workshop_enter"
+            app:exitAnim="@anim/workshop_exit"
+            app:popEnterAnim="@anim/workshop_pop_enter"
+            app:popExitAnim="@anim/workshop_pop_exit" />
+        <action
             android:id="@+id/action_open_workshop_download_center"
             app:destination="@id/workshop_download_center_fragment"
             app:enterAnim="@anim/workshop_enter"
@@ -157,6 +164,20 @@
         android:id="@+id/steam_download_fragment"
         android:name="com.zomdroid.fragments.SteamDownloadFragment"
         android:label="@string/steam_dl_menu" />
+
+    <fragment
+        android:id="@+id/workshop_favorites_fragment"
+        android:name="com.zomdroid.fragments.WorkshopFavoritesFragment"
+        android:label="@string/workshop_favorites_title"
+        tools:layout="@layout/fragment_workshop_favorites">
+        <action
+            android:id="@+id/action_workshop_favorite_detail"
+            app:destination="@id/workshop_detail_fragment"
+            app:enterAnim="@anim/workshop_enter"
+            app:exitAnim="@anim/workshop_exit"
+            app:popEnterAnim="@anim/workshop_pop_enter"
+            app:popExitAnim="@anim/workshop_pop_exit" />
+    </fragment>
 
     <fragment
         android:id="@+id/workshop_download_center_fragment"

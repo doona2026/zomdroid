@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.animation.AnimationUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,8 +37,12 @@ import com.zomdroid.workshop.auth.SteamAuthRuntime;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Locale;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 import kotlinx.coroutines.Job;
 
@@ -49,6 +54,8 @@ public class WorkshopDownloadCenterFragment extends Fragment {
     private Job observation;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private List<DownloadCenterTask> latestTasks = java.util.Collections.emptyList();
+    private final Map<String, View> taskViews = new LinkedHashMap<>();
+    private TextView emptyView;
     private boolean renderScheduled;
     private final Runnable scheduledRender = () -> {
         renderScheduled = false;
@@ -85,6 +92,8 @@ public class WorkshopDownloadCenterFragment extends Fragment {
         mainHandler.removeCallbacks(scheduledRender);
         renderScheduled = false;
         latestTasks = java.util.Collections.emptyList();
+        taskViews.clear();
+        emptyView = null;
         tasksContainer = null;
         super.onDestroyView();
     }
@@ -98,21 +107,56 @@ public class WorkshopDownloadCenterFragment extends Fragment {
     }
 
     private void render(List<DownloadCenterTask> tasks) {
-        tasksContainer.removeAllViews();
         if (tasks.isEmpty()) {
-            TextView empty = new TextView(requireContext());
-            empty.setText(R.string.workshop_download_center_empty);
-            empty.setPadding(0, 24, 0, 24);
-            tasksContainer.addView(empty);
+            for (View row : taskViews.values()) tasksContainer.removeView(row);
+            taskViews.clear();
+            if (emptyView == null) {
+                emptyView = new TextView(requireContext());
+                emptyView.setText(R.string.workshop_download_center_empty);
+                emptyView.setPadding(0, 24, 0, 24);
+                tasksContainer.addView(emptyView);
+            }
             return;
         }
-        for (DownloadCenterTask task : tasks) addTaskView(task);
-        tasksContainer.scheduleLayoutAnimation();
+        if (emptyView != null) {
+            tasksContainer.removeView(emptyView);
+            emptyView = null;
+        }
+
+        Set<String> activeIds = new HashSet<>();
+        for (DownloadCenterTask task : tasks) activeIds.add(task.getId());
+        java.util.Iterator<Map.Entry<String, View>> iterator = taskViews.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, View> entry = iterator.next();
+            if (!activeIds.contains(entry.getKey())) {
+                tasksContainer.removeView(entry.getValue());
+                iterator.remove();
+            }
+        }
+
+        for (int index = 0; index < tasks.size(); index++) {
+            DownloadCenterTask task = tasks.get(index);
+            View row = taskViews.get(task.getId());
+            if (row == null) {
+                row = createTaskView();
+                taskViews.put(task.getId(), row);
+                tasksContainer.addView(row, index);
+                row.startAnimation(AnimationUtils.loadAnimation(
+                        requireContext(), R.anim.workshop_content_enter));
+            } else if (tasksContainer.indexOfChild(row) != index) {
+                tasksContainer.removeView(row);
+                tasksContainer.addView(row, index);
+            }
+            bindTaskView(row, task);
+        }
     }
 
-    private void addTaskView(DownloadCenterTask task) {
-        View row = getLayoutInflater().inflate(
+    private View createTaskView() {
+        return getLayoutInflater().inflate(
                 R.layout.item_workshop_download_task, tasksContainer, false);
+    }
+
+    private void bindTaskView(View row, DownloadCenterTask task) {
         TextView title = row.findViewById(R.id.workshop_task_title);
         TextView status = row.findViewById(R.id.workshop_task_status);
         TextView log = row.findViewById(R.id.workshop_task_log);
@@ -164,7 +208,6 @@ public class WorkshopDownloadCenterFragment extends Fragment {
         delete.setOnClickListener(ignored -> manager.delete(task.getId()));
         install.setOnClickListener(ignored -> chooseInstance(task));
         fallback.setOnClickListener(ignored -> showFailureActions(task));
-        tasksContainer.addView(row);
     }
 
     private String formatStatus(DownloadCenterTask task) {

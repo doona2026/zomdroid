@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_open_workshop_favorites"
+        android:icon="@drawable/ic_favorite_filled"
+        android:title="@string/workshop_favorites_title"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_open_workshop_download_center"
         android:icon="@drawable/ic_workshop_download"
         android:title="@string/workshop_download_center_title"

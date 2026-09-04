@@ -9,6 +9,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -25,6 +26,7 @@ import com.zomdroid.R;
 import com.zomdroid.workshop.data.WorkshopBrowseItem;
 import com.zomdroid.workshop.data.WorkshopBrowsePage;
 import com.zomdroid.workshop.data.WorkshopCatalogRuntime;
+import com.zomdroid.workshop.favorites.WorkshopFavoritesRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +45,7 @@ public class WorkshopFragment extends Fragment {
     private Button toTop;
     private RecyclerView list;
     private WorkshopAdapter adapter;
+    private WorkshopFavoritesRepository favoritesRepository;
     private Parcelable pendingListState;
     private int appliedSort = -1;
     private int viewGeneration;
@@ -73,6 +76,7 @@ public class WorkshopFragment extends Fragment {
         previous = footer.findViewById(R.id.workshop_previous);
         next = footer.findViewById(R.id.workshop_next);
         toTop = view.findViewById(R.id.workshop_to_top);
+        favoritesRepository = new WorkshopFavoritesRepository(requireContext());
         adapter = new WorkshopAdapter(header, footer);
         list.setAdapter(adapter);
         sort.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item,
@@ -262,13 +266,16 @@ public class WorkshopFragment extends Fragment {
         private final TextView title;
         private final TextView author;
         private final TextView description;
+        private final ImageButton favorite;
         WorkshopHolder(View view) {
             super(view);
             image = view.findViewById(R.id.workshop_item_image);
             title = view.findViewById(R.id.workshop_item_title);
             author = view.findViewById(R.id.workshop_item_author);
             description = view.findViewById(R.id.workshop_item_description);
+            favorite = view.findViewById(R.id.workshop_item_favorite);
             view.findViewById(R.id.workshop_item_details).setOnClickListener(v -> openDetails());
+            favorite.setOnClickListener(v -> toggleFavorite());
             view.setOnClickListener(v -> openDetails());
         }
         void bind(WorkshopBrowseItem item) {
@@ -278,6 +285,31 @@ public class WorkshopFragment extends Fragment {
             description.setText(item.getDescriptionSnippet());
             image.setImageDrawable(null);
             WorkshopCatalogRuntime.loadImage(requireContext(), item.getPreviewImageUrl(), image);
+            bindFavorite(item);
+        }
+        private void toggleFavorite() {
+            WorkshopBrowseItem item = (WorkshopBrowseItem) itemView.getTag();
+            if (item == null || favoritesRepository == null) return;
+            boolean added = favoritesRepository.toggle(item);
+            bindFavorite(item);
+            favorite.setScaleX(0.82f);
+            favorite.setScaleY(0.82f);
+            favorite.animate().scaleX(1f).scaleY(1f).setDuration(160L).start();
+            Toast.makeText(requireContext(),
+                    added ? R.string.workshop_favorite_added : R.string.workshop_favorite_removed,
+                    Toast.LENGTH_SHORT).show();
+        }
+        private void bindFavorite(WorkshopBrowseItem item) {
+            boolean added = favoritesRepository.contains(
+                    WorkshopCatalogRuntime.appId(item),
+                    WorkshopCatalogRuntime.publishedFileId(item));
+            favorite.setImageResource(added
+                    ? R.drawable.ic_favorite_filled
+                    : R.drawable.ic_favorite_outline);
+            favorite.setContentDescription(getString(added
+                    ? R.string.workshop_favorite_remove
+                    : R.string.workshop_favorite_add));
+            favorite.setSelected(added);
         }
         private void openDetails() {
             WorkshopBrowseItem item = (WorkshopBrowseItem) itemView.getTag();

@@ -6,6 +6,27 @@
         <TextView android:id="@+id/workshop_item_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:textStyle="bold" android:textSize="16sp" />
         <TextView android:id="@+id/workshop_item_author" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" />
         <TextView android:id="@+id/workshop_item_description" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLines="2" android:ellipsize="end" android:textSize="13sp" />
-        <Button android:id="@+id/workshop_item_details" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/workshop_details" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/workshop_item_details"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/workshop_details" />
+            <ImageButton
+                android:id="@+id/workshop_item_favorite"
+                style="@style/AppTheme.ImageButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/workshop_favorite_add"
+                android:padding="8dp"
+                android:src="@drawable/ic_favorite_outline"
+                android:tint="@null" />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

@@ -707,6 +707,12 @@
     <string name="workshop_previous">Previous</string>
     <string name="workshop_next">Next</string>
     <string name="workshop_to_top">Back to top</string>
+    <string name="workshop_favorites_title">Favorites</string>
+    <string name="workshop_favorites_empty">No favorited Workshop mods yet. Tap the star on a mod to save it here.</string>
+    <string name="workshop_favorite_add">Add to favorites</string>
+    <string name="workshop_favorite_remove">Remove from favorites</string>
+    <string name="workshop_favorite_added">Added to favorites.</string>
+    <string name="workshop_favorite_removed">Removed from favorites.</string>
     <string name="workshop_page_format">Page %1$d</string>
     <string name="workshop_loading">Loading Workshop…</string>
     <string name="workshop_loaded">Loaded</string>

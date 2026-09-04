@@ -549,6 +549,12 @@
     <string name="workshop_previous">上一页</string>
     <string name="workshop_next">下一页</string>
     <string name="workshop_to_top">返回顶部</string>
+    <string name="workshop_favorites_title">模组收藏</string>
+    <string name="workshop_favorites_empty">还没有收藏模组。点击模组旁边的星标即可收藏。</string>
+    <string name="workshop_favorite_add">收藏模组</string>
+    <string name="workshop_favorite_remove">取消收藏</string>
+    <string name="workshop_favorite_added">已收藏模组。</string>
+    <string name="workshop_favorite_removed">已取消收藏。</string>
     <string name="workshop_page_format">第 %1$d 页</string>
     <string name="workshop_loading">正在加载创意工坊…</string>
     <string name="workshop_loaded">加载完成</string>
