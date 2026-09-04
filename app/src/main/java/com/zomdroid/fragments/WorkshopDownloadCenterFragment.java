@@ -33,7 +33,7 @@ import com.zomdroid.workshop.download.DownloadCenterTaskObserver;
 import com.zomdroid.workshop.download.DownloadCenterTaskState;
 import com.zomdroid.workshop.download.WorkshopDownloadForegroundService;
 import com.zomdroid.workshop.thirdparty.GgntwFallbackRuntime;
-import com.zomdroid.workshop.auth.SteamAuthRuntime;
+import com.zomdroid.workshop.auth.SteamAuthRepository;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -348,15 +348,28 @@ public class WorkshopDownloadCenterFragment extends Fragment {
     }
 
     private void showFailureActions(DownloadCenterTask task) {
+        if (!isBoundAccountUnavailable(task)) {
+            // Network/CDN failures are not authentication failures. Keep the
+            // third-party fallback available without showing a misleading
+            // sign-in dialog first.
+            showFallbackNotice(task);
+            return;
+        }
         new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.workshop_download_center_auth_title)
                 .setMessage(R.string.workshop_download_center_auth_message)
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.workshop_download_center_open_accounts,
                         (dialog, which) -> androidx.navigation.fragment.NavHostFragment.findNavController(this)
-                                .navigate(R.id.action_open_workshop_account))
+                                .navigate(R.id.action_download_center_open_workshop_account))
                 .setNeutralButton(R.string.workshop_download_center_keep_third_party,
                         (dialog, which) -> showFallbackNotice(task))
                 .show();
+    }
+
+    private boolean isBoundAccountUnavailable(DownloadCenterTask task) {
+        String accountId = task.getAccountId();
+        return accountId != null
+                && new SteamAuthRepository(requireContext()).accountSessionFor(accountId) == null;
     }
 }

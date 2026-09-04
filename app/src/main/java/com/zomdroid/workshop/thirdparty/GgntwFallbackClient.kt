@@ -128,6 +128,25 @@ class GgntwFallbackClient(
 
         @JvmStatic
         fun isAllowedHost(host: String): Boolean =
-            host == "ggntw.com" || host.endsWith(".ggntw.com")
+            TRUSTED_DOWNLOAD_HOST_SUFFIXES.any { suffix ->
+                host == suffix || host.endsWith(".$suffix")
+            }
+
+        /**
+         * ggntw currently returns an ouo.io short link before the Steam CDN
+         * URL. The Steam entries cover the direct CDN variants that can be
+         * returned by the service. Host matching stays suffix-bound so an
+         * arbitrary HTTPS host cannot be accepted as a download target.
+         */
+        private val TRUSTED_DOWNLOAD_HOST_SUFFIXES = setOf(
+            "ggntw.com",
+            "ouo.io",
+            "ouo.press",
+            "steamcontent.com",
+            "steamusercontent.com",
+            "steamusercontent-a.akamaihd.net",
+            "steamcdn-a.akamaihd.net",
+            "cdn.akamai.steamstatic.com",
+        )
     }
 }

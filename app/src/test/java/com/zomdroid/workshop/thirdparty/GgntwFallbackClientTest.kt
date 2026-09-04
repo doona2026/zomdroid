@@ -15,6 +15,10 @@ class GgntwFallbackClientTest {
             .isEqualTo("cdn.ggntw.com")
         assertThat(GgntwFallbackClient.parseDownloadUrl("{\"url\":\"https://ggntw.com/mod.zip\"}").encodedPath)
             .isEqualTo("/mod.zip")
+        assertThat(GgntwFallbackClient.parseDownloadUrl("https://ouo.io/LZvrPf").host)
+            .isEqualTo("ouo.io")
+        assertThat(GgntwFallbackClient.parseDownloadUrl("https://steamusercontent-a.akamaihd.net/ugc/mod.zip").host)
+            .isEqualTo("steamusercontent-a.akamaihd.net")
     }
 
     @Test

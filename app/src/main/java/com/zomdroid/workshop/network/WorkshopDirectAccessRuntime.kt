@@ -11,6 +11,7 @@ internal data class WorkshopDirectAccessRuntime(
     val resolvers: List<WattToolkitWorkshopRouteResolver>,
     val hostnameVerifier: WorkshopDirectHostnameVerifier,
     val directHttpClient: OkHttpClient,
+    val forwardDns: WattToolkitForwardDns,
 )
 
 private val defaultWorkshopRouteProfiles = listOf(
@@ -48,7 +49,12 @@ internal fun createWorkshopDirectAccessRuntime(
         .followSslRedirects(false)
         .protocols(listOf(Protocol.HTTP_1_1))
         .build()
-    return WorkshopDirectAccessRuntime(resolvers, hostnameVerifier, directHttpClient)
+    return WorkshopDirectAccessRuntime(
+        resolvers = resolvers,
+        hostnameVerifier = hostnameVerifier,
+        directHttpClient = directHttpClient,
+        forwardDns = forwardDns,
+    )
 }
 
 internal fun createWorkshopCatalogHttpClient(context: Context): OkHttpClient {
@@ -60,16 +66,35 @@ internal fun createWorkshopCatalogHttpClient(context: Context): OkHttpClient {
         .readTimeout(20, TimeUnit.SECONDS)
         .writeTimeout(20, TimeUnit.SECONDS)
         .callTimeout(25, TimeUnit.SECONDS)
-        .hostnameVerifier(runtime.hostnameVerifier)
-        .apply {
-            runtime.resolvers.forEach { resolver ->
-                addInterceptor(
-                    WorkshopDirectAccessInterceptor(
-                        routeResolver = resolver,
-                        directCallFactory = runtime.directHttpClient,
-                    ),
-                )
-            }
-        }
+        .addWorkshopDirectAccess(runtime)
         .build()
+}
+
+/**
+ * Adds the same WorkshopAndroidDownloader-compatible direct route to any
+ * Steam HTTP client, including the client used by the download engine.
+ *
+ * Keeping this as a builder extension is intentional: authenticated clients
+ * can add their cookie interceptor before this extension, while the relay
+ * request still strips Steam credentials in WorkshopDirectAccessInterceptor.
+ */
+internal fun OkHttpClient.Builder.addWorkshopDirectAccess(
+    context: Context,
+): OkHttpClient.Builder = addWorkshopDirectAccess(
+    createWorkshopDirectAccessRuntime(context.applicationContext.filesDir),
+)
+
+internal fun OkHttpClient.Builder.addWorkshopDirectAccess(
+    runtime: WorkshopDirectAccessRuntime,
+): OkHttpClient.Builder = apply {
+    hostnameVerifier(runtime.hostnameVerifier)
+    runtime.resolvers.forEach { resolver ->
+        addInterceptor(
+            WorkshopDirectAccessInterceptor(
+                routeResolver = resolver,
+                directCallFactory = runtime.directHttpClient,
+                forwardDns = runtime.forwardDns,
+            ),
+        )
+    }
 }

@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <!--
-      Steam content CDN edge nodes are sometimes served over plain HTTP. Depot chunks are
-      AES-encrypted and hash-verified by Steam regardless of transport, so permitting cleartext
-      for these specific CDN domains is safe; everything else stays HTTPS-only.
+      Steam can return workshop manifests/chunks from dynamic CDN domains, including
+      providers outside steamcontent.com (for example clngaa.com and pphimalayanrt.com).
+      This matches WorkshopAndroidDownloader's CDN compatibility mode. Workshop requests do
+      not send Steam cookies or Authorization headers to these public CDN endpoints.
     -->
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">steamcontent.com</domain>
-        <domain includeSubdomains="true">steampipe.steamcontent.com</domain>
-        <domain includeSubdomains="true">steamstatic.com</domain>
-        <domain includeSubdomains="true">akamaihd.net</domain>
-        <domain includeSubdomains="true">akamaized.net</domain>
-        <!-- Steam may return depot manifests/chunks from st.dl.eccdnx.com. -->
-        <domain includeSubdomains="true">eccdnx.com</domain>
-    </domain-config>
+    <base-config cleartextTrafficPermitted="true" />
 </network-security-config>

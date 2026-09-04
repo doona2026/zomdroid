@@ -183,7 +183,15 @@
         android:id="@+id/workshop_download_center_fragment"
         android:name="com.zomdroid.fragments.WorkshopDownloadCenterFragment"
         android:label="@string/workshop_download_center_title"
-        tools:layout="@layout/fragment_workshop_download_center" />
+        tools:layout="@layout/fragment_workshop_download_center">
+        <action
+            android:id="@+id/action_download_center_open_workshop_account"
+            app:destination="@id/workshop_account_fragment"
+            app:enterAnim="@anim/workshop_enter"
+            app:exitAnim="@anim/workshop_exit"
+            app:popEnterAnim="@anim/workshop_pop_enter"
+            app:popExitAnim="@anim/workshop_pop_exit" />
+    </fragment>
 
     <fragment
         android:id="@+id/workshop_fragment"

@@ -1,6 +1,8 @@
 package com.zomdroid.workshop.network
 
 import com.google.common.truth.Truth.assertThat
+import java.net.InetAddress
+import okhttp3.Dns
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -111,6 +113,53 @@ class WorkshopDirectAccessTest {
             assertThat(forwardedRequest.headers["Host"]).isEqualTo("steamcommunity.com")
             assertThat(forwardedRequest.headers["Cookie"]).isNull()
             assertThat(forwardedRequest.headers["Authorization"]).isNull()
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun interceptorRegistersFakeServerNameWithForwardDnsBeforeRequest() {
+        val server = MockWebServer()
+        server.enqueue(MockResponse.Builder().code(200).body("workshop").build())
+        server.start()
+        try {
+            val profile = WattToolkitRouteProfile(
+                name = "test",
+                cacheFileName = "test.json",
+                supportedHosts = setOf("api.steampowered.com"),
+                bootstrapForwardTargets = listOf(server.url("/").toString()),
+                bootstrapFakeServerName = "steamstore-a.akamaihd.net",
+            )
+            val resolver = WattToolkitWorkshopRouteResolver(
+                routeProfile = profile,
+                routeStore = NoOpWattToolkitWorkshopRouteStore,
+            )
+            val forwardDns = WattToolkitForwardDns(
+                delegate = Dns { hostname ->
+                    assertThat(hostname).isEqualTo(server.hostName)
+                    listOf(InetAddress.getByName("127.0.0.1"))
+                },
+            )
+            val directClient = OkHttpClient.Builder()
+                .dns(forwardDns)
+                .build()
+            val client = OkHttpClient.Builder()
+                .addInterceptor(
+                    WorkshopDirectAccessInterceptor(
+                        routeResolver = resolver,
+                        directCallFactory = directClient,
+                        forwardDns = forwardDns,
+                    ),
+                )
+                .build()
+
+            client.newCall(
+                Request.Builder().url("https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/").build(),
+            ).execute().use { response ->
+                assertThat(response.code).isEqualTo(200)
+                assertThat(response.body?.string()).isEqualTo("workshop")
+            }
         } finally {
             server.close()
         }

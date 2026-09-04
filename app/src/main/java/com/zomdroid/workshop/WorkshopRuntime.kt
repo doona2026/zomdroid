@@ -2,12 +2,12 @@
 package com.zomdroid.workshop
 
 import android.content.Context
+import com.zomdroid.workshop.auth.SteamClientIdentity
 import com.zomdroid.workshop.auth.SteamAuthRepository
 import com.zomdroid.workshop.core.WorkshopDownloadEngine
-import com.zomdroid.workshop.steam.protocol.OkHttpSteamCmSession
 import com.zomdroid.workshop.steam.protocol.applyDefaultHttpTimeouts
 import com.zomdroid.workshop.steam.protocol.applySteamHttpCompatibility
-import com.zomdroid.workshop.steam.protocol.newDefaultOkHttpClient
+import com.zomdroid.workshop.network.addWorkshopDirectAccess
 import okhttp3.OkHttpClient
 
 /** Process-scoped owner for the shared Workshop HTTP client and official Steam engine. */
@@ -19,7 +19,12 @@ object WorkshopRuntime {
     @Synchronized
     fun initialize(context: Context) {
         if (engine == null) {
-            engine = WorkshopDownloadEngine.createDefault(client = newDefaultOkHttpClient())
+            val client = OkHttpClient.Builder()
+                .applyDefaultHttpTimeouts()
+                .applySteamHttpCompatibility()
+                .addWorkshopDirectAccess(context)
+                .build()
+            engine = WorkshopDownloadEngine.createDefault(client = client)
         }
     }
 
@@ -36,6 +41,11 @@ object WorkshopRuntime {
         }
         val appContext = context.applicationContext
         val authRepository = SteamAuthRepository(appContext)
+        // Keep the CM identity used for an authenticated download identical to the
+        // identity used while creating/refreshing the account session. Using the
+        // protocol's demo identity here makes Steam see the same account from a
+        // different client installation and can result in EResult=84/AccessDenied.
+        val steamClientIdentity = SteamClientIdentity(appContext)
         val account = authRepository.accountSessionFor(accountId)
             ?: error("Steam account is unavailable or requires reauthentication")
         val client = OkHttpClient.Builder()
@@ -48,10 +58,11 @@ object WorkshopRuntime {
                     fallbackToActiveAccount = false,
                 ),
             )
+            .addWorkshopDirectAccess(appContext)
             .build()
         return WorkshopDownloadEngine.createDefault(
             client = client,
-            sessionFactory = { OkHttpSteamCmSession(client) },
+            sessionFactory = { steamClientIdentity.createSession(client) },
             sessionConnector = { session, servers -> session.connectWithRefreshToken(servers, account) },
         )
     }

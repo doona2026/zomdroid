@@ -39,6 +39,7 @@ internal class WorkshopDirectAccessInterceptor(
     private val routeResolver: WattToolkitWorkshopRouteResolver,
     private val directCallFactory: Call.Factory,
     private val maxRedirects: Int = MAX_FOLLOW_UPS,
+    private val forwardDns: WattToolkitForwardDns? = null,
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
@@ -144,6 +145,13 @@ internal class WorkshopDirectAccessInterceptor(
         if (!shouldForward) {
             return logicalRequest.newBuilder().url(networkUrl).build()
         }
+
+        // The forward URL may use a fake SNI host (for example
+        // steamstore-a.akamaihd.net) while the route target is a relay host.
+        // Register that mapping before OkHttp performs DNS resolution; without
+        // it the request resolves the fake host on the public DNS and then
+        // falls back to the original Steam endpoint.
+        forwardDns?.register(route)
 
         // Catalog requests are intentionally public/anonymous. Do not send a
         // Steam Cookie header to the relay; the original route still receives
