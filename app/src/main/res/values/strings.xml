@@ -706,6 +706,7 @@
     <string name="workshop_search">Search</string>
     <string name="workshop_previous">Previous</string>
     <string name="workshop_next">Next</string>
+    <string name="workshop_to_top">Back to top</string>
     <string name="workshop_page_format">Page %1$d</string>
     <string name="workshop_loading">Loading Workshop…</string>
     <string name="workshop_loaded">Loaded</string>

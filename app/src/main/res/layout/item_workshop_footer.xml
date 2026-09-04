@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:paddingTop="4dp"
+    android:paddingBottom="12dp">
+    <Button
+        android:id="@+id/workshop_previous"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/workshop_previous" />
+    <TextView
+        android:id="@+id/workshop_page"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="12dp" />
+    <Button
+        android:id="@+id/workshop_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/workshop_next" />
+</LinearLayout>

@@ -548,6 +548,7 @@
     <string name="workshop_search">搜索</string>
     <string name="workshop_previous">上一页</string>
     <string name="workshop_next">下一页</string>
+    <string name="workshop_to_top">返回顶部</string>
     <string name="workshop_page_format">第 %1$d 页</string>
     <string name="workshop_loading">正在加载创意工坊…</string>
     <string name="workshop_loaded">加载完成</string>
