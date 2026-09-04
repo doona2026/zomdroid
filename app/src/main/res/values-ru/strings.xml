@@ -316,9 +316,11 @@
     <string name="version_check_title">Zomdroid by udar_molota</string>
     <string name="version_check_up_to_date">Актуальная версия: %1$s</string>
     <string name="version_check_update_available">Установлена: %1$s\nДоступна: %2$s\n%3$s</string>
+    <string name="version_check_checking">Проверка обновлений…\nТекущая версия: %1$s</string>
     <string name="version_check_error">Не удалось проверить обновления\nТекущая версия: %1$s</string>
     <string name="version_check_ahead_of_release">Установлена: %1$s\nЭта сборка новее последнего опубликованного релиза (%2$s)</string>
     <string name="nav_menu_version">Проверить обновления</string>
+    <string name="modified_github_repo">Репозиторий GitHub этой модифицированной версии лаунчера:\nhttps://github.com/doona2026/zomdroid/tree/Modified</string>
 
     <!-- Bug report -->
     <string name="nav_bug_report">Сообщить об ошибке</string>
@@ -585,6 +587,13 @@
     <!-- Appearance / controls / detection -->
     <string name="settings_group_appearance">Оформление</string>
     <string name="settings_theme">Тема лаунчера</string>
+    <string name="settings_language">Язык лаунчера</string>
+    <string name="settings_language_system">Системный язык</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_simplified_chinese">简体中文</string>
+    <string name="settings_language_indonesian">Bahasa Indonesia</string>
+    <string name="settings_language_portuguese_brazil">Português (Brasil)</string>
+    <string name="settings_language_russian">Русский</string>
     <string name="control_element_style">Стиль</string>
     <string name="control_element_custom_icon">Своя иконка…</string>
     <string name="control_element_custom_icon_failed">Не удалось загрузить изображение</string>

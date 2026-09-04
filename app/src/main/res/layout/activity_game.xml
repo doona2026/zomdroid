@@ -38,23 +38,12 @@
             android:paddingStart="24dp"
             android:paddingTop="28dp"
             android:paddingEnd="20dp"
-            android:paddingBottom="20dp"
-            android:background="@drawable/toolbar_gradient">
-
-            <TextView
-                android:id="@+id/game_drawer_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/game_menu_title"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+            android:paddingBottom="16dp">
 
             <TextView
                 android:id="@+id/game_drawer_instance"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="?attr/colorOnSurfaceVariant"

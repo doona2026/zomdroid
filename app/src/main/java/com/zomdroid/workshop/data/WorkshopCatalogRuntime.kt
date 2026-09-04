@@ -13,11 +13,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import okhttp3.Cache
 import okhttp3.OkHttpClient
-import java.io.File
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
+import com.zomdroid.workshop.network.createWorkshopCatalogHttpClient
 
 object WorkshopCatalogRuntime {
     interface BrowseCallback {
@@ -141,13 +139,7 @@ object WorkshopCatalogRuntime {
         client?.let { return it }
         synchronized(this) {
             client?.let { return it }
-            val cacheDir = File(context.applicationContext.cacheDir, "workshop-catalog-http")
-            val created = OkHttpClient.Builder()
-                .cache(Cache(cacheDir, 5L * 1024L * 1024L))
-                .connectTimeout(15, TimeUnit.SECONDS)
-                .readTimeout(20, TimeUnit.SECONDS)
-                .writeTimeout(20, TimeUnit.SECONDS)
-                .build()
+            val created = createWorkshopCatalogHttpClient(context)
             client = created
             return created
         }

@@ -317,9 +317,11 @@
     <string name="version_check_title">Zomdroid by udar_molota</string>
     <string name="version_check_up_to_date">Anda memiliki versi terbaru: %1$s</string>
     <string name="version_check_update_available">Installed: %1$s\nAvailable: %2$s\n%3$s</string>
+    <string name="version_check_checking">Memeriksa pembaruan…\nVersi saat ini: %1$s</string>
     <string name="version_check_error">Could not check for updates\nCurrent version: %1$s</string>
     <string name="version_check_ahead_of_release">Terpasang: %1$s\nBuild ini lebih baru dari rilis terakhir yang dipublikasikan (%2$s)</string>
     <string name="nav_menu_version">Periksa pembaruan</string>
+    <string name="modified_github_repo">Repositori GitHub untuk launcher modifikasi ini:\nhttps://github.com/doona2026/zomdroid/tree/Modified</string>
 
     <!-- Bug report -->
     <string name="nav_bug_report">Laporkan bug</string>
@@ -586,6 +588,13 @@
     <!-- Appearance / controls / detection -->
     <string name="settings_group_appearance">Tampilan</string>
     <string name="settings_theme">Tema launcher</string>
+    <string name="settings_language">Bahasa launcher</string>
+    <string name="settings_language_system">Sesuai sistem</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_simplified_chinese">简体中文</string>
+    <string name="settings_language_indonesian">Bahasa Indonesia</string>
+    <string name="settings_language_portuguese_brazil">Português (Brasil)</string>
+    <string name="settings_language_russian">Русский</string>
     <string name="control_element_style">Gaya</string>
     <string name="control_element_custom_icon">Ikon kustom…</string>
     <string name="control_element_custom_icon_failed">Tidak dapat memuat gambar</string>

@@ -73,4 +73,12 @@
 
 ## Stage 7 Full Validation
 
+## Workshop Direct Access Follow-up
+
+- Implemented at: 2026-09-04
+- Scope: Added the Watt Toolkit route resolver, persisted route cache, forwarded-host DNS mapping, manual redirect handling, relay-target fallback, and original Steam-route fallback for the public Workshop catalog client. Browse, detail/API, and Workshop image requests now share this client; official Workshop downloads and the existing explicit ggntw fallback remain unchanged.
+- Privacy boundary: forwarded catalog requests strip Steam Cookie headers and remain anonymous. Authenticated/restricted content continues to use the original Steam route until a separate credential-forwarding decision is made.
+- Validation: Added route construction, redirect normalization, bootstrap route, relay fallback, dynamic project-group parsing, cache persistence, and MockWebServer forwarding tests. Full `:app:testDebugUnitTest` and `:app:assembleDebug` pass. APK: `app/build/outputs/apk/debug/zomdroid-debug-1.4.8.apk`.
+- Device validation: Pending because MuMu ADB device `b488527b` is still `unauthorized`; install and bare-network Workshop smoke testing require accepting the RSA authorization prompt.
+
 - Pending: Tasks 18–19 (full regression and real-device validation).

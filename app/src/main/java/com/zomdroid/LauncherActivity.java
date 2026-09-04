@@ -313,23 +313,33 @@ public class LauncherActivity extends AppCompatActivity {
     }
 
     private void checkForUpdate() {
+        String current = BuildConfig.VERSION_NAME;
+        AlertDialog dialog = showVersionDialog(current, null, null, true);
         new Thread(() -> {
             try {
                 JSONObject json = fetchLatestRelease();
                 String latestTag = json.getString("tag_name"); // "v1.4.1"
                 String releaseUrl = json.getString("html_url");
                 String latest = latestTag.startsWith("v") ? latestTag.substring(1) : latestTag;
-                String current = BuildConfig.VERSION_NAME;
 
                 // Keep the daily-check badge state in sync with whatever the manual check just saw.
                 LauncherPreferences.requireSingleton().setLatestSeenTag(latestTag);
 
-                runOnUiThread(() -> { showVersionDialog(current, latest, releaseUrl); refreshUpdateBadge(); });
+                runOnUiThread(() -> {
+                    if (dialog.isShowing()) {
+                        updateVersionDialog(dialog, current, latest, releaseUrl);
+                    }
+                    refreshUpdateBadge();
+                });
 
             } catch (Exception e) {
-                runOnUiThread(() -> showVersionDialog(BuildConfig.VERSION_NAME, null, null));
+                runOnUiThread(() -> {
+                    if (dialog.isShowing()) {
+                        updateVersionDialog(dialog, current, null, null);
+                    }
+                });
             }
-        }).start();
+        }, "zd-manual-update-check").start();
     }
 
     private static JSONObject fetchLatestRelease() throws Exception {
@@ -511,9 +521,47 @@ public class LauncherActivity extends AppCompatActivity {
         }
     }
 
-    private void showVersionDialog(String current, String latest, String releaseUrl) {
+    private AlertDialog showVersionDialog(String current, String latest, String releaseUrl) {
+        return showVersionDialog(current, latest, releaseUrl, false);
+    }
+
+    private AlertDialog showVersionDialog(String current, String latest, String releaseUrl,
+                                          boolean checking) {
+        String message = buildVersionDialogMessage(current, latest, releaseUrl, checking);
+
+        SpannableString s = new SpannableString(message);
+        Linkify.addLinks(s, Linkify.WEB_URLS);
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.version_check_title)
+                .setMessage(s)
+                .setPositiveButton(R.string.dialog_button_ok, null)
+                .create();
+        dialog.show();
+        TextView messageView = dialog.findViewById(android.R.id.message);
+        if (messageView != null) {
+            messageView.setMovementMethod(LinkMovementMethod.getInstance());
+        }
+        return dialog;
+    }
+
+    private void updateVersionDialog(AlertDialog dialog, String current, String latest,
+                                     String releaseUrl) {
+        String message = buildVersionDialogMessage(current, latest, releaseUrl, false);
+        SpannableString s = new SpannableString(message);
+        Linkify.addLinks(s, Linkify.WEB_URLS);
+        TextView messageView = dialog.findViewById(android.R.id.message);
+        if (messageView != null) {
+            messageView.setText(s);
+            messageView.setMovementMethod(LinkMovementMethod.getInstance());
+        }
+    }
+
+    private String buildVersionDialogMessage(String current, String latest, String releaseUrl,
+                                             boolean checking) {
         String message;
-        if (latest == null) {
+        if (checking) {
+            message = getString(R.string.version_check_checking, current);
+        } else if (latest == null) {
             message = getString(R.string.version_check_error, current);
         } else {
             // Numeric compare, not equals(): a dev build that runs ahead of the published release
@@ -534,19 +582,8 @@ public class LauncherActivity extends AppCompatActivity {
         // is shown once, on first launch, and never again, while a CC BY credit has to stay
         // reachable. This dialog is the app's de facto About screen - it sits behind the GitHub
         // icon and can be opened any time.
+        message += "\n\n" + getString(R.string.modified_github_repo);
         message += "\n\n" + getString(R.string.credits_third_party);
-
-        SpannableString s = new SpannableString(message);
-        Linkify.addLinks(s, Linkify.WEB_URLS);
-        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.version_check_title)
-                .setMessage(s)
-                .setPositiveButton(R.string.dialog_button_ok, null)
-                .create();
-        dialog.show();
-        TextView messageView = dialog.findViewById(android.R.id.message);
-        if (messageView != null) {
-            messageView.setMovementMethod(LinkMovementMethod.getInstance());
-        }
+        return message;
     }
 }

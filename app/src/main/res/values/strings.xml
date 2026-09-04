@@ -402,6 +402,7 @@
     <string name="nav_menu_reddit">Reddit</string>
     <!-- Labels for the bottom icon row. Short on purpose: five columns share the drawer width. -->
     <string name="nav_bottom_github">GitHub</string>
+    <string name="modified_github_repo">GitHub repository for this modified launcher:\nhttps://github.com/doona2026/zomdroid/tree/Modified</string>
     <!-- CC BY requires the credit to stay visible, so it rides along in the version dialog - the
          one "about this app" surface reachable at any time. Untranslated on purpose: a licence
          attribution names people and a licence, and both stay as written. -->
@@ -436,6 +437,7 @@
     <string name="version_check_title">Zomdroid by udar_molota</string>
     <string name="version_check_up_to_date">You have the latest version: %1$s</string>
     <string name="version_check_update_available">Installed: %1$s\nAvailable: %2$s\n%3$s</string>
+    <string name="version_check_checking">Checking for updates…\nCurrent version: %1$s</string>
     <string name="version_check_error">Could not check for updates\nCurrent version: %1$s</string>
     <string name="version_check_ahead_of_release">Installed: %1$s\nThis build is newer than the latest published release (%2$s)</string>
     <string name="nav_menu_version">Check for updates</string>
@@ -465,6 +467,13 @@
     <string name="settings_group_rendering">Rendering</string>
     <string name="settings_group_appearance">Appearance</string>
     <string name="settings_theme">Launcher theme</string>
+    <string name="settings_language">Launcher language</string>
+    <string name="settings_language_system">System default</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_simplified_chinese">简体中文</string>
+    <string name="settings_language_indonesian">Bahasa Indonesia</string>
+    <string name="settings_language_portuguese_brazil">Português (Brasil)</string>
+    <string name="settings_language_russian">Русский</string>
     <string name="settings_group_advanced">Advanced</string>
     <string name="settings_group_controls">Controls</string>
     <string name="settings_group_audio">Audio</string>
@@ -743,14 +752,14 @@
     <string name="workshop_comments_unavailable">Comments are not included in this response.</string>
     <string name="workshop_detail_missing">Workshop item information is missing.</string>
     <string name="install_mod_official_workshop_btn">Browse official Workshop</string>
-    <string name="workshop_account_title">Steam Workshop accounts</string>
-    <string name="workshop_account_note">Sign in to download private or account-bound Workshop content. Credentials are used only for Steam authentication; downloads without an account remain anonymous.</string>
+    <string name="workshop_account_title">Steam Account</string>
+    <string name="workshop_account_note">Sign in once to use Steam-authenticated features in Zomdroid, including Steam game downloads and private or account-bound Workshop content. Your password is never stored locally; public content remains available anonymously when no account is selected.</string>
     <string name="workshop_account_username">Steam account name</string>
     <string name="workshop_account_password">Steam password</string>
     <string name="workshop_account_sign_in">Add Steam account</string>
     <string name="workshop_account_remove">Remove</string>
-    <string name="workshop_account_anonymous">No Steam account selected; downloads use anonymous access.</string>
-    <string name="workshop_account_ready">Account state ready.</string>
+    <string name="workshop_account_anonymous">No Steam account selected; public content uses anonymous access. Features that require an account are unavailable.</string>
+    <string name="workshop_account_ready">Steam account is ready.</string>
     <string name="workshop_account_signing_in">Contacting Steam…</string>
     <string name="workshop_account_missing_credentials">Enter both account name and password.</string>
     <string name="workshop_account_error">Steam sign-in failed.</string>

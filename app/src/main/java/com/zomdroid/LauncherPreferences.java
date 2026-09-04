@@ -342,6 +342,32 @@ public class LauncherPreferences {
     public ThemeMode getThemeMode() { return themeMode != null ? themeMode : ThemeMode.SYSTEM; }
     public void setThemeMode(ThemeMode mode) { themeMode = mode; saveToPreferences(); }
 
+    public enum LanguageMode {
+        SYSTEM(""),
+        ENGLISH("en"),
+        SIMPLIFIED_CHINESE("zh-CN"),
+        INDONESIAN("id"),
+        PORTUGUESE_BRAZIL("pt-BR"),
+        RUSSIAN("ru");
+
+        public final String localeTag;
+
+        LanguageMode(String localeTag) {
+            this.localeTag = localeTag;
+        }
+    }
+
+    private LanguageMode languageMode = LanguageMode.SYSTEM;
+
+    public LanguageMode getLanguageMode() {
+        return languageMode != null ? languageMode : LanguageMode.SYSTEM;
+    }
+
+    public void setLanguageMode(LanguageMode mode) {
+        languageMode = mode != null ? mode : LanguageMode.SYSTEM;
+        saveToPreferences();
+    }
+
     private boolean touchControlsEnabled = false;
 
     public boolean isTouchControlsEnabled() {

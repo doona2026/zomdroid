@@ -310,9 +310,11 @@
     <string name="version_check_title">Zomdroid by udar_molota</string>
     <string name="version_check_up_to_date">当前已是最新版本：%1$s</string>
     <string name="version_check_update_available">已安装：%1$s\n可用更新：%2$s\n%3$s</string>
+    <string name="version_check_checking">正在检查更新…\n当前版本：%1$s</string>
     <string name="version_check_error">无法检查更新\n当前版本：%1$s</string>
     <string name="version_check_ahead_of_release">已安装：%1$s\n此版本比最新发布版本（%2$s）更新</string>
     <string name="nav_menu_version">检查更新</string>
+    <string name="modified_github_repo">本魔改版启动器Github仓库地址：\nhttps://github.com/doona2026/zomdroid/tree/Modified</string>
 
     <!-- Bug report -->
     <string name="nav_bug_report">报告错误</string>
@@ -612,14 +614,14 @@
     <string name="workshop_download_center_fallback_started">确认后已开始第三方下载。</string>
     <string name="workshop_download_center_fallback_complete">第三方下载完成，已加入 Mod 库。</string>
 
-    <string name="workshop_account_title">Steam 创意工坊账号</string>
-    <string name="workshop_account_note">登录后可下载私有或绑定账号的创意工坊内容。凭据仅用于 Steam 身份验证；未选择账号时仍使用匿名访问。</string>
+    <string name="workshop_account_title">Steam 账号</string>
+    <string name="workshop_account_note">登录一次后，即可在 Zomdroid 中使用需要 Steam 身份验证的功能，包括 Steam 游戏下载，以及访问私有或绑定账号的创意工坊内容。密码不会保存在本机；未选择账号时，公开内容仍可匿名访问。</string>
     <string name="workshop_account_username">Steam 账号名</string>
     <string name="workshop_account_password">Steam 密码</string>
     <string name="workshop_account_sign_in">添加 Steam 账号</string>
     <string name="workshop_account_remove">移除</string>
-    <string name="workshop_account_anonymous">未选择 Steam 账号；下载将使用匿名访问。</string>
-    <string name="workshop_account_ready">账号状态正常。</string>
+    <string name="workshop_account_anonymous">未选择 Steam 账号；公开内容将使用匿名访问，需要账号权限的功能暂不可用。</string>
+    <string name="workshop_account_ready">Steam 账号状态正常。</string>
     <string name="workshop_account_signing_in">正在连接 Steam…</string>
     <string name="workshop_account_missing_credentials">请输入账号名和密码。</string>
     <string name="workshop_account_error">Steam 登录失败。</string>
@@ -717,6 +719,13 @@
     <!-- Appearance / controls / detection -->
     <string name="settings_group_appearance">外观</string>
     <string name="settings_theme">启动器主题</string>
+    <string name="settings_language">启动器语言</string>
+    <string name="settings_language_system">跟随系统</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_simplified_chinese">简体中文</string>
+    <string name="settings_language_indonesian">Bahasa Indonesia</string>
+    <string name="settings_language_portuguese_brazil">Português (Brasil)</string>
+    <string name="settings_language_russian">Русский</string>
     <string name="control_element_style">样式</string>
     <string name="control_element_custom_icon">自定义图标…</string>
     <string name="control_element_custom_icon_failed">无法加载图片</string>

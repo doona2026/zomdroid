@@ -6,9 +6,6 @@
         android:orientation="vertical" android:padding="16dp">
         <TextView
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="@string/workshop_library_title" android:textAppearance="?attr/textAppearanceHeadlineSmall" />
-        <TextView
-            android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="8dp" android:text="@string/workshop_library_note"
             android:textColor="?attr/colorOnSurfaceVariant" />
         <Button
