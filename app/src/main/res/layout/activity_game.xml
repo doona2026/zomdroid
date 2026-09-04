@@ -127,7 +127,7 @@
 
                     <ImageView
                         style="@style/GameMenuIcon"
-                        android:src="@drawable/mt_icon_heart"
+                        android:src="@drawable/mt_icon_vibration"
                         android:tint="?attr/colorOnSurfaceVariant"
                         android:contentDescription="@null" />
 
