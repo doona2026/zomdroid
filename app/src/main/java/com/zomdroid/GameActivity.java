@@ -6,6 +6,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
+import android.os.Process;
 import android.system.ErrnoException;
 import android.util.Log;
 
@@ -432,9 +433,30 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.game_menu_exit_title)
                 .setMessage(R.string.game_menu_exit_message)
+                .setNeutralButton(R.string.game_menu_force_exit, (dialog, which) -> confirmForceExit())
                 .setNegativeButton(R.string.game_menu_return_to_game, null)
                 .setPositiveButton(R.string.game_menu_exit_confirm, (dialog, which) -> exitToLauncher())
                 .show();
+    }
+
+    private void confirmForceExit() {
+        if (exitInProgress) return;
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.game_menu_force_exit_title)
+                .setMessage(R.string.game_menu_force_exit_message)
+                .setNegativeButton(R.string.game_menu_return_to_game, null)
+                .setPositiveButton(R.string.game_menu_force_exit_confirm,
+                        (dialog, which) -> forceExitGame())
+                .show();
+    }
+
+    private void forceExitGame() {
+        if (exitInProgress) return;
+        exitInProgress = true;
+        // The embedded game and Zomdroid share one Android process. Killing this process is the
+        // only reliable fallback when the JVM/game is hung and cannot execute its normal close
+        // path. Unlike the graceful exit above, this intentionally does not wait for saving.
+        Process.killProcess(Process.myPid());
     }
 
     private void returnToLauncher() {

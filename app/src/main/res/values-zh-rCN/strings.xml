@@ -738,6 +738,10 @@
     <string name="game_menu_exit">退出游戏</string>
     <string name="game_menu_exit_title">退出游戏？</string>
     <string name="game_menu_exit_message">游戏将关闭并返回启动器，请确认当前进度已经保存。</string>
+    <string name="game_menu_force_exit">强制退出</string>
+    <string name="game_menu_force_exit_title">强制退出游戏？</string>
+    <string name="game_menu_force_exit_message">这将立即终止 Zomdroid，未保存的进度可能会丢失。仅在游戏无法正常退出时使用。</string>
+    <string name="game_menu_force_exit_confirm">立即强制退出</string>
     <string name="game_menu_exit_confirm">退出到启动器</string>
     <string name="game_menu_exit_failed">游戏尚未准备好退出，请稍后重试。</string>
     <string name="game_active_instance_message">已有游戏正在运行，请先返回当前游戏。</string>

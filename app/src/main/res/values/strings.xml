@@ -812,6 +812,10 @@
     <string name="game_menu_exit">Exit game</string>
     <string name="game_menu_exit_title">Exit game?</string>
     <string name="game_menu_exit_message">The game will close and return to the launcher. Make sure your progress has been saved.</string>
+    <string name="game_menu_force_exit">Force exit</string>
+    <string name="game_menu_force_exit_title">Force exit game?</string>
+    <string name="game_menu_force_exit_message">This will immediately terminate Zomdroid. Unsaved progress may be lost. Use this only when the game cannot exit normally.</string>
+    <string name="game_menu_force_exit_confirm">Force exit</string>
     <string name="game_menu_exit_confirm">Exit to launcher</string>
     <string name="game_menu_exit_failed">The game is not ready to exit. Please try again in a moment.</string>
     <string name="game_active_instance_message">A game is already running. Return to it before starting another instance.</string>
