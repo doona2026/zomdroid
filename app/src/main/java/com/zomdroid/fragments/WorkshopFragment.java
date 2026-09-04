@@ -48,7 +48,9 @@ public class WorkshopFragment extends Fragment {
     private WorkshopFavoritesRepository favoritesRepository;
     private Parcelable pendingListState;
     private int appliedSort = -1;
+    private String appliedSearch = "";
     private int viewGeneration;
+    private int requestGeneration;
     private int page = 1;
     private boolean hasNext;
     private final List<WorkshopBrowseItem> cachedItems = new ArrayList<>();
@@ -90,18 +92,27 @@ public class WorkshopFragment extends Fragment {
             page = Math.max(1, state.getInt(STATE_PAGE, 1));
             hasNext = state.getBoolean(STATE_HAS_NEXT, false);
             pendingListState = state.getParcelable(STATE_LIST);
+        } else {
+            search.setText(appliedSearch);
+            if (appliedSort >= 0 && sort.getCount() > 0) {
+                sort.setSelection(Math.min(appliedSort, sort.getCount() - 1));
+            }
         }
+        appliedSearch = search.getText().toString().trim();
         appliedSort = sort.getSelectedItemPosition();
         sort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View itemView, int position, long id) {
                 if (position == appliedSort) return;
                 appliedSort = position;
+                appliedSearch = search.getText().toString().trim();
                 refreshFromFirstPage();
             }
 
             @Override public void onNothingSelected(AdapterView<?> parent) { }
         });
         header.findViewById(R.id.workshop_search_btn).setOnClickListener(v -> {
+            appliedSearch = search.getText().toString().trim();
+            appliedSort = sort.getSelectedItemPosition();
             refreshFromFirstPage();
         });
         previous.setOnClickListener(v -> load(page - 1));
@@ -150,15 +161,19 @@ public class WorkshopFragment extends Fragment {
     private void load(int requestedPage) {
         if (!isAdded() || requestedPage < 1) return;
         int requestViewGeneration = viewGeneration;
+        int requestToken = ++requestGeneration;
+        String requestSearch = appliedSearch;
+        int requestSort = appliedSort;
         page = requestedPage;
         scrollToTop();
         progress.setVisibility(View.VISIBLE);
         status.setText(R.string.workshop_loading);
         updatePaging();
-        WorkshopCatalogRuntime.browse(requireContext(), search.getText().toString().trim(), sort.getSelectedItemPosition(), page,
+        WorkshopCatalogRuntime.browse(requireContext(), requestSearch, requestSort, page,
                 new WorkshopCatalogRuntime.BrowseCallback() {
                     @Override public void onSuccess(WorkshopBrowsePage result) {
-                        if (!isAdded() || requestViewGeneration != viewGeneration || getView() == null) return;
+                        if (!isAdded() || requestViewGeneration != viewGeneration
+                                || requestToken != requestGeneration || getView() == null) return;
                         progress.setVisibility(View.GONE);
                         cachedItems.clear();
                         cachedItems.addAll(result.getItems());
@@ -171,7 +186,8 @@ public class WorkshopFragment extends Fragment {
                         restoreListState();
                     }
                     @Override public void onError(String message) {
-                        if (!isAdded() || requestViewGeneration != viewGeneration || getView() == null) return;
+                        if (!isAdded() || requestViewGeneration != viewGeneration
+                                || requestToken != requestGeneration || getView() == null) return;
                         progress.setVisibility(View.GONE);
                         status.setText(message);
                         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
@@ -216,6 +232,7 @@ public class WorkshopFragment extends Fragment {
             pendingListState = list.getLayoutManager().onSaveInstanceState();
         }
         viewGeneration++;
+        requestGeneration++;
         list = null;
         search = null;
         sort = null;
