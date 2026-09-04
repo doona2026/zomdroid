@@ -101,6 +101,7 @@ public class WorkshopAccountFragment extends Fragment {
             remove.setOnClickListener(v -> SteamAuthRuntime.remove(requireContext(), account.getAccountId(), new Callback()));
             accounts.addView(remove);
         }
+        accounts.scheduleLayoutAnimation();
         if (snapshot.getAccounts().isEmpty()) status.setText(R.string.workshop_account_anonymous);
     }
 

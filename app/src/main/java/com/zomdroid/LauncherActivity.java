@@ -29,6 +29,7 @@ import androidx.appcompat.widget.ActionMenuView;
 
 import androidx.core.text.HtmlCompat;
 import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -281,13 +282,22 @@ public class LauncherActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_open_workshop_download_center) {
-            navController.navigate(R.id.workshop_download_center_fragment);
+            navController.navigate(R.id.workshop_download_center_fragment, null, workshopForwardNavOptions());
             return true;
         } else if (item.getItemId() == R.id.action_open_workshop_account) {
-            navController.navigate(R.id.workshop_account_fragment);
+            navController.navigate(R.id.workshop_account_fragment, null, workshopForwardNavOptions());
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private NavOptions workshopForwardNavOptions() {
+        return new NavOptions.Builder()
+                .setEnterAnim(R.anim.workshop_enter)
+                .setExitAnim(R.anim.workshop_exit)
+                .setPopEnterAnim(R.anim.workshop_pop_enter)
+                .setPopExitAnim(R.anim.workshop_pop_exit)
+                .build();
     }
 
     private void checkForUpdate() {

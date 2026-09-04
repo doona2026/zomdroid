@@ -107,6 +107,7 @@ public class WorkshopDownloadCenterFragment extends Fragment {
             return;
         }
         for (DownloadCenterTask task : tasks) addTaskView(task);
+        tasksContainer.scheduleLayoutAnimation();
     }
 
     private void addTaskView(DownloadCenterTask task) {

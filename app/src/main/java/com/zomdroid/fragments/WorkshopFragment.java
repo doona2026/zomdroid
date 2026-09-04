@@ -114,6 +114,7 @@ public class WorkshopFragment extends Fragment {
             load(page);
         } else {
             adapter.setItems(cachedItems);
+            list.scheduleLayoutAnimation();
             status.setText(R.string.workshop_loaded);
             updatePaging();
             restoreListState();
@@ -158,6 +159,7 @@ public class WorkshopFragment extends Fragment {
                         cachedItems.clear();
                         cachedItems.addAll(result.getItems());
                         adapter.setItems(result.getItems());
+                        list.scheduleLayoutAnimation();
                         page = result.getPage();
                         hasNext = result.getHasNextPage();
                         status.setText(result.getItems().isEmpty() ? R.string.workshop_empty : R.string.workshop_loaded);

@@ -54,13 +54,25 @@
             app:destination="@id/steam_download_fragment" />
         <action
             android:id="@+id/action_open_workshop_download_center"
-            app:destination="@id/workshop_download_center_fragment" />
+            app:destination="@id/workshop_download_center_fragment"
+            app:enterAnim="@anim/workshop_enter"
+            app:exitAnim="@anim/workshop_exit"
+            app:popEnterAnim="@anim/workshop_pop_enter"
+            app:popExitAnim="@anim/workshop_pop_exit" />
         <action
             android:id="@+id/action_open_workshop"
-            app:destination="@id/workshop_fragment" />
+            app:destination="@id/workshop_fragment"
+            app:enterAnim="@anim/workshop_enter"
+            app:exitAnim="@anim/workshop_exit"
+            app:popEnterAnim="@anim/workshop_pop_enter"
+            app:popExitAnim="@anim/workshop_pop_exit" />
         <action
             android:id="@+id/action_open_workshop_account"
-            app:destination="@id/workshop_account_fragment" />
+            app:destination="@id/workshop_account_fragment"
+            app:enterAnim="@anim/workshop_enter"
+            app:exitAnim="@anim/workshop_exit"
+            app:popEnterAnim="@anim/workshop_pop_enter"
+            app:popExitAnim="@anim/workshop_pop_exit" />
         <action
             android:id="@+id/action_open_workshop_library"
             app:destination="@id/workshop_mod_library_fragment" />
@@ -159,7 +171,11 @@
         tools:layout="@layout/fragment_workshop">
         <action
             android:id="@+id/action_workshop_detail"
-            app:destination="@id/workshop_detail_fragment" />
+            app:destination="@id/workshop_detail_fragment"
+            app:enterAnim="@anim/workshop_enter"
+            app:exitAnim="@anim/workshop_exit"
+            app:popEnterAnim="@anim/workshop_pop_enter"
+            app:popExitAnim="@anim/workshop_pop_exit" />
     </fragment>
 
     <fragment

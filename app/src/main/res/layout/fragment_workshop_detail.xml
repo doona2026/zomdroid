@@ -110,6 +110,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:layoutAnimation="@anim/workshop_content_layout"
             android:orientation="vertical" />
 
         <TextView
@@ -142,6 +143,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
+            android:layoutAnimation="@anim/workshop_content_layout"
             android:orientation="vertical" />
 
         <TextView
@@ -158,6 +160,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
+            android:layoutAnimation="@anim/workshop_content_layout"
             android:orientation="vertical" />
 
         <TextView

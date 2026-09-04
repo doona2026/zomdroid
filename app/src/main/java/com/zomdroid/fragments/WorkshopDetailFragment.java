@@ -61,6 +61,10 @@ public class WorkshopDetailFragment extends Fragment {
         image.setAdapter(imageAdapter);
         new PagerSnapHelper().attachToRecyclerView(image);
         image.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                updateImageTransforms();
+            }
+
             @Override public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 updateImagePage();
             }
@@ -116,6 +120,7 @@ public class WorkshopDetailFragment extends Fragment {
             galleryImageUrls = java.util.Collections.singletonList(value.getPreviewImageUrl());
         }
         imageAdapter.setItems(galleryImageUrls);
+        image.scheduleLayoutAnimation();
         download.setEnabled(true);
         dependencyDownload.setVisibility(value.getRequiredItems().isEmpty() ? View.GONE : View.VISIBLE);
         renderDependencies(value.getRequiredItems());
@@ -135,6 +140,7 @@ public class WorkshopDetailFragment extends Fragment {
         List<WorkshopDescriptionBlock> blocks = value.getDescriptionBlocks();
         if (blocks.isEmpty()) {
             addDescriptionText(container, value.getDescription());
+            container.scheduleLayoutAnimation();
             return;
         }
         for (WorkshopDescriptionBlock block : blocks) {
@@ -154,6 +160,7 @@ public class WorkshopDetailFragment extends Fragment {
                 WorkshopCatalogRuntime.loadImage(requireContext(), block.getImageUrl(), imageView);
             }
         }
+        container.scheduleLayoutAnimation();
     }
 
     private void addDescriptionText(LinearLayout container, String text) {
@@ -184,6 +191,21 @@ public class WorkshopDetailFragment extends Fragment {
         }
     }
 
+    private void updateImageTransforms() {
+        if (image == null || image.getWidth() == 0) return;
+        float center = image.getWidth() / 2f;
+        float maxDistance = Math.max(1f, image.getWidth());
+        for (int index = 0; index < image.getChildCount(); index++) {
+            View child = image.getChildAt(index);
+            float childCenter = (child.getLeft() + child.getRight()) / 2f;
+            float distance = Math.min(1f, Math.abs(childCenter - center) / maxDistance);
+            float scale = 1f - distance * 0.08f;
+            child.setScaleX(scale);
+            child.setScaleY(scale);
+            child.setAlpha(1f - distance * 0.35f);
+        }
+    }
+
     private int dp(int value) {
         return Math.round(value * getResources().getDisplayMetrics().density);
     }
@@ -202,6 +224,8 @@ public class WorkshopDetailFragment extends Fragment {
             if (!urls.isEmpty()) {
                 image.scrollToPosition(0);
             }
+            image.scheduleLayoutAnimation();
+            updateImageTransforms();
             updateImagePage();
         }
 
@@ -246,6 +270,7 @@ public class WorkshopDetailFragment extends Fragment {
             row.findViewById(R.id.workshop_dependency_download).setOnClickListener(v -> enqueue(WorkshopCatalogRuntime.requiredPublishedFileId(dependency), dependency.getTitle()));
             container.addView(row);
         }
+        container.scheduleLayoutAnimation();
     }
 
     private void renderComments(List<WorkshopComment> comments) {
@@ -262,6 +287,7 @@ public class WorkshopDetailFragment extends Fragment {
             empty.setText(R.string.workshop_comments_unavailable);
             container.addView(empty);
         }
+        container.scheduleLayoutAnimation();
     }
 
     private void openSteamPage() {
