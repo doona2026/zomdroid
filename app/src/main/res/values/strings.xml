@@ -771,9 +771,12 @@
     <string name="workshop_library_choose_instance">Choose a Zomboid instance</string>
     <string name="workshop_library_overwrite_title">Replace existing mods?</string>
     <string name="workshop_library_overwrite_message">If a mod with the same folder name exists, it will be replaced atomically. Choose whether to retain a backup after installation.</string>
+    <string name="workshop_library_overwrite_message_named">Existing mod folder(s) detected: %1$s. They will be replaced atomically. Choose whether to retain a backup after installation.</string>
     <string name="workshop_library_install_without_backup">Replace</string>
     <string name="workshop_library_install_with_backup">Replace and keep backup</string>
     <string name="workshop_library_install_started">Installation started.</string>
+    <string name="workshop_library_install_success">Mod installation successful</string>
+    <string name="workshop_library_install_success_detail">Installed successfully to instance “%1$s”.</string>
     <string name="workshop_library_check_later">Checked recently; try again later.</string>
     <string name="workshop_library_update_available">A newer Workshop version is available. Download it manually from the Workshop page.</string>
     <string name="workshop_library_up_to_date">The library entry is up to date.</string>

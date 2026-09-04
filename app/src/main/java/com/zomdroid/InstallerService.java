@@ -545,7 +545,12 @@ public class InstallerService extends Service implements TaskProgressListener {
             try {
                 String modsRootPath = gameInstance.getHomePath() + "/Zomboid/mods";
                 File modsRootDir = new File(modsRootPath);
-                if (!modsRootDir.exists()) modsRootDir.mkdirs();
+                if (!modsRootDir.exists() && !modsRootDir.mkdirs()) {
+                    throw new IOException("Failed to create Mod directory: " + modsRootDir.getAbsolutePath());
+                }
+                if (!modsRootDir.isDirectory()) {
+                    throw new IOException("Mod install target is not a directory: " + modsRootDir.getAbsolutePath());
+                }
 
                 // Temp dir next to mods folder for faster atomic move
                 File tempDir = new File(gameInstance.getHomePath(), "tmp_mods_import_" + System.currentTimeMillis());
@@ -1443,11 +1448,13 @@ public class InstallerService extends Service implements TaskProgressListener {
                 Log.d("ModFix", "Found " + modRoots.size() + " mod root(s)");
 
                 String modsPath = gameInstance.getHomePath() + "/Zomboid/mods";
-                new File(modsPath).mkdirs();
-                String instanceNameLower = gameInstance.getName().toLowerCase();
-                String inceptionRelPath = "data/user/0/com.zomdroid/files/instances/"
-                        + instanceNameLower + "/zomboid/mods";
-                File inceptionDir = new File(modsPath, inceptionRelPath);
+                File modsDirectory = new File(modsPath);
+                if (!modsDirectory.exists() && !modsDirectory.mkdirs()) {
+                    throw new IOException("Failed to create Mod directory: " + modsDirectory.getAbsolutePath());
+                }
+                if (!modsDirectory.isDirectory()) {
+                    throw new IOException("Mod install target is not a directory: " + modsDirectory.getAbsolutePath());
+                }
 
                 for (File modRoot : modRoots) {
                     // Step 3: Determine mod name
@@ -1469,23 +1476,32 @@ public class InstallerService extends Service implements TaskProgressListener {
                     //}
 
                     // Step 6: Install normal-case copy
-                    File normalDest = new File(modsPath, modName);
+                    File normalDest = new File(modsDirectory, modName);
                     if (normalDest.exists()) FileUtils.deleteDirectory(normalDest);
                     copyDirectory(modRoot, normalDest);
                     Log.d("ModFix", "  Installed normal: " + normalDest.getAbsolutePath());
 
                     // Step 7: lowercase aliases inside the mod + the doubled-path link. Repeated at
                     // every launch, because the doubled path spells out where the mod lives today.
-                    com.zomdroid.patch.LowercasePathAliases.applyToMod(normalDest, new File(modsPath));
+                    com.zomdroid.patch.LowercasePathAliases.applyToMod(normalDest, modsDirectory);
                 }
 
-                finish(getString(R.string.mod_fix_installed), null);
+                finishWorkshopInstall(gameInstance.getName());
             } catch (Exception e) {
                 finishWithError(taskTitle, e.toString());
             } finally {
                 try { FileUtils.deleteDirectory(tmpDir); } catch (Exception ignored) {}
             }
         });
+    }
+
+    /** Reports success only after every mod root and its B42 compatibility aliases are complete. */
+    private void finishWorkshopInstall(String instanceName) {
+        String title = getString(R.string.workshop_library_install_success);
+        String message = getString(R.string.workshop_library_install_success_detail, instanceName);
+        finish(title, message);
+        handler.post(() -> android.widget.Toast.makeText(
+                getApplicationContext(), message, android.widget.Toast.LENGTH_LONG).show());
     }
 
     // -------------------- MOD FIX HELPERS --------------------

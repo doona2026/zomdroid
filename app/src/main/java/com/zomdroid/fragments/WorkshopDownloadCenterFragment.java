@@ -43,6 +43,8 @@ import java.util.Map;
 import java.util.Locale;
 import java.util.LinkedHashMap;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import kotlinx.coroutines.Job;
 
@@ -53,6 +55,7 @@ public class WorkshopDownloadCenterFragment extends Fragment {
     private ModLibraryRepository library;
     private Job observation;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final ExecutorService installPreflightExecutor = Executors.newSingleThreadExecutor();
     private List<DownloadCenterTask> latestTasks = java.util.Collections.emptyList();
     private final Map<String, View> taskViews = new LinkedHashMap<>();
     private TextView emptyView;
@@ -96,6 +99,12 @@ public class WorkshopDownloadCenterFragment extends Fragment {
         emptyView = null;
         tasksContainer = null;
         super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        installPreflightExecutor.shutdownNow();
+        super.onDestroy();
     }
 
     private void scheduleRender(List<DownloadCenterTask> tasks) {
@@ -247,32 +256,73 @@ public class WorkshopDownloadCenterFragment extends Fragment {
     }
 
     private void confirmInstall(DownloadCenterTask task, GameInstance instance) {
+        final ModLibraryEntry entry;
+        try {
+            entry = resolveLibraryEntry(task);
+        } catch (Throwable error) {
+            showInstallError(error);
+            return;
+        }
+
+        // ZIPs can be several gigabytes. Inspect only their central directory off the UI thread;
+        // this also makes the first-install path independent from the task title or ZIP filename.
+        installPreflightExecutor.execute(() -> {
+            try {
+                List<String> existing = WorkshopLibraryInstaller.findExistingModNames(entry, instance);
+                mainHandler.post(() -> {
+                    if (!isAdded()) return;
+                    if (existing.isEmpty()) {
+                        install(task, instance, entry, false);
+                    } else {
+                        showOverwriteDialog(task, instance, entry, existing);
+                    }
+                });
+            } catch (Throwable error) {
+                mainHandler.post(() -> {
+                    if (isAdded()) showInstallError(error);
+                });
+            }
+        });
+    }
+
+    private void showOverwriteDialog(DownloadCenterTask task, GameInstance instance,
+                                     ModLibraryEntry entry, List<String> existing) {
+        String names = android.text.TextUtils.join(", ", existing);
         new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.workshop_library_overwrite_title)
-                .setMessage(R.string.workshop_library_overwrite_message)
+                .setMessage(getString(R.string.workshop_library_overwrite_message_named, names))
                 .setNegativeButton(R.string.workshop_library_install_without_backup,
-                        (dialog, which) -> install(task, instance, false))
+                        (dialog, which) -> install(task, instance, entry, false))
                 .setPositiveButton(R.string.workshop_library_install_with_backup,
-                        (dialog, which) -> install(task, instance, true))
+                        (dialog, which) -> install(task, instance, entry, true))
                 .setNeutralButton(android.R.string.cancel, null)
                 .show();
     }
 
-    private void install(DownloadCenterTask task, GameInstance instance, boolean keepBackup) {
+    private ModLibraryEntry resolveLibraryEntry(DownloadCenterTask task) {
+        if (task.getOutputPath() == null) throw new IllegalStateException("Completed archive path is missing");
+        return library.entriesFor(task.getAppId(), task.getPublishedFileId()).stream()
+                .filter(candidate -> task.getOutputPath().equals(candidate.getCompletedPath()))
+                .findFirst().orElseGet(() -> library.recordCompleted(
+                        task.getAppId(), task.getPublishedFileId(), task.getTitle() == null ? "" : task.getTitle(), "", "", null,
+                        new File(task.getOutputPath()), java.util.Collections.emptyList(), "steam"));
+    }
+
+    private void install(DownloadCenterTask task, GameInstance instance, ModLibraryEntry entry,
+                         boolean keepBackup) {
         try {
-            if (task.getOutputPath() == null) throw new IllegalStateException("Completed archive path is missing");
-            ModLibraryEntry entry = library.entriesFor(task.getAppId(), task.getPublishedFileId()).stream()
-                    .filter(candidate -> task.getOutputPath() != null && task.getOutputPath().equals(candidate.getCompletedPath()))
-                    .findFirst().orElseGet(() -> library.recordCompleted(
-                            task.getAppId(), task.getPublishedFileId(), task.getTitle() == null ? "" : task.getTitle(), "", "", null,
-                            new File(task.getOutputPath()), java.util.Collections.emptyList(), "steam"));
             requireContext().startForegroundService(WorkshopLibraryInstaller.buildIntent(
                     requireContext(), entry, instance, keepBackup));
         } catch (Throwable error) {
-            Toast.makeText(requireContext(),
-                    getString(R.string.workshop_download_center_install_error, error.getMessage()),
-                    Toast.LENGTH_LONG).show();
+            showInstallError(error);
         }
+    }
+
+    private void showInstallError(Throwable error) {
+        if (!isAdded()) return;
+        Toast.makeText(requireContext(),
+                getString(R.string.workshop_download_center_install_error, error.getMessage()),
+                Toast.LENGTH_LONG).show();
     }
 
     private void showFallbackNotice(DownloadCenterTask task) {

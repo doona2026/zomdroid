@@ -649,9 +649,12 @@
     <string name="workshop_library_choose_instance">选择 Zomboid 实例</string>
     <string name="workshop_library_overwrite_title">替换现有 Mod？</string>
     <string name="workshop_library_overwrite_message">如果存在同名文件夹，将以原子方式替换。请选择是否保留安装前的备份。</string>
+    <string name="workshop_library_overwrite_message_named">检测到目标实例中已有同名 Mod 文件夹：%1$s。安装时会原子替换，请选择是否保留安装前的备份。</string>
     <string name="workshop_library_install_without_backup">替换</string>
     <string name="workshop_library_install_with_backup">替换并保留备份</string>
     <string name="workshop_library_install_started">已开始安装。</string>
+    <string name="workshop_library_install_success">Mod 安装成功</string>
+    <string name="workshop_library_install_success_detail">已成功安装到实例“%1$s”。</string>
     <string name="workshop_library_check_later">最近已检查过，请稍后再试。</string>
     <string name="workshop_library_update_available">有更新版本的创意工坊内容，请从创意工坊页面手动下载。</string>
     <string name="workshop_library_up_to_date">Mod 库条目已是最新版本。</string>

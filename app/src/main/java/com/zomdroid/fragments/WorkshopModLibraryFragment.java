@@ -3,6 +3,8 @@ package com.zomdroid.fragments;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,10 +32,14 @@ import com.zomdroid.workshop.WorkshopFileAccess;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class WorkshopModLibraryFragment extends Fragment {
     private LinearLayout list;
     private ModLibraryRepository repository;
+    private final ExecutorService installPreflightExecutor = Executors.newSingleThreadExecutor();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Nullable
     @Override
@@ -44,6 +50,12 @@ public class WorkshopModLibraryFragment extends Fragment {
         view.findViewById(R.id.workshop_library_cleanup).setOnClickListener(v -> confirmCleanup());
         render();
         return view;
+    }
+
+    @Override
+    public void onDestroy() {
+        installPreflightExecutor.shutdownNow();
+        super.onDestroy();
     }
 
     private void render() {
@@ -103,9 +115,27 @@ public class WorkshopModLibraryFragment extends Fragment {
     }
 
     private void confirmInstall(ModLibraryEntry entry, GameInstance instance) {
+        installPreflightExecutor.execute(() -> {
+            try {
+                List<String> existing = WorkshopLibraryInstaller.findExistingModNames(entry, instance);
+                mainHandler.post(() -> {
+                    if (!isAdded()) return;
+                    if (existing.isEmpty()) install(entry, instance, false);
+                    else showOverwriteDialog(entry, instance, existing);
+                });
+            } catch (Throwable error) {
+                mainHandler.post(() -> {
+                    if (isAdded()) showInstallError(error);
+                });
+            }
+        });
+    }
+
+    private void showOverwriteDialog(ModLibraryEntry entry, GameInstance instance, List<String> existing) {
+        String names = android.text.TextUtils.join(", ", existing);
         new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.workshop_library_overwrite_title)
-                .setMessage(R.string.workshop_library_overwrite_message)
+                .setMessage(getString(R.string.workshop_library_overwrite_message_named, names))
                 .setNegativeButton(R.string.workshop_library_install_without_backup,
                         (dialog, which) -> install(entry, instance, false))
                 .setPositiveButton(R.string.workshop_library_install_with_backup,
@@ -123,6 +153,10 @@ public class WorkshopModLibraryFragment extends Fragment {
         } catch (Throwable error) {
             Toast.makeText(requireContext(), getString(R.string.workshop_download_center_install_error, error.getMessage()), Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void showInstallError(Throwable error) {
+        Toast.makeText(requireContext(), getString(R.string.workshop_download_center_install_error, error.getMessage()), Toast.LENGTH_LONG).show();
     }
 
     private void checkUpdate(ModLibraryEntry entry) {
