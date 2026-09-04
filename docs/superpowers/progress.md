@@ -48,6 +48,13 @@
 - Validation: Stage 6 focused suites passed (16 tests, 0 failures), including library round-trip/legacy migration/version/deletion cases, download-center regression, and fallback URL/MockWebServer response validation; Kotlin/Java compilation and `assembleDebug` pass. APK: `app/build/outputs/apk/debug/zomdroid-debug-1.4.8.apk` (168,633,422 bytes). API 30/35 and real-device end-to-end validation remain in Stage 7.
 - Follow-up fix: Successful download-center and legacy anonymous Workshop downloads now remove their private staging tree after the final archive is published; startup also removes staging for tasks already recorded as successful. Failed/paused downloads retain staging for recovery. Archive names now use a sanitized Workshop title plus Workshop ID and timestamp, with metadata-title fallback for the legacy ID-only entry point.
 
+## Steam Account Entry Unification
+
+- Implemented at: 2026-09-04
+- Scope: The Steam game download page now contains only the Project Zomboid depot downloader. Its former credential form and duplicate Workshop-ID tab were removed; Workshop tasks remain in the persistent Workshop download center.
+- Shared session: The Steam game page and Workshop page open the same `WorkshopAccountFragment`, read the same encrypted multi-account store and active account, and pass the selected refresh-token session to the game downloader only in memory. Missing or expired accounts are rejected before a game download starts.
+- Validation: Java/Kotlin compilation, JVM unit tests and `assembleDebug` pass. APK: `app/build/outputs/apk/debug/zomdroid-debug-1.4.8.apk`. MuMu ADB device `b488527b` is currently unauthorized, so installation and UI smoke testing are pending device authorization.
+
 ## Runtime Game Menu
 
 - Implemented at: 2026-09-04

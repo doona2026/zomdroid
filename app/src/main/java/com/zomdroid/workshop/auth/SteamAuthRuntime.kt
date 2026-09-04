@@ -3,6 +3,7 @@ package com.zomdroid.workshop.auth
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import com.zomdroid.workshop.steam.protocol.SteamAccountSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,6 +28,13 @@ object SteamAuthRuntime {
 
     @JvmStatic
     fun currentAccountId(context: Context): String? = repository(context).activeAccountId()
+
+    /** Returns the selected account's in-memory session for Java Steam clients. */
+    @JvmStatic
+    fun currentAccountSession(context: Context): SteamAccountSession? {
+        val repo = repository(context)
+        return repo.accountSessionFor(repo.activeAccountId())
+    }
 
     @JvmStatic
     fun loadSnapshot(context: Context, callback: Callback) {

@@ -34,6 +34,7 @@ import in.dragonbra.javasteam.types.ChunkData;
 import in.dragonbra.javasteam.types.DepotManifest;
 import in.dragonbra.javasteam.types.FileData;
 import in.dragonbra.javasteam.types.KeyValue;
+import com.zomdroid.workshop.steam.protocol.SteamAccountSession;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -81,6 +82,7 @@ public class SteamGameDownloader implements Runnable, Cancellable {
     }
 
     private final String username, password;
+    private final SteamAccountSession accountSession;
     private final long manifestId;       // 0 = latest build on the branch; >0 = pin this build
     private final String branch;         // Steam branch: "public" = Build 41, "unstable" = Build 42
     private final String buildLabel;     // "41" or "42" — for the output folder name only
@@ -105,6 +107,20 @@ public class SteamGameDownloader implements Runnable, Cancellable {
                               String branch, String buildLabel, Listener listener) {
         this.username = username;
         this.password = password;
+        this.accountSession = null;
+        this.manifestId = manifestId;
+        this.branch = (branch != null && !branch.isEmpty()) ? branch : "public";
+        this.buildLabel = (buildLabel != null && !buildLabel.isEmpty()) ? buildLabel : "41";
+        this.listener = listener;
+    }
+
+    /** Uses the selected shared Steam session; the refresh token remains in memory. */
+    public SteamGameDownloader(SteamAccountSession accountSession, long manifestId,
+                              String branch, String buildLabel, Listener listener) {
+        if (accountSession == null) throw new IllegalArgumentException("accountSession is required");
+        this.username = null;
+        this.password = null;
+        this.accountSession = accountSession;
         this.manifestId = manifestId;
         this.branch = (branch != null && !branch.isEmpty()) ? branch : "public";
         this.buildLabel = (buildLabel != null && !buildLabel.isEmpty()) ? buildLabel : "41";
@@ -163,6 +179,12 @@ public class SteamGameDownloader implements Runnable, Cancellable {
 
     private void onConnected(ConnectedCallback cb) {
         try {
+            if (accountSession != null) {
+                accountName = accountSession.getAccountName();
+                refreshToken = accountSession.getRefreshToken();
+                logOnWithToken();
+                return;
+            }
             if (refreshToken != null) { logOnWithToken(); return; }
             progress("Connected. Authenticating '" + username + "'...");
             AuthSessionDetails details = new AuthSessionDetails();

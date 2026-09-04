@@ -30,6 +30,25 @@ class SteamAuthRepositoryTest {
     }
 
     @Test
+    fun projectsSelectedSessionForGameDownloadAndRejectsReauthentication() {
+        val preferences = fakePreferences()
+        preferences.edit().putString(
+            "accounts_json",
+            """{"accounts":[
+                {"accountId":"a","accountName":"Alice","steamId":1,"refreshToken":"refresh-a"},
+                {"accountId":"b","accountName":"Bob","steamId":2,"refreshToken":"refresh-b","requiresReauthentication":true}
+            ],"activeAccountId":"a"}""".replace("\n", ""),
+        ).apply()
+        val repository = SteamAuthRepository(TestContext(preferences))
+
+        val selected = repository.accountSessionFor(repository.activeAccountId())
+
+        assertThat(selected?.accountName).isEqualTo("Alice")
+        assertThat(selected?.refreshToken).isEqualTo("refresh-a")
+        assertThat(repository.accountSessionFor("b")).isNull()
+    }
+
+    @Test
     fun removesAccountWithoutTouchingOtherAccounts() {
         val preferences = fakePreferences()
         preferences.edit().putString(

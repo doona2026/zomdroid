@@ -28,9 +28,12 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.zomdroid.R;
 import com.zomdroid.steam.SteamDownloadState;
 import com.zomdroid.steam.SteamGameDownloader;
-import com.zomdroid.steam.SteamModDownloader;
+import com.zomdroid.workshop.auth.SteamAccountSummary;
+import com.zomdroid.workshop.auth.SteamAccountsSnapshot;
+import com.zomdroid.workshop.auth.SteamAuthRuntime;
+import com.zomdroid.workshop.steam.protocol.SteamAccountSession;
+import androidx.navigation.fragment.NavHostFragment;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,11 +44,10 @@ import java.util.regex.Pattern;
  */
 public class SteamDownloadFragment extends Fragment implements SteamDownloadState.View {
 
-    private EditText etUser, etPass, etManifest, etModsIds;
-    private Button btnStart, btnModsStart, btnCancel;
+    private EditText etManifest;
+    private Button btnStart, btnCancel, btnManageAccount;
     private ProgressBar progress;
-    private TextView tvStatus;
-    private android.view.View blockLogin, sectionGame, sectionMods;
+    private TextView tvStatus, tvAccountStatus;
     private MaterialButtonToggleGroup buildToggle;
     private Context appCtx;
 
@@ -58,33 +60,19 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
         appCtx = requireContext().getApplicationContext();
-        etUser = v.findViewById(R.id.et_dl_user);
-        etPass = v.findViewById(R.id.et_dl_pass);
         etManifest = v.findViewById(R.id.et_dl_manifest);
-        etModsIds = v.findViewById(R.id.et_mods_ids);
         btnStart = v.findViewById(R.id.btn_dl_start);
-        btnModsStart = v.findViewById(R.id.btn_mods_start);
         btnCancel = v.findViewById(R.id.btn_dl_cancel);
+        btnManageAccount = v.findViewById(R.id.btn_manage_account);
         progress = v.findViewById(R.id.progress_dl);
         tvStatus = v.findViewById(R.id.tv_dl_status);
-        blockLogin = v.findViewById(R.id.block_login);
-        sectionGame = v.findViewById(R.id.section_game);
-        sectionMods = v.findViewById(R.id.section_mods);
+        tvAccountStatus = v.findViewById(R.id.tv_account_status);
 
         tvStatus.setMovementMethod(new ScrollingMovementMethod());
         btnStart.setOnClickListener(view -> startGame());
-        btnModsStart.setOnClickListener(view -> startMods());
         btnCancel.setOnClickListener(view -> confirmCancel());
-
-        MaterialButtonToggleGroup toggle = v.findViewById(R.id.toggle_dl_type);
-        toggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            if (!isChecked) return;
-            boolean game = checkedId == R.id.btn_type_game;
-            sectionGame.setVisibility(game ? View.VISIBLE : View.GONE);
-            sectionMods.setVisibility(game ? View.GONE : View.VISIBLE);
-            blockLogin.setVisibility(game ? View.VISIBLE : View.GONE);
-        });
-        toggle.check(R.id.btn_type_game);
+        btnManageAccount.setOnClickListener(view -> openAccountManagement());
+        refreshAccountStatus();
 
         buildToggle = v.findViewById(R.id.toggle_dl_build);
         buildToggle.check(R.id.btn_build_41);   // legacy41 is the default selection
@@ -131,6 +119,12 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
         super.onDestroyView();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (tvAccountStatus != null) refreshAccountStatus();
+    }
+
     // SteamDB's depot "Manifests" tab offers two copy formats per row; only "DepotDownloader"
     // carries the branch, e.g.:
     //   -app 108600 -depot 108603 -manifest 769556489232787342 -beta legacy41
@@ -159,8 +153,13 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
     // ---- start ----
     private void startGame() {
         if (SteamDownloadState.get().isDownloading()) return;
-        if (text(etUser).isEmpty()) { etUser.setError(getString(R.string.steam_dl_required)); return; }
-        if (etPass.getText().toString().isEmpty()) { etPass.setError(getString(R.string.steam_dl_required)); return; }
+        SteamAccountSession accountSession = SteamAuthRuntime.currentAccountSession(appCtx);
+        if (accountSession == null) {
+            refreshAccountStatus();
+            Toast.makeText(requireContext(), R.string.steam_dl_account_required, Toast.LENGTH_SHORT).show();
+            openAccountManagement();
+            return;
+        }
         if (!ensureAllFilesAccess()) return;
 
         String manifestText = text(etManifest);
@@ -190,8 +189,7 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
         }
 
         SteamDownloadState st = SteamDownloadState.get();
-        SteamGameDownloader dl = new SteamGameDownloader(text(etUser), etPass.getText().toString(),
-                manifestId, branch, buildLabel, st);
+        SteamGameDownloader dl = new SteamGameDownloader(accountSession, manifestId, branch, buildLabel, st);
         Thread th = new Thread(dl, "zd-download");
         st.begin(appCtx);
         st.setActive(dl, th);
@@ -199,22 +197,29 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
         th.start();
     }
 
-    private void startMods() {
-        if (SteamDownloadState.get().isDownloading()) return;
-        List<Long> ids = SteamModDownloader.parseWorkshopIds(text(etModsIds));
-        if (ids.isEmpty()) {
-            Toast.makeText(requireContext(), R.string.steam_dl_mods_empty, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (!ensureAllFilesAccess()) return;
+    private void refreshAccountStatus() {
+        SteamAuthRuntime.loadSnapshot(appCtx, new SteamAuthRuntime.Callback() {
+            @Override
+            public void onResult(SteamAuthRuntime.Result result) {
+                if (tvAccountStatus == null || !"snapshot".equals(result.getKind())) return;
+                SteamAccountsSnapshot snapshot = result.getSnapshot();
+                SteamAccountSummary account = snapshot.getActiveAccount();
+                if (account == null) {
+                    tvAccountStatus.setText(R.string.steam_dl_account_anonymous);
+                } else if (account.getRequiresReauthentication()) {
+                    tvAccountStatus.setText(getString(R.string.steam_dl_account_reauth,
+                            account.getAccountName()));
+                } else {
+                    tvAccountStatus.setText(getString(R.string.steam_dl_account_ready,
+                            account.getAccountName()));
+                }
+            }
+        });
+    }
 
-        SteamDownloadState st = SteamDownloadState.get();
-        SteamModDownloader dl = new SteamModDownloader(appCtx, ids, st);
-        Thread th = new Thread(dl, "zd-anon-mod");
-        st.begin(appCtx);
-        st.setActive(dl, th);
-        beginUi();
-        th.start();
+    private void openAccountManagement() {
+        if (!isAdded()) return;
+        NavHostFragment.findNavController(this).navigate(R.id.workshop_account_fragment);
     }
 
     private void beginUi() {
@@ -235,11 +240,8 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
     }
 
     private void setControlsEnabled(boolean enabled) {
-        if (etUser != null) etUser.setEnabled(enabled);
-        if (etPass != null) etPass.setEnabled(enabled);
         if (etManifest != null) etManifest.setEnabled(enabled);
         if (btnStart != null) btnStart.setEnabled(enabled);
-        if (btnModsStart != null) btnModsStart.setEnabled(enabled);
     }
 
     // ---- All-files access (writes into the public Downloads/zomdroid folder) ----

@@ -676,10 +676,17 @@
     <string name="control_element_opacity_all">全部</string>
 
     <!-- Steam downloader -->
-    <string name="steam_dl_menu">从 Steam 下载</string>
+    <string name="steam_dl_menu">Steam 游戏下载</string>
     <string name="steam_dl_tab_game">游戏</string>
     <string name="steam_dl_tab_mods">模组</string>
     <string name="steam_dl_login_group">Steam 登录</string>
+    <string name="steam_dl_account_group">Steam 账号</string>
+    <string name="steam_dl_account_status_loading">正在检查统一 Steam 账号状态…</string>
+    <string name="steam_dl_account_anonymous">尚未选择 Steam 账号。管理账号后，Steam 下载和创意工坊可以共用一次登录。</string>
+    <string name="steam_dl_account_ready">当前使用统一 Steam 账号：%1$s</string>
+    <string name="steam_dl_account_reauth">Steam 账号 %1$s 需要重新登录。</string>
+    <string name="steam_dl_manage_account">管理 Steam 账号</string>
+    <string name="steam_dl_account_required">下载游戏前请先选择 Steam 账号。</string>
     <string name="steam_dl_login_note">你的登录信息会发送给 Steam（与 DepotDownloader 相同方式），不会被保存——不存储任何数据或密码。请在 Steam 手机版中确认登录，或在提示时输入 Steam 令牌（Steam Guard）验证码。</string>
     <string name="steam_dl_slow_warning">⚠️ 下载可能很慢。</string>
     <string name="steam_dl_build_42">Build 42</string>

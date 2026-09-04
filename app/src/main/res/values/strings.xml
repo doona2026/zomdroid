@@ -89,10 +89,17 @@
     <string name="control_element_custom_icon_failed">Could not load image</string>
 
     <!-- Steam downloader -->
-    <string name="steam_dl_menu">Download from Steam</string>
+    <string name="steam_dl_menu">Steam game download</string>
     <string name="steam_dl_tab_game">Game</string>
     <string name="steam_dl_tab_mods">Mods</string>
     <string name="steam_dl_login_group">Steam login</string>
+    <string name="steam_dl_account_group">Steam account</string>
+    <string name="steam_dl_account_status_loading">Checking shared Steam account…</string>
+    <string name="steam_dl_account_anonymous">No Steam account selected. Manage accounts to sign in once for both Steam downloads and Workshop.</string>
+    <string name="steam_dl_account_ready">Using shared Steam account: %1$s</string>
+    <string name="steam_dl_account_reauth">Steam account %1$s needs reauthentication.</string>
+    <string name="steam_dl_manage_account">Manage Steam accounts</string>
+    <string name="steam_dl_account_required">Select a Steam account before downloading the game.</string>
     <string name="steam_dl_login_note">Your login is sent to Steam (the same way DepotDownloader works) and is NOT stored — no data or password is saved. Approve the sign-in in your Steam Mobile app, or enter the Steam Guard code when asked.</string>
     <string name="steam_dl_slow_warning">⚠️ Downloading can be slow.</string>
     <string name="steam_dl_build_42">Build 42</string>
