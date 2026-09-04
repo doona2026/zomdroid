@@ -340,6 +340,8 @@ public class GameLauncher {
 
     public static native int initZomdroidWindow();
     public static native void destroyZomdroidWindow();
+    public static native boolean requestGameExit();
+    public static native boolean isGameRunning();
     public static native int setSurface(Surface surface, int width, int height);
     public static native void destroySurface();
     static native void startGame(String gameDirPath, String libraryDirPath, String[] jvmArgs, String mainClassName, String[] args);

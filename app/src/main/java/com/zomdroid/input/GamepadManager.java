@@ -103,6 +103,10 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         return touchOverride;
     }
 
+    public boolean hasConnectedGamepad() {
+        return !connectedGamepadIds.isEmpty();
+    }
+
     /**
      * Whether triggers must be reported the way real hardware does: -1 released, +1 fully pressed.
      * Set from the game instance; see the note at the call site in GameActivity.

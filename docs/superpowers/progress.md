@@ -48,6 +48,22 @@
 - Validation: Stage 6 focused suites passed (16 tests, 0 failures), including library round-trip/legacy migration/version/deletion cases, download-center regression, and fallback URL/MockWebServer response validation; Kotlin/Java compilation and `assembleDebug` pass. APK: `app/build/outputs/apk/debug/zomdroid-debug-1.4.8.apk` (168,633,422 bytes). API 30/35 and real-device end-to-end validation remain in Stage 7.
 - Follow-up fix: Successful download-center and legacy anonymous Workshop downloads now remove their private staging tree after the final archive is published; startup also removes staging for tasks already recorded as successful. Failed/paused downloads retain staging for recovery. Archive names now use a sanitized Workshop title plus Workshop ID and timestamp, with metadata-title fallback for the legacy ID-only entry point.
 
+## Runtime Game Menu
+
+- Implemented at: 2026-09-04
+- Current scope: Prevent an accidental Android Back press from leaving the running game; expose a
+  runtime drawer with virtual-control editing, touch-control override, vibration, Build 42 F10 quick
+  save, a keep-running return to launcher action, and a confirmed real-exit action.
+- Lifecycle: GameActivity now stays above LauncherActivity. The keep-running action reorders the
+  existing launcher Activity to the front while retaining GameActivity underneath; selecting the same
+  instance or pressing Back can resume it. The real-exit action requests Project Zomboid's
+  `GameWindow.closeRequested` shutdown flag through the embedded-JVM bridge, waits for the game JVM to
+  stop, and then finishes back to the launcher. The embedded JVM is destroyed only after an explicit
+  requested shutdown so the next game launch can create a fresh VM.
+- Validation: Java/Kotlin compilation, ARM64 external-native build, JVM unit tests, debug APK assembly,
+  ADB installation and launcher startup pass. A full in-game drawer/exit/relaunch smoke test remains
+  pending until a playable instance is present on the connected device.
+
 ## Stage 7 Full Validation
 
 - Pending: Tasks 18–19 (full regression and real-device validation).

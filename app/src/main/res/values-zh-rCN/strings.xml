@@ -722,4 +722,25 @@
     <string name="settings_features_title">功能</string>
     <string name="settings_backup_switch">快速存档（F10，Build 42）</string>
     <string name="game_instance_restore_backup">恢复快速存档备份…</string>
+    <!-- 游戏内抽屉菜单 -->
+    <string name="game_menu_title">游戏菜单</string>
+    <string name="game_menu_instance_format">当前实例：%1$s</string>
+    <string name="game_menu_edit_controls">编辑虚拟按键</string>
+    <string name="game_menu_touch_controls">启用屏幕触摸控制</string>
+    <string name="game_menu_vibrate">按下按钮时振动</string>
+    <string name="game_menu_quick_save">快速存档（F10）</string>
+    <string name="game_menu_quick_save_build42_only">仅支持 Build 42</string>
+    <string name="game_menu_quick_save_enabled">Build 42 · 点击存档</string>
+    <string name="game_menu_quick_save_disabled">Build 42 · 请先在设置中启用</string>
+    <string name="game_menu_quick_save_started">快速存档已开始。</string>
+    <string name="game_menu_quick_save_not_available">快速存档仅支持 Build 42。</string>
+    <string name="game_menu_return_launcher">返回启动器（游戏继续运行）</string>
+    <string name="game_menu_exit">退出游戏</string>
+    <string name="game_menu_exit_title">退出游戏？</string>
+    <string name="game_menu_exit_message">游戏将关闭并返回启动器，请确认当前进度已经保存。</string>
+    <string name="game_menu_exit_confirm">退出到启动器</string>
+    <string name="game_menu_exit_failed">游戏尚未准备好退出，请稍后重试。</string>
+    <string name="game_active_instance_message">已有游戏正在运行，请先返回当前游戏。</string>
+    <string name="game_menu_return_to_game">继续游戏</string>
+    <string name="game_menu_controls_editor_failed">无法打开虚拟按键编辑器。</string>
 </resources>

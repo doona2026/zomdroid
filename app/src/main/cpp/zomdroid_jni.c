@@ -71,6 +71,16 @@ Java_com_zomdroid_GameLauncher_destroyZomdroidWindow(JNIEnv *env, jobject clazz)
     zomdroid_deinit();
 }
 
+JNIEXPORT jboolean JNICALL
+Java_com_zomdroid_GameLauncher_requestGameExit(JNIEnv *env, jobject clazz) {
+    return zomdroid_request_game_exit() ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_zomdroid_GameLauncher_isGameRunning(JNIEnv *env, jobject clazz) {
+    return zomdroid_is_game_running() ? JNI_TRUE : JNI_FALSE;
+}
+
 JNIEXPORT jint JNICALL
 Java_com_zomdroid_GameLauncher_initZomdroidWindow(JNIEnv *env, jobject clazz) {
     return zomdroid_init();

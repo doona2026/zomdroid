@@ -9,6 +9,8 @@ void zomdroid_start_game(const char* game_dir_path, const char* library_dir_path
                          const char** jvm_argv, const char* main_class_name, int argc, const char** argv);
 
 void zomdroid_deinit();
+bool zomdroid_request_game_exit();
+int zomdroid_is_game_running();
 int zomdroid_init();
 
 void zomdroid_surface_deinit();

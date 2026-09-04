@@ -39,6 +39,9 @@ Renderer g_zomdroid_renderer;
 
 ZomdroidEventQueue g_zomdroid_event_queue;
 
+static atomic_bool g_zomdroid_game_running = false;
+static atomic_bool g_zomdroid_exit_requested = false;
+
 static long get_mem_available_mb() {
     FILE* f = fopen("/proc/meminfo", "r");
     if (!f) return -1;
@@ -212,6 +215,8 @@ static void create_jvm_and_launch_main(int jvm_argc, const char** jvm_argv, cons
 //    }
 
     g_zomdroid_jvm = jvm;
+    atomic_store_explicit(&g_zomdroid_exit_requested, false, memory_order_release);
+    atomic_store_explicit(&g_zomdroid_game_running, true, memory_order_release);
 
     jclass main_class = (*env)->FindClass(env, main_class_name);
     if (main_class == NULL) {
@@ -254,8 +259,148 @@ static void create_jvm_and_launch_main(int jvm_argc, const char** jvm_argv, cons
         abort();
     }
 
-    LOGW("JNI: leaving create_jvm_and_launch_main() WITHOUT DestroyJavaVM");
+    bool exit_requested = atomic_load_explicit(&g_zomdroid_exit_requested, memory_order_acquire);
+    if (exit_requested && g_zomdroid_jvm == jvm) {
+        // GameWindow.closeRequested lets Project Zomboid run its own shutdown path. Once its
+        // main() has returned, destroy the embedded VM so the launcher can start another game
+        // instance in the same Android process later.
+        LOGI("JNI: destroying embedded JVM after requested game exit");
+        jint destroy_res = (*jvm)->DestroyJavaVM(jvm);
+        LOGI("JNI: DestroyJavaVM returned %d", destroy_res);
+    } else {
+        LOGW("JNI: leaving create_jvm_and_launch_main() WITHOUT DestroyJavaVM");
+    }
 
+    g_zomdroid_jvm = NULL;
+    atomic_store_explicit(&g_zomdroid_game_running, false, memory_order_release);
+
+}
+
+static jclass find_game_class(JNIEnv* env, const char* slash_name, const char* dotted_name) {
+    jclass clazz = (*env)->FindClass(env, slash_name);
+    if (clazz != NULL) return clazz;
+    if ((*env)->ExceptionCheck(env)) (*env)->ExceptionClear(env);
+
+    if (g_zomdroid_main_class_loader == NULL) return NULL;
+
+    jclass loader_class = (*env)->FindClass(env, "java/lang/ClassLoader");
+    if (loader_class == NULL) {
+        if ((*env)->ExceptionCheck(env)) (*env)->ExceptionClear(env);
+        return NULL;
+    }
+    jmethodID load_class = (*env)->GetMethodID(env, loader_class, "loadClass",
+                                                "(Ljava/lang/String;)Ljava/lang/Class;");
+    if (load_class == NULL) {
+        if ((*env)->ExceptionCheck(env)) (*env)->ExceptionClear(env);
+        return NULL;
+    }
+    jstring name = (*env)->NewStringUTF(env, dotted_name);
+    clazz = (jclass)(*env)->CallObjectMethod(env, g_zomdroid_main_class_loader, load_class, name);
+    (*env)->DeleteLocalRef(env, name);
+    if ((*env)->ExceptionCheck(env)) {
+        (*env)->ExceptionClear(env);
+        return NULL;
+    }
+    return clazz;
+}
+
+static bool set_game_window_close_requested(JNIEnv* env) {
+    jclass game_window = find_game_class(env, "zombie/GameWindow", "zombie.GameWindow");
+    jfieldID close_requested = game_window == NULL
+            ? NULL
+            : (*env)->GetStaticFieldID(env, game_window, "closeRequested", "Z");
+    if (close_requested == NULL || (*env)->ExceptionCheck(env)) {
+        LOGE("Cannot request game exit: zombie.GameWindow.closeRequested is unavailable");
+        if ((*env)->ExceptionCheck(env)) (*env)->ExceptionClear(env);
+        if (game_window != NULL) (*env)->DeleteLocalRef(env, game_window);
+        return false;
+    }
+
+    (*env)->SetStaticBooleanField(env, game_window, close_requested, JNI_TRUE);
+    if ((*env)->ExceptionCheck(env)) {
+        LOGE("Cannot request game exit: setting GameWindow.closeRequested failed");
+        (*env)->ExceptionClear(env);
+        (*env)->DeleteLocalRef(env, game_window);
+        return false;
+    }
+
+    (*env)->DeleteLocalRef(env, game_window);
+    LOGI("Requested Project Zomboid shutdown through GameWindow.closeRequested");
+    return true;
+}
+
+typedef struct {
+    pthread_mutex_t mutex;
+    pthread_cond_t condition;
+    bool finished;
+    bool success;
+    JavaVM* jvm;
+} GameExitRequest;
+
+static void* request_game_exit_thread(void* opaque) {
+    GameExitRequest* request = (GameExitRequest*)opaque;
+    JNIEnv* env = NULL;
+    bool success = false;
+    jint attach_res = (*request->jvm)->AttachCurrentThread(request->jvm, (void**)&env, NULL);
+    if (attach_res != JNI_OK || env == NULL) {
+        LOGE("Cannot request game exit: AttachCurrentThread returned %d", attach_res);
+    } else {
+        success = set_game_window_close_requested(env);
+        (*request->jvm)->DetachCurrentThread(request->jvm);
+    }
+
+    pthread_mutex_lock(&request->mutex);
+    request->success = success;
+    request->finished = true;
+    pthread_cond_signal(&request->condition);
+    pthread_mutex_unlock(&request->mutex);
+    return NULL;
+}
+
+bool zomdroid_request_game_exit() {
+    if (!atomic_load_explicit(&g_zomdroid_game_running, memory_order_acquire)) return false;
+
+    bool already_requested = atomic_exchange_explicit(&g_zomdroid_exit_requested, true,
+                                                       memory_order_acq_rel);
+    if (already_requested) return true;
+
+    JavaVM* jvm = g_zomdroid_jvm;
+    if (jvm == NULL) {
+        LOGW("Cannot request game exit: embedded JVM is unavailable");
+        atomic_store_explicit(&g_zomdroid_exit_requested, false, memory_order_release);
+        return false;
+    }
+
+    GameExitRequest request = {
+            .mutex = PTHREAD_MUTEX_INITIALIZER,
+            .condition = PTHREAD_COND_INITIALIZER,
+            .finished = false,
+            .success = false,
+            .jvm = jvm,
+    };
+    pthread_t exit_thread;
+    if (pthread_create(&exit_thread, NULL, request_game_exit_thread, &request) != 0) {
+        LOGE("Cannot request game exit: failed to create JNI helper thread");
+        atomic_store_explicit(&g_zomdroid_exit_requested, false, memory_order_release);
+        return false;
+    }
+    pthread_detach(exit_thread);
+
+    pthread_mutex_lock(&request.mutex);
+    while (!request.finished) {
+        pthread_cond_wait(&request.condition, &request.mutex);
+    }
+    bool success = request.success;
+    pthread_mutex_unlock(&request.mutex);
+    pthread_cond_destroy(&request.condition);
+    pthread_mutex_destroy(&request.mutex);
+
+    if (!success) atomic_store_explicit(&g_zomdroid_exit_requested, false, memory_order_release);
+    return success;
+}
+
+int zomdroid_is_game_running() {
+    return atomic_load_explicit(&g_zomdroid_game_running, memory_order_acquire) ? 1 : 0;
 }
 
 static int init_zomdroid_namespace(const char* ld_library_path) {

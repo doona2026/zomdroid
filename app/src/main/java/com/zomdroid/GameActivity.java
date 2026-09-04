@@ -1,6 +1,7 @@
 package com.zomdroid;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
@@ -21,7 +22,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 import android.content.Context;
 import androidx.annotation.NonNull;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.zomdroid.input.GLFWBinding;
 import com.zomdroid.input.GamepadManager;
@@ -31,12 +35,15 @@ import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
 import com.zomdroid.input.InputControlsView;
 import com.zomdroid.input.KeyboardManager;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import android.Manifest;
 
 import org.fmod.FMOD;
+
+import java.io.File;
 
 /**
  * Main game activity. Handles UI, surface, and input.
@@ -50,6 +57,8 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     private ActivityGameBinding binding;
     private Surface gameSurface;
     private static boolean isGameStarted = false;
+    private static final int REQUEST_CONTROLS_EDITOR = 4101;
+    private static volatile String activeGameInstanceName;
 
     // Handles all gamepad connection/disconnection and input events
     private GamepadManager gamepadManager;
@@ -63,6 +72,9 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     private boolean rightMouseDown = false;
 
     private boolean systemKeyboardVisible = false;
+    private String gameInstanceName;
+    private GameInstance gameInstance;
+    private boolean exitInProgress = false;
     // Helps to calculate mouse cursor position
     private float renderScale = 1f;
 
@@ -84,7 +96,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // set instanceName before any inputControlsV calls
-        String gameInstanceName = getIntent().getStringExtra(EXTRA_GAME_INSTANCE_NAME);
+        gameInstanceName = getIntent().getStringExtra(EXTRA_GAME_INSTANCE_NAME);
         if (gameInstanceName != null) {
             binding.inputControlsV.setInstanceName(gameInstanceName);
         }
@@ -140,13 +152,14 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         // in every bug report we have). The manifest form starts the activity in landscape to begin
         // with, and configChanges keeps a rotation from tearing down the GL surface underneath us.
 
-        //String gameInstanceName = getIntent().getStringExtra(EXTRA_GAME_INSTANCE_NAME);
-        gameInstanceName = getIntent().getStringExtra(EXTRA_GAME_INSTANCE_NAME);
         if (gameInstanceName == null)
             throw new RuntimeException("Expected game instance name to be passed as intent extra");
-        GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
+        gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
         if (gameInstance == null)
             throw new RuntimeException("Game instance with name " + gameInstanceName + " not found");
+
+        activeGameInstanceName = gameInstanceName;
+        setupGameDrawer();
 
         // Build 42.20 binds trigger actions to thresholds that assume a real pad's axis range,
         // e.g. "Melee > -0.80" on the left trigger. A released trigger has to read as -1 for that
@@ -283,8 +296,208 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
       });
     }
 
+    private void setupGameDrawer() {
+        binding.gameDrawerInstance.setText(getString(R.string.game_menu_instance_format, gameInstanceName));
+
+        binding.gameDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        binding.gameDrawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+            @Override
+            public void onDrawerOpened(@NonNull View drawerView) {
+                // Keep the game surface focused only while the drawer is closed. This prevents
+                // keyboard/game input from leaking through the drawer rows.
+                drawerView.requestFocus();
+            }
+
+            @Override
+            public void onDrawerClosed(@NonNull View drawerView) {
+                binding.gameSv.requestFocus();
+            }
+        });
+
+        binding.gameEditControlsRow.setOnClickListener(v -> openControlsEditor());
+
+        boolean touchEnabled = LauncherPreferences.requireSingleton().isTouchControlsEnabled();
+        binding.gameTouchControlsSwitch.setChecked(touchEnabled);
+        binding.gameTouchControlsSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
+                applyTouchControlsSetting(isChecked));
+        binding.gameTouchControlsRow.setOnClickListener(v ->
+                binding.gameTouchControlsSwitch.toggle());
+
+        binding.gameVibrateSwitch.setChecked(LauncherPreferences.requireSingleton().isVibrateOnTouch());
+        binding.gameVibrateSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
+                LauncherPreferences.requireSingleton().setVibrateOnTouch(isChecked));
+        binding.gameVibrateRow.setOnClickListener(v -> binding.gameVibrateSwitch.toggle());
+
+        updateQuickSaveMenuState();
+        binding.gameQuickSaveRow.setOnClickListener(v -> triggerQuickSave());
+        binding.gameReturnLauncherRow.setOnClickListener(v -> returnToLauncher());
+        binding.gameExitRow.setOnClickListener(v -> confirmExitToLauncher());
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (binding.gameDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    binding.gameDrawerLayout.closeDrawer(GravityCompat.START);
+                } else {
+                    binding.gameDrawerLayout.openDrawer(GravityCompat.START);
+                }
+            }
+        });
+    }
+
+    private void applyTouchControlsSetting(boolean enabled) {
+        LauncherPreferences.requireSingleton().setTouchControlsEnabled(enabled);
+        GamepadManager.setTouchOverride(enabled);
+        KeyboardManager.setTouchOverride(enabled);
+        // Re-scan devices immediately. Without this, turning the override off after a controller
+        // was already connected would leave the overlay visible until the next hotplug event.
+        if (gamepadManager != null) {
+            gamepadManager.unregister();
+            gamepadManager.register();
+            isGamepadConnected = gamepadManager.hasConnectedGamepad();
+        }
+        if (keyboardManager != null) {
+            keyboardManager.unregister();
+            keyboardManager.register();
+            isKeyboardConnected = keyboardManager.hasConnectedKeyboard();
+        }
+        applyInputOverlay();
+    }
+
+    private void updateQuickSaveMenuState() {
+        boolean build42 = gameInstance.getBuildVersion() != null
+                && gameInstance.getBuildVersion().startsWith("42");
+        binding.gameQuickSaveRow.setEnabled(build42);
+        binding.gameQuickSaveRow.setAlpha(build42 ? 1f : 0.5f);
+        if (!build42) {
+            binding.gameQuickSaveStatus.setText(R.string.game_menu_quick_save_build42_only);
+        } else if (LauncherPreferences.requireSingleton().isQuickSaveBackup()) {
+            binding.gameQuickSaveStatus.setText(R.string.game_menu_quick_save_enabled);
+        } else {
+            binding.gameQuickSaveStatus.setText(R.string.game_menu_quick_save_disabled);
+        }
+    }
+
+    private void triggerQuickSave() {
+        boolean build42 = gameInstance.getBuildVersion() != null
+                && gameInstance.getBuildVersion().startsWith("42");
+        if (!build42) {
+            Toast.makeText(this, R.string.game_menu_quick_save_not_available, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        LauncherPreferences preferences = LauncherPreferences.requireSingleton();
+        if (!preferences.isQuickSaveBackup()) {
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.backup_warning_title)
+                    .setMessage(R.string.backup_warning_message)
+                    .setPositiveButton(R.string.dialog_button_confirm, (dialog, which) -> {
+                        preferences.setQuickSaveBackup(true);
+                        updateQuickSaveMenuState();
+                        sendQuickSaveKey();
+                    })
+                    .setNegativeButton(R.string.dialog_button_cancel, null)
+                    .show();
+            return;
+        }
+        sendQuickSaveKey();
+    }
+
+    private void sendQuickSaveKey() {
+        binding.gameDrawerLayout.closeDrawer(GravityCompat.START);
+        InputNativeInterface.sendKeyboard(GLFWBinding.KEY_F10.code, true);
+        binding.gameSv.postDelayed(
+                () -> InputNativeInterface.sendKeyboard(GLFWBinding.KEY_F10.code, false), 50L);
+        Toast.makeText(this, R.string.game_menu_quick_save_started, Toast.LENGTH_SHORT).show();
+    }
+
+    private void openControlsEditor() {
+        try {
+            Intent intent = new Intent(this, ControlsEditorActivity.class);
+            intent.putExtra(ControlsEditorActivity.EXTRA_INSTANCE_NAME, gameInstanceName);
+            File background = new File(gameInstance.getHomePath(), "game/controls/editor_background.jpg");
+            if (background.isFile()) {
+                intent.putExtra(ControlsEditorActivity.EXTRA_BACKGROUND_PATH, background.getAbsolutePath());
+            }
+            binding.gameDrawerLayout.closeDrawer(GravityCompat.START);
+            startActivityForResult(intent, REQUEST_CONTROLS_EDITOR);
+        } catch (RuntimeException e) {
+            Log.e(LOG_TAG, "Unable to open controls editor", e);
+            Toast.makeText(this, R.string.game_menu_controls_editor_failed, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void confirmExitToLauncher() {
+        if (exitInProgress) return;
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.game_menu_exit_title)
+                .setMessage(R.string.game_menu_exit_message)
+                .setNegativeButton(R.string.game_menu_return_to_game, null)
+                .setPositiveButton(R.string.game_menu_exit_confirm, (dialog, which) -> exitToLauncher())
+                .show();
+    }
+
+    private void returnToLauncher() {
+        binding.gameDrawerLayout.closeDrawers();
+        // Reorder the existing launcher Activity to the front. GameActivity stays underneath with
+        // its JVM and surface alive, so selecting the same instance or pressing Back can resume it.
+        Intent intent = new Intent(this, LauncherActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(intent);
+    }
+
+    public static boolean hasActiveGame() {
+        return activeGameInstanceName != null;
+    }
+
+    public static boolean isActiveGameInstance(String instanceName) {
+        return instanceName != null && instanceName.equals(activeGameInstanceName);
+    }
+
+    public static void resumeActiveGame(Context context) {
+        Intent intent = new Intent(context, GameActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        context.startActivity(intent);
+    }
+
+    private void exitToLauncher() {
+        if (exitInProgress) return;
+        if (!GameLauncher.requestGameExit()) {
+            Toast.makeText(this, R.string.game_menu_exit_failed, Toast.LENGTH_LONG).show();
+            return;
+        }
+        exitInProgress = true;
+        binding.gameExitRow.setEnabled(false);
+        binding.gameDrawerLayout.closeDrawers();
+        waitForGameExit();
+    }
+
+    private void waitForGameExit() {
+        if (!exitInProgress) return;
+        if (!GameLauncher.isGameRunning()) {
+            GameLauncher.destroyZomdroidWindow();
+            finish();
+            return;
+        }
+        binding.gameSv.postDelayed(this::waitForGameExit, 100L);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CONTROLS_EDITOR && binding != null) {
+            binding.inputControlsV.loadControlElementsFromDisk();
+            applyInputOverlay();
+            binding.gameSv.requestFocus();
+        }
+    }
+
     @Override
     protected void onDestroy() {
+      isGameStarted = false;
+      if (gameInstanceName != null && gameInstanceName.equals(activeGameInstanceName)) {
+          activeGameInstanceName = null;
+      }
       super.onDestroy();
       // Unregister GamepadManager to avoid leaks
       if (gamepadManager != null) {
@@ -455,10 +668,14 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     }
 
     private void applyInputOverlay() {
-      if (binding.inputControlsV == null) return;
+      if (binding == null || binding.inputControlsV == null) return;
       binding.inputControlsV.setGamepadConnected(isGamepadConnected);
 
-      if (isKeyboardConnected) {
+      boolean touchEnabled = LauncherPreferences.requireSingleton().isTouchControlsEnabled();
+      if (touchEnabled) {
+        binding.inputControlsV.setVisibility(View.VISIBLE);
+        binding.inputControlsV.applyInputMode(InputControlsView.InputMode.ALL);
+      } else if (isKeyboardConnected) {
         binding.inputControlsV.setVisibility(View.GONE);
       } else if (isGamepadConnected) {
         binding.inputControlsV.setVisibility(View.VISIBLE);

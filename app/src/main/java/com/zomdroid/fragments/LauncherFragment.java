@@ -483,11 +483,20 @@ public class LauncherFragment extends Fragment {
     private void launchGame(GameInstance gameInstance) {
         // Heals whatever an interrupted restore may have left, cheap when there is nothing to do.
         BackupManager.cleanupInterruptedRestore(gameInstance);
+        if (GameActivity.hasActiveGame()) {
+            if (GameActivity.isActiveGameInstance(gameInstance.getName())) {
+                GameActivity.resumeActiveGame(requireContext());
+            } else {
+                Toast.makeText(requireContext(), R.string.game_active_instance_message,
+                        Toast.LENGTH_LONG).show();
+            }
+            return;
+        }
         Intent intent = new Intent(requireContext(), GameActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        // Keep LauncherActivity below GameActivity. The in-game drawer can then stop the embedded
+        // game and finish GameActivity back to the launcher instead of dropping the user at home.
         intent.putExtra(GameActivity.EXTRA_GAME_INSTANCE_NAME, gameInstance.getName());
         startActivity(intent);
-        requireActivity().finish();
     }
 
     /**

@@ -796,4 +796,25 @@
     <string name="native_libs_installed">Native libraries installed</string>
 
     <string name="control_element_opacity_all">To all</string>
+    <!-- In-game drawer -->
+    <string name="game_menu_title">Game menu</string>
+    <string name="game_menu_instance_format">Instance: %1$s</string>
+    <string name="game_menu_edit_controls">Edit virtual controls</string>
+    <string name="game_menu_touch_controls">Enable touch controls</string>
+    <string name="game_menu_vibrate">Vibrate on button press</string>
+    <string name="game_menu_quick_save">Quick save (F10)</string>
+    <string name="game_menu_quick_save_build42_only">Build 42 only</string>
+    <string name="game_menu_quick_save_enabled">Build 42 · Tap to save</string>
+    <string name="game_menu_quick_save_disabled">Build 42 · Enable in Settings first</string>
+    <string name="game_menu_quick_save_started">Quick save started.</string>
+    <string name="game_menu_quick_save_not_available">Quick save is only available on Build 42.</string>
+    <string name="game_menu_return_launcher">Return to launcher (keep game running)</string>
+    <string name="game_menu_exit">Exit game</string>
+    <string name="game_menu_exit_title">Exit game?</string>
+    <string name="game_menu_exit_message">The game will close and return to the launcher. Make sure your progress has been saved.</string>
+    <string name="game_menu_exit_confirm">Exit to launcher</string>
+    <string name="game_menu_exit_failed">The game is not ready to exit. Please try again in a moment.</string>
+    <string name="game_active_instance_message">A game is already running. Return to it before starting another instance.</string>
+    <string name="game_menu_return_to_game">Continue game</string>
+    <string name="game_menu_controls_editor_failed">Unable to open the virtual controls editor.</string>
 </resources>

@@ -350,6 +350,7 @@ public class LauncherPreferences {
 
     public void setTouchControlsEnabled(boolean enabled) {
         touchControlsEnabled = enabled;
+        saveToPreferences();
     }
 
     private boolean vibrateOnTouch = false;

@@ -95,6 +95,10 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
     return touchOverride;
   }
 
+  public boolean hasConnectedKeyboard() {
+    return !goodKeyboards.isEmpty();
+  }
+
   // Handle KeyEvent from physical keyboard
   public boolean handleKeyEvent(KeyEvent event) {
     int androidCode = event.getKeyCode();
