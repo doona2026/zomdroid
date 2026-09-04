@@ -77,6 +77,7 @@ public class WorkshopFragment extends Fragment {
         view.findViewById(R.id.workshop_search_btn).setOnClickListener(v -> {
             cachedItems.clear();
             hasNext = false;
+            WorkshopCatalogRuntime.clearBrowseCache();
             load(1);
         });
         previous.setOnClickListener(v -> load(page - 1));
@@ -166,6 +167,7 @@ public class WorkshopFragment extends Fragment {
             title.setText(item.getTitle());
             author.setText(getString(R.string.workshop_author_format, item.getAuthorName()));
             description.setText(item.getDescriptionSnippet());
+            image.setImageDrawable(null);
             WorkshopCatalogRuntime.loadImage(requireContext(), item.getPreviewImageUrl(), image);
         }
         private void openDetails() {
