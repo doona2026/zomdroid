@@ -153,13 +153,6 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
     // ---- start ----
     private void startGame() {
         if (SteamDownloadState.get().isDownloading()) return;
-        SteamAccountSession accountSession = SteamAuthRuntime.currentAccountSession(appCtx);
-        if (accountSession == null) {
-            refreshAccountStatus();
-            Toast.makeText(requireContext(), R.string.steam_dl_account_required, Toast.LENGTH_SHORT).show();
-            openAccountManagement();
-            return;
-        }
         if (!ensureAllFilesAccess()) return;
 
         String manifestText = text(etManifest);
@@ -188,6 +181,41 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
             buildLabel = is42 ? "42" : "41";
         }
 
+        setControlsEnabled(false);
+        if (tvAccountStatus != null) {
+            tvAccountStatus.setText(R.string.steam_dl_account_status_loading);
+        }
+        SteamAuthRuntime.prepareGameSession(appCtx, new SteamAuthRuntime.Callback() {
+            @Override
+            public void onResult(SteamAuthRuntime.Result result) {
+                if (!isAdded() || getView() == null) return;
+                SteamAccountSession accountSession = result.getSession();
+                if ("game_session_ready".equals(result.getKind()) && accountSession != null) {
+                    startGameWithSession(accountSession, manifestId, branch, buildLabel);
+                    refreshAccountStatus();
+                    return;
+                }
+
+                setControlsEnabled(true);
+                refreshAccountStatus();
+                if ("game_session_no_account".equals(result.getKind())
+                        || "game_session_reauth_required".equals(result.getKind())
+                        || (result.getSnapshot().getActiveAccount() != null
+                        && result.getSnapshot().getActiveAccount().getRequiresReauthentication())) {
+                    Toast.makeText(requireContext(), R.string.steam_dl_account_required, Toast.LENGTH_SHORT).show();
+                    openAccountManagement();
+                } else {
+                    String message = result.getMessage() != null
+                            ? result.getMessage()
+                            : getString(R.string.steam_dl_account_validation_failed);
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    private void startGameWithSession(SteamAccountSession accountSession, long manifestId,
+                                      String branch, String buildLabel) {
         SteamDownloadState st = SteamDownloadState.get();
         SteamGameDownloader dl = new SteamGameDownloader(accountSession, manifestId, branch, buildLabel, st);
         Thread th = new Thread(dl, "zd-download");
@@ -242,6 +270,7 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
     private void setControlsEnabled(boolean enabled) {
         if (etManifest != null) etManifest.setEnabled(enabled);
         if (btnStart != null) btnStart.setEnabled(enabled);
+        if (btnManageAccount != null) btnManageAccount.setEnabled(enabled);
     }
 
     // ---- All-files access (writes into the public Downloads/zomdroid folder) ----
@@ -283,6 +312,13 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
 
     @Override
     public void onFinished(String message) {
+        if (message != null && message.contains("logOn failed: AccessDenied")) {
+            String accountId = SteamAuthRuntime.currentAccountId(appCtx);
+            if (accountId != null) {
+                SteamAuthRuntime.markAccountRequiresReauthentication(appCtx, accountId);
+            }
+            refreshAccountStatus();
+        }
         setControlsEnabled(true);
         if (progress != null) progress.setVisibility(View.GONE);
         if (btnCancel != null) btnCancel.setVisibility(View.GONE);

@@ -103,6 +103,46 @@ class SteamAuthRepository(context: Context) {
         ?.takeUnless { it.requiresReauthentication }
         ?.toProtocolSession(steamClientIdentity.machineName)
 
+    /**
+     * Validates the selected account's refresh token and stores any rotated token before a game
+     * download hands the session to JavaSteam. This keeps the game downloader on the same account
+     * lifecycle as Workshop and prevents a stale token from reaching the CM logon call.
+     */
+    suspend fun prepareGameSession(accountId: String?): SteamAccountSession? = tokenMutex.withLock {
+        val account = accountId
+            ?.let { id -> loadState().accounts.firstOrNull { it.accountId == id } }
+            ?: return@withLock null
+        if (account.requiresReauthentication) return@withLock null
+
+        val tokens = try {
+            authenticationClient.generateAccessTokenForApp(
+                account = account.toProtocolSession(steamClientIdentity.machineName),
+                allowRenewal = true,
+            )
+        } catch (error: Throwable) {
+            val definitive = error.steamAuthenticationResultCodeOrNull() in DEFINITIVE_REAUTHENTICATION_RESULT_CODES
+            Log.w(
+                TAG,
+                "Steam game session preparation failed accountId=${account.accountId.maskForLog()} " +
+                    "definitive=$definitive",
+                error,
+            )
+            if (definitive) markAccountRequiresReauthentication(account.accountId)
+            throw error
+        }
+
+        val accessTokenInfo = parseSteamJwtInfo(tokens.accessToken)
+        updateAccount(account.accountId) {
+            it.copy(
+                refreshToken = tokens.refreshToken ?: it.refreshToken,
+                webAccessToken = tokens.accessToken,
+                webAccessTokenExpEpochSeconds = accessTokenInfo.expiresAtEpochSeconds,
+                requiresReauthentication = false,
+            )
+        }
+        accountSessionFor(account.accountId)
+    }
+
     fun activeAccountRequiresReauthentication(): Boolean =
         loadSnapshot().activeAccount?.requiresReauthentication == true
 

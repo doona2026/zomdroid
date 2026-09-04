@@ -102,6 +102,7 @@
     <string name="steam_dl_account_required">Select a Steam account before downloading the game.</string>
     <string name="steam_dl_login_note">Your login is sent to Steam (the same way DepotDownloader works) and is NOT stored — no data or password is saved. Approve the sign-in in your Steam Mobile app, or enter the Steam Guard code when asked.</string>
     <string name="steam_dl_slow_warning">⚠️ Downloading can be slow.</string>
+    <string name="steam_dl_account_validation_failed">Could not prepare the Steam game download session. Check your connection and try again.</string>
     <string name="steam_dl_build_42">Build 42</string>
     <string name="steam_dl_build_41">Build 41</string>
     <string name="steam_dl_manifest_hint_41">Build 41 manifest id (required)</string>

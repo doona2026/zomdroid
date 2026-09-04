@@ -11,5 +11,7 @@
         <domain includeSubdomains="true">steamstatic.com</domain>
         <domain includeSubdomains="true">akamaihd.net</domain>
         <domain includeSubdomains="true">akamaized.net</domain>
+        <!-- Steam may return depot manifests/chunks from st.dl.eccdnx.com. -->
+        <domain includeSubdomains="true">eccdnx.com</domain>
     </domain-config>
 </network-security-config>

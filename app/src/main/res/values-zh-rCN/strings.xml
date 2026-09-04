@@ -689,6 +689,7 @@
     <string name="steam_dl_account_required">下载游戏前请先选择 Steam 账号。</string>
     <string name="steam_dl_login_note">你的登录信息会发送给 Steam（与 DepotDownloader 相同方式），不会被保存——不存储任何数据或密码。请在 Steam 手机版中确认登录，或在提示时输入 Steam 令牌（Steam Guard）验证码。</string>
     <string name="steam_dl_slow_warning">⚠️ 下载可能很慢。</string>
+    <string name="steam_dl_account_validation_failed">无法准备 Steam 游戏下载会话，请检查网络后重试。</string>
     <string name="steam_dl_build_42">Build 42</string>
     <string name="steam_dl_build_41">Build 41</string>
     <string name="steam_dl_manifest_hint_41">Build 41 清单 id（必填）</string>

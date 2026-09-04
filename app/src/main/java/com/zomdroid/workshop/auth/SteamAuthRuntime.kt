@@ -20,6 +20,7 @@ object SteamAuthRuntime {
         val kind: String,
         val message: String? = null,
         val snapshot: SteamAccountsSnapshot = SteamAccountsSnapshot(),
+        val session: SteamAccountSession? = null,
     )
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -34,6 +35,40 @@ object SteamAuthRuntime {
     fun currentAccountSession(context: Context): SteamAccountSession? {
         val repo = repository(context)
         return repo.accountSessionFor(repo.activeAccountId())
+    }
+
+    /** Refreshes the active account before JavaSteam starts a game download. */
+    @JvmStatic
+    fun prepareGameSession(context: Context, callback: Callback) {
+        scope.launch {
+            val result = runCatching {
+                val repo = repository(context)
+                val activeAccountId = repo.activeAccountId()
+                if (activeAccountId == null) {
+                    Result(kind = "game_session_no_account", snapshot = repo.loadSnapshot())
+                } else {
+                    val session = repo.prepareGameSession(activeAccountId)
+                    if (session == null) {
+                        Result(kind = "game_session_reauth_required", snapshot = repo.loadSnapshot())
+                    } else {
+                        Result(
+                            kind = "game_session_ready",
+                            snapshot = repo.loadSnapshot(),
+                            session = session,
+                        )
+                    }
+                }
+            }.getOrElse { error ->
+                val repo = repository(context)
+                Result(
+                    kind = "game_session_error",
+                    message = error.message?.substringBefore('\n')?.take(240)
+                        ?: "Steam game session preparation failed",
+                    snapshot = repo.loadSnapshot(),
+                )
+            }
+            post(callback, result)
+        }
     }
 
     @JvmStatic
@@ -102,6 +137,11 @@ object SteamAuthRuntime {
             }.getOrElse { error(it) }
             post(callback, result)
         }
+    }
+
+    @JvmStatic
+    fun markAccountRequiresReauthentication(context: Context, accountId: String) {
+        repository(context).markAccountRequiresReauthentication(accountId)
     }
 
     @JvmStatic

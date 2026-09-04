@@ -213,6 +213,10 @@ public class SteamGameDownloader implements Runnable, Cancellable {
         lod.setUsername(accountName);
         lod.setAccessToken(refreshToken);
         lod.setLoginID(149);
+        if (accountSession != null) {
+            lod.setMachineName(accountSession.getMachineName());
+            lod.setShouldRememberPassword(accountSession.getShouldRememberPassword());
+        }
         progress("Logging in...");
         steamUser.logOn(lod);
     }
