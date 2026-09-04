@@ -14,7 +14,10 @@ import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowInsets;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +25,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.ActionMenuView;
 
 import androidx.core.text.HtmlCompat;
 import androidx.navigation.NavController;
@@ -53,6 +57,8 @@ public class LauncherActivity extends AppCompatActivity {
     private NavController navController;
     private AppBarConfiguration appBarConfiguration;
     private boolean inited = false;
+    private int defaultToolbarEndInsetWithActions;
+    private boolean workshopToolbarActionsVisible;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +98,7 @@ public class LauncherActivity extends AppCompatActivity {
         });
 
         setSupportActionBar(binding.appbar);
+        defaultToolbarEndInsetWithActions = binding.appbar.getContentInsetEndWithActions();
 
         appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.launcher_fragment)
@@ -100,6 +107,7 @@ public class LauncherActivity extends AppCompatActivity {
 
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> invalidateOptionsMenu());
         NavigationUI.setupWithNavController(binding.launcherNv, navController);
 
         binding.launcherNv.setNavigationItemSelectedListener(item -> {
@@ -226,6 +234,60 @@ public class LauncherActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         return NavigationUI.navigateUp(navController, appBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        workshopToolbarActionsVisible = isWorkshopListDestination();
+        if (workshopToolbarActionsVisible) {
+            getMenuInflater().inflate(R.menu.menu_workshop_toolbar, menu);
+        }
+        binding.appbar.post(this::updateWorkshopToolbarPosition);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
+        menu.clear();
+        workshopToolbarActionsVisible = isWorkshopListDestination();
+        if (workshopToolbarActionsVisible) {
+            getMenuInflater().inflate(R.menu.menu_workshop_toolbar, menu);
+        }
+        binding.appbar.post(this::updateWorkshopToolbarPosition);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    private boolean isWorkshopListDestination() {
+        return navController != null && navController.getCurrentDestination() != null
+                && navController.getCurrentDestination().getId() == R.id.workshop_fragment;
+    }
+
+    private void updateWorkshopToolbarPosition() {
+        if (binding == null || binding.appbar.getWidth() <= 0) return;
+        // Toolbar's content inset is theme-dependent and does not reliably move the action
+        // menu on every MaterialToolbar version. Position the actual menu child instead.
+        binding.appbar.setContentInsetEndWithActions(defaultToolbarEndInsetWithActions);
+        for (int index = 0; index < binding.appbar.getChildCount(); index++) {
+            View child = binding.appbar.getChildAt(index);
+            if (!(child instanceof ActionMenuView)) continue;
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) child.getLayoutParams();
+            params.setMarginEnd(workshopToolbarActionsVisible
+                    ? Math.round(binding.appbar.getWidth() * 0.05f)
+                    : 0);
+            child.setLayoutParams(params);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_open_workshop_download_center) {
+            navController.navigate(R.id.workshop_download_center_fragment);
+            return true;
+        } else if (item.getItemId() == R.id.action_open_workshop_account) {
+            navController.navigate(R.id.workshop_account_fragment);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void checkForUpdate() {

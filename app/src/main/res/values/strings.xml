@@ -700,7 +700,7 @@
         <item>Recently updated</item>
         <item>Most subscribed</item>
     </string-array>
-    <string name="workshop_title">Project Zomboid Workshop</string>
+    <string name="workshop_title">Workshop</string>
     <string name="workshop_detail_title">Workshop item</string>
     <string name="workshop_search_hint">Search Workshop</string>
     <string name="workshop_search">Search</string>

@@ -542,7 +542,7 @@
         <item>最近更新</item>
         <item>订阅最多</item>
     </string-array>
-    <string name="workshop_title">Project Zomboid 创意工坊</string>
+    <string name="workshop_title">创意工坊</string>
     <string name="workshop_detail_title">创意工坊项目</string>
     <string name="workshop_search_hint">搜索创意工坊</string>
     <string name="workshop_search">搜索</string>

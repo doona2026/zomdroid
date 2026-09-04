@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_open_workshop_download_center"
+        android:icon="@drawable/ic_workshop_download"
+        android:title="@string/workshop_download_center_title"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_open_workshop_account"
+        android:icon="@drawable/ic_steam"
+        android:title="@string/workshop_account_menu"
+        app:showAsAction="always" />
+</menu>
