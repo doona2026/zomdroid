@@ -351,7 +351,13 @@ public class LauncherPreferences {
         BLUE_GRAY,
         FOREST,
         PURPLE,
-        CLASSIC_AMBER
+        CLASSIC_AMBER,
+        MONET_AQUA,
+        MONET_ROSE,
+        MONET_LAVENDER,
+        MONET_SAGE,
+        IVORY,
+        PURE_WHITE
     }
 
     private ColorTheme colorTheme = ColorTheme.BLUE_GRAY;

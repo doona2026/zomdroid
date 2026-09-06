@@ -529,6 +529,10 @@
     <string name="export_label">Экспорт</string>
 
     <!-- ===== Workshop Download strings ===== -->
+    <string name="workshop_download_delete_title">Удалить задачу загрузки?</string>
+    <string name="workshop_download_delete_message">Удалить «%1$s»? Задача и загруженные файлы будут удалены.</string>
+    <string name="workshop_download_delete_cancel">Отмена</string>
+    <string name="workshop_download_delete_confirm">Удалить</string>
     <string name="install_mod_workshop_section">Скачать из Steam Workshop</string>
     <string name="install_mod_workshop_disclaimer">Работает через ggntw.com — сторонний сервис, может перестать работать в любой момент.\nПри первом использовании перед скачиванием может появиться много рекламы.</string>
     <string name="install_mod_workshop_btn">Скачать из Workshop</string>
@@ -585,6 +589,12 @@
     <string name="steam_dl_guard_email">Код отправлен на %1$s</string>
 
     <!-- Appearance / controls / detection -->
+    <string name="settings_color_theme_monet_aqua">Monet Аквамарин</string>
+    <string name="settings_color_theme_monet_rose">Monet Роза</string>
+    <string name="settings_color_theme_monet_lavender">Monet Лаванда</string>
+    <string name="settings_color_theme_monet_sage">Monet Шалфей</string>
+    <string name="settings_color_theme_ivory">Слоновая кость</string>
+    <string name="settings_color_theme_pure_white">Чисто-белая</string>
     <string name="settings_color_theme">Цветовая тема</string>
     <string name="settings_color_theme_blue_gray">Сине-серая</string>
     <string name="settings_color_theme_forest">Лесная</string>

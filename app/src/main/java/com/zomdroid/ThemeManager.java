@@ -29,6 +29,18 @@ public final class ThemeManager {
                 return R.style.AppThemePalettePurple;
             case CLASSIC_AMBER:
                 return R.style.AppThemePaletteClassicAmber;
+            case MONET_AQUA:
+                return R.style.AppThemePaletteMonetAqua;
+            case MONET_ROSE:
+                return R.style.AppThemePaletteMonetRose;
+            case MONET_LAVENDER:
+                return R.style.AppThemePaletteMonetLavender;
+            case MONET_SAGE:
+                return R.style.AppThemePaletteMonetSage;
+            case IVORY:
+                return R.style.AppThemePaletteIvory;
+            case PURE_WHITE:
+                return R.style.AppThemePalettePureWhite;
             case BLUE_GRAY:
             default:
                 return R.style.AppThemePaletteBlueGray;

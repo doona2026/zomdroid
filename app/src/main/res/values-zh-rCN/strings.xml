@@ -606,6 +606,10 @@
     <string name="workshop_download_retry">重试</string>
     <string name="workshop_download_cancel">取消</string>
     <string name="workshop_download_delete">删除</string>
+    <string name="workshop_download_delete_title">删除下载任务？</string>
+    <string name="workshop_download_delete_message">确定删除“%1$s”？该任务及其已下载文件将被移除。</string>
+    <string name="workshop_download_delete_cancel">取消</string>
+    <string name="workshop_download_delete_confirm">删除</string>
     <string name="workshop_download_install">安装</string>
     <string name="workshop_download_fallback">第三方重试</string>
     <string name="workshop_download_center_no_instance">请先创建 Zomboid 游戏实例，再安装创意工坊文件。</string>
@@ -726,6 +730,12 @@
     <string name="steam_dl_guard_email">验证码已发送至 %1$s</string>
 
     <!-- Appearance / controls / detection -->
+    <string name="settings_color_theme_monet_aqua">Monet 青瓷</string>
+    <string name="settings_color_theme_monet_rose">Monet 玫瑰</string>
+    <string name="settings_color_theme_monet_lavender">Monet 薰衣草</string>
+    <string name="settings_color_theme_monet_sage">Monet 鼠尾草</string>
+    <string name="settings_color_theme_ivory">象牙白</string>
+    <string name="settings_color_theme_pure_white">纯白</string>
     <string name="settings_color_theme">颜色主题</string>
     <string name="settings_color_theme_blue_gray">蓝灰</string>
     <string name="settings_color_theme_forest">森林绿</string>

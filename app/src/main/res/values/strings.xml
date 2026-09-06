@@ -145,6 +145,10 @@
     <string name="workshop_download_retry">Retry</string>
     <string name="workshop_download_cancel">Cancel</string>
     <string name="workshop_download_delete">Delete</string>
+    <string name="workshop_download_delete_title">Delete download task?</string>
+    <string name="workshop_download_delete_message">Delete &quot;%1$s&quot;? The task and downloaded files will be removed.</string>
+    <string name="workshop_download_delete_cancel">Cancel</string>
+    <string name="workshop_download_delete_confirm">Delete</string>
     <string name="workshop_download_install">Install</string>
     <string name="workshop_download_fallback">Third-party retry</string>
     <string name="workshop_download_center_no_instance">Create a Zomboid game instance before installing a Workshop file.</string>
@@ -473,6 +477,12 @@
     <string name="preset_dialog_message_b4212">Build 42.12 and above. Needs at least 8 GB of RAM to play comfortably.</string>
 
     <!-- Settings groups -->
+    <string name="settings_color_theme_monet_aqua">Monet Aqua</string>
+    <string name="settings_color_theme_monet_rose">Monet Rose</string>
+    <string name="settings_color_theme_monet_lavender">Monet Lavender</string>
+    <string name="settings_color_theme_monet_sage">Monet Sage</string>
+    <string name="settings_color_theme_ivory">Ivory</string>
+    <string name="settings_color_theme_pure_white">Pure white</string>
     <string name="settings_group_rendering">Rendering</string>
     <string name="settings_group_appearance">Appearance</string>
     <string name="settings_color_theme">Color theme</string>

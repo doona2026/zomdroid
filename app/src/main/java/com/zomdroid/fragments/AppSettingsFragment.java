@@ -45,7 +45,13 @@ public class AppSettingsFragment extends Fragment {
                 getString(R.string.settings_color_theme_blue_gray),
                 getString(R.string.settings_color_theme_forest),
                 getString(R.string.settings_color_theme_purple),
-                getString(R.string.settings_color_theme_classic_amber)
+                getString(R.string.settings_color_theme_classic_amber),
+                getString(R.string.settings_color_theme_monet_aqua),
+                getString(R.string.settings_color_theme_monet_rose),
+                getString(R.string.settings_color_theme_monet_lavender),
+                getString(R.string.settings_color_theme_monet_sage),
+                getString(R.string.settings_color_theme_ivory),
+                getString(R.string.settings_color_theme_pure_white)
         };
         ArrayAdapter<String> colorThemeAdapter = new ArrayAdapter<>(
                 requireContext(),

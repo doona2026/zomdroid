@@ -214,9 +214,23 @@ public class WorkshopDownloadCenterFragment extends Fragment {
         resume.setOnClickListener(ignored -> command(WorkshopDownloadForegroundService.ACTION_RESUME, task.getId()));
         retry.setOnClickListener(ignored -> command(WorkshopDownloadForegroundService.ACTION_RETRY, task.getId()));
         cancel.setOnClickListener(ignored -> command(WorkshopDownloadForegroundService.ACTION_CANCEL, task.getId()));
-        delete.setOnClickListener(ignored -> manager.delete(task.getId()));
+        delete.setOnClickListener(ignored -> confirmDeleteTask(task));
         install.setOnClickListener(ignored -> chooseInstance(task));
         fallback.setOnClickListener(ignored -> showFailureActions(task));
+    }
+
+    private void confirmDeleteTask(DownloadCenterTask task) {
+        String title = task.getTitle();
+        if (title == null || title.trim().isEmpty()) {
+            title = getString(R.string.workshop_download_center_item, task.getPublishedFileId());
+        }
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.workshop_download_delete_title)
+                .setMessage(getString(R.string.workshop_download_delete_message, title))
+                .setNegativeButton(R.string.workshop_download_delete_cancel, null)
+                .setPositiveButton(R.string.workshop_download_delete_confirm,
+                        (dialog, which) -> manager.delete(task.getId()))
+                .show();
     }
 
     private String formatStatus(DownloadCenterTask task) {
