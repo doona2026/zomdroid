@@ -1,7 +1,9 @@
 package com.zomdroid;
 
 public class C {
-    public static final String STORAGE_PROVIDER_AUTHORITY = "com.zomdroid.STORAGE_PROVIDER_AUTHORITY";
+    /** Provider authority must follow the application ID so the two distributions can coexist. */
+    public static final String STORAGE_PROVIDER_AUTHORITY =
+            BuildConfig.APPLICATION_ID + ".STORAGE_PROVIDER_AUTHORITY";
 
     /**
      * On-disk cache of ETC2-compressed textures, one file per texture, named by content hash.

@@ -83,11 +83,27 @@ android {
         }
     }
 
+    // Build both installable distributions from the same sources. The original flavor keeps the
+    // existing package name, while the coexist flavor gets its own package so both APKs can be
+    // installed on one device at the same time.
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("original") {
+            dimension = "distribution"
+            applicationId = "com.zomdroid"
+        }
+        create("coexist") {
+            dimension = "distribution"
+            applicationId = "com.zomdroid.mod"
+        }
+    }
+
     applicationVariants.all {
         val variant = this
         outputs.all {
             val outputImpl = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            outputImpl.outputFileName = "zomdroid-${variant.buildType.name}-${variant.versionName}.apk"
+            val flavorSuffix = if (variant.flavorName == "original") "" else "-${variant.flavorName}"
+            outputImpl.outputFileName = "zomdroid${flavorSuffix}-${variant.buildType.name}-${variant.versionName}.apk"
         }
     }
 
