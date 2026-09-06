@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="180"
+    android:duration="@integer/motion_page_exit"
     android:interpolator="@android:interpolator/accelerate_cubic">
     <alpha
         android:fromAlpha="1"

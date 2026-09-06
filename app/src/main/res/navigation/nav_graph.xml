@@ -12,80 +12,144 @@
         tools:layout="@layout/fragment_launcher">
         <action
             android:id="@+id/action_open_new_game_instance_fragment"
-            app:destination="@id/new_game_instance_fragment" />
+            app:destination="@id/new_game_instance_fragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@id/action_open_settings_fragment"
-            app:destination="@id/app_settings_fragment"/>
+            app:destination="@id/app_settings_fragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_open_instance_settings"
-            app:destination="@id/settings_fragment"/>
+            app:destination="@id/settings_fragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@id/action_open_gamepad_mapper"
-            app:destination="@id/gamepad_mapper_fragment"/>
+            app:destination="@id/gamepad_mapper_fragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_open_wiki_fragment"
-            app:destination="@id/wiki_fragment"/>
+            app:destination="@id/wiki_fragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_open_install_mod"
-            app:destination="@id/install_mod_fragment" />
+            app:destination="@id/install_mod_fragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_install_controls"
-            app:destination="@id/installControlsFragment" />
+            app:destination="@id/installControlsFragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_install_saves"
-            app:destination="@id/install_saves_fragment" />
+            app:destination="@id/install_saves_fragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_install_driver"
-            app:destination="@id/install_driver_fragment" />
+            app:destination="@id/install_driver_fragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_export_log"
-            app:destination="@id/export_log_fragment" />
+            app:destination="@id/export_log_fragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_open_optimization"
-            app:destination="@id/optimization_fragment" />
+            app:destination="@id/optimization_fragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_open_controls_editor_launch"
-            app:destination="@id/controls_editor_launch_fragment" />
+            app:destination="@id/controls_editor_launch_fragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_game_settings"
-            app:destination="@id/game_settings_fragment" />
+            app:destination="@id/game_settings_fragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_install_native_libs"
-            app:destination="@id/install_native_libs_fragment" />
+            app:destination="@id/install_native_libs_fragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_download_steam"
-            app:destination="@id/steam_download_fragment" />
+            app:destination="@id/steam_download_fragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_open_workshop_favorites"
             app:destination="@id/workshop_favorites_fragment"
-            app:enterAnim="@anim/workshop_enter"
-            app:exitAnim="@anim/workshop_exit"
-            app:popEnterAnim="@anim/workshop_pop_enter"
-            app:popExitAnim="@anim/workshop_pop_exit" />
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_open_workshop_download_center"
             app:destination="@id/workshop_download_center_fragment"
-            app:enterAnim="@anim/workshop_enter"
-            app:exitAnim="@anim/workshop_exit"
-            app:popEnterAnim="@anim/workshop_pop_enter"
-            app:popExitAnim="@anim/workshop_pop_exit" />
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_open_workshop"
             app:destination="@id/workshop_fragment"
-            app:enterAnim="@anim/workshop_enter"
-            app:exitAnim="@anim/workshop_exit"
-            app:popEnterAnim="@anim/workshop_pop_enter"
-            app:popExitAnim="@anim/workshop_pop_exit" />
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_open_workshop_account"
             app:destination="@id/workshop_account_fragment"
-            app:enterAnim="@anim/workshop_enter"
-            app:exitAnim="@anim/workshop_exit"
-            app:popEnterAnim="@anim/workshop_pop_enter"
-            app:popExitAnim="@anim/workshop_pop_exit" />
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
         <action
             android:id="@+id/action_open_workshop_library"
-            app:destination="@id/workshop_mod_library_fragment" />
+            app:destination="@id/workshop_mod_library_fragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
     </fragment>
 
     <fragment
@@ -138,10 +202,10 @@
         <action
             android:id="@+id/action_install_mod_open_workshop"
             app:destination="@id/workshop_fragment"
-            app:enterAnim="@anim/workshop_enter"
-            app:exitAnim="@anim/workshop_exit"
-            app:popEnterAnim="@anim/workshop_pop_enter"
-            app:popExitAnim="@anim/workshop_pop_exit" />
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
     </fragment>
 
     <fragment
@@ -200,10 +264,10 @@
         <action
             android:id="@+id/action_workshop_favorite_detail"
             app:destination="@id/workshop_detail_fragment"
-            app:enterAnim="@anim/workshop_enter"
-            app:exitAnim="@anim/workshop_exit"
-            app:popEnterAnim="@anim/workshop_pop_enter"
-            app:popExitAnim="@anim/workshop_pop_exit" />
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
     </fragment>
 
     <fragment
@@ -214,10 +278,10 @@
         <action
             android:id="@+id/action_download_center_open_workshop_account"
             app:destination="@id/workshop_account_fragment"
-            app:enterAnim="@anim/workshop_enter"
-            app:exitAnim="@anim/workshop_exit"
-            app:popEnterAnim="@anim/workshop_pop_enter"
-            app:popExitAnim="@anim/workshop_pop_exit" />
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
     </fragment>
 
     <fragment
@@ -228,10 +292,10 @@
         <action
             android:id="@+id/action_workshop_detail"
             app:destination="@id/workshop_detail_fragment"
-            app:enterAnim="@anim/workshop_enter"
-            app:exitAnim="@anim/workshop_exit"
-            app:popEnterAnim="@anim/workshop_pop_enter"
-            app:popExitAnim="@anim/workshop_pop_exit" />
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
     </fragment>
 
     <fragment

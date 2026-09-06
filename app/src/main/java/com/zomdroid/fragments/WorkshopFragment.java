@@ -23,6 +23,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,6 +37,7 @@ import com.zomdroid.workshop.favorites.WorkshopFavoritesRepository;
 import com.zomdroid.workshop.download.DownloadCenterManager;
 import com.zomdroid.workshop.download.DownloadCenterManagerProvider;
 import com.zomdroid.workshop.download.WorkshopDownloadForegroundService;
+import com.zomdroid.ui.MotionAnimations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +64,7 @@ public class WorkshopFragment extends Fragment {
     private int requestGeneration;
     private int page = 1;
     private boolean hasNext;
+    private boolean loadingUi;
     private final List<WorkshopBrowseItem> cachedItems = new ArrayList<>();
 
     private static final String STATE_SEARCH = "workshop_search";
@@ -77,6 +80,7 @@ public class WorkshopFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_workshop, container, false);
         list = view.findViewById(R.id.workshop_list);
         list.setLayoutManager(new LinearLayoutManager(requireContext()));
+        list.setItemAnimator(new DefaultItemAnimator());
         View header = inflater.inflate(R.layout.item_workshop_header, list, false);
         View footer = inflater.inflate(R.layout.item_workshop_footer, list, false);
         search = header.findViewById(R.id.workshop_search);
@@ -153,7 +157,7 @@ public class WorkshopFragment extends Fragment {
             load(page);
         } else {
             adapter.setItems(cachedItems);
-            list.scheduleLayoutAnimation();
+            list.post(() -> MotionAnimations.animateFirstVisibleChildren(list));
             status.setText(R.string.workshop_loaded);
             updatePaging();
             restoreListState();
@@ -235,7 +239,8 @@ public class WorkshopFragment extends Fragment {
         int requestSort = appliedSort;
         page = requestedPage;
         scrollToTop();
-        progress.setVisibility(View.VISIBLE);
+        if (!loadingUi) MotionAnimations.setExpanded(progress, true);
+        loadingUi = true;
         status.setText(R.string.workshop_loading);
         updatePaging();
         WorkshopCatalogRuntime.browse(requireContext(), requestSearch, requestSort, page,
@@ -243,11 +248,12 @@ public class WorkshopFragment extends Fragment {
                     @Override public void onSuccess(WorkshopBrowsePage result) {
                         if (!isAdded() || requestViewGeneration != viewGeneration
                                 || requestToken != requestGeneration || getView() == null) return;
-                        progress.setVisibility(View.GONE);
+                        MotionAnimations.setExpanded(progress, false);
+                        loadingUi = false;
                         cachedItems.clear();
                         cachedItems.addAll(result.getItems());
                         adapter.setItems(result.getItems());
-                        list.scheduleLayoutAnimation();
+                        list.post(() -> MotionAnimations.animateFirstVisibleChildren(list));
                         page = result.getPage();
                         hasNext = result.getHasNextPage();
                         status.setText(result.getItems().isEmpty() ? R.string.workshop_empty : R.string.workshop_loaded);
@@ -257,7 +263,8 @@ public class WorkshopFragment extends Fragment {
                     @Override public void onError(String message) {
                         if (!isAdded() || requestViewGeneration != viewGeneration
                                 || requestToken != requestGeneration || getView() == null) return;
-                        progress.setVisibility(View.GONE);
+                        MotionAnimations.setExpanded(progress, false);
+                        loadingUi = false;
                         status.setText(message);
                         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
                         updatePaging();
@@ -297,6 +304,8 @@ public class WorkshopFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        MotionAnimations.cancel(list, progress);
+        loadingUi = false;
         if (list != null && list.getLayoutManager() != null) {
             pendingListState = list.getLayoutManager().onSaveInstanceState();
         }
@@ -380,7 +389,10 @@ public class WorkshopFragment extends Fragment {
             bindFavorite(item);
             favorite.setScaleX(0.82f);
             favorite.setScaleY(0.82f);
-            favorite.animate().scaleX(1f).scaleY(1f).setDuration(160L).start();
+            favorite.animate().scaleX(1f).scaleY(1f)
+                    .setDuration(requireContext().getResources().getInteger(R.integer.motion_fast))
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                    .start();
             Toast.makeText(requireContext(),
                     added ? R.string.workshop_favorite_added : R.string.workshop_favorite_removed,
                     Toast.LENGTH_SHORT).show();
@@ -412,7 +424,8 @@ public class WorkshopFragment extends Fragment {
                 args.putString(ARG_TARGET_INSTANCE_NAME, parent.getString(ARG_TARGET_INSTANCE_NAME));
                 args.putString(ARG_TARGET_BUILD_VERSION, parent.getString(ARG_TARGET_BUILD_VERSION));
             }
-            NavHostFragment.findNavController(WorkshopFragment.this).navigate(R.id.action_workshop_detail, args);
+            NavHostFragment.findNavController(WorkshopFragment.this).navigate(
+                    R.id.action_workshop_detail, args, MotionAnimations.forwardNavOptions());
         }
     }
 }

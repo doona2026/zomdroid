@@ -42,6 +42,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_marginTop="8dp"
-            android:layoutAnimation="@anim/workshop_content_layout" />
+            />
     </LinearLayout>
 </ScrollView>

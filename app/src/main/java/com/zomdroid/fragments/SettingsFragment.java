@@ -23,6 +23,7 @@ import com.zomdroid.R;
 import com.zomdroid.databinding.FragmentSettingsBinding;
 import com.zomdroid.game.SuggestedPreset;
 import com.zomdroid.input.GamepadManager;
+import com.zomdroid.ui.MotionAnimations;
 
 public class SettingsFragment extends Fragment {
     /** Name of the instance whose settings this screen edits, passed by the card's gear button. */
@@ -385,7 +386,8 @@ public class SettingsFragment extends Fragment {
                     .setMessage(getString(R.string.settings_render_hint))
                     .setPositiveButton(getString(R.string.dialog_button_ok), null)
                     .setNeutralButton(getString(R.string.dialog_button_wiki), (dialog, which) -> {
-                        Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+                        Navigation.findNavController(v).navigate(
+                                R.id.wiki_fragment, null, MotionAnimations.forwardNavOptions());
                     })
                     .show();
         });
@@ -401,7 +403,7 @@ public class SettingsFragment extends Fragment {
                                    android.widget.ImageView expandIcon) {
         header.setOnClickListener(v -> {
             boolean expanded = content.getVisibility() == android.view.View.VISIBLE;
-            content.setVisibility(expanded ? android.view.View.GONE : android.view.View.VISIBLE);
+            MotionAnimations.setExpanded(content, !expanded);
             expandIcon.setImageResource(expanded
                     ? R.drawable.mt_icon_expand_more
                     : R.drawable.mt_icon_expand_less);

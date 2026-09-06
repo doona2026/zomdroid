@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.ActionMenuView;
+import androidx.core.view.GravityCompat;
 
 import androidx.core.text.HtmlCompat;
 import androidx.navigation.NavController;
@@ -41,6 +42,7 @@ import com.zomdroid.game.GameInstanceManager;
 import com.zomdroid.input.AbstractControlElement;
 import com.zomdroid.input.ControlElementDescription;
 import com.zomdroid.input.GamepadManager;
+import com.zomdroid.ui.MotionAnimations;
 
 import org.json.JSONObject;
 
@@ -113,64 +115,64 @@ public class LauncherActivity extends AppCompatActivity {
 
         binding.launcherNv.setNavigationItemSelectedListener(item -> {
             if (item.getItemId() == R.id.action_game_settings) {
-                binding.drawerLayout.close();
-                navController.navigate(R.id.action_game_settings);
+                navigateFromDrawer(R.id.action_game_settings);
+                return true;
+            } else if (item.getItemId() == R.id.action_open_settings_fragment) {
+                navigateFromDrawer(R.id.action_open_settings_fragment);
                 return true;
             } else if (item.getItemId() == R.id.action_open_controls_editor) {
                 //Intent intent = new Intent(this, ControlsEditorActivity.class);
                 //startActivity(intent);
-                binding.drawerLayout.close();
-                navController.navigate(R.id.action_open_controls_editor_launch);
+                navigateFromDrawer(R.id.action_open_controls_editor_launch);
                 return true;
             } else if (item.getItemId() == R.id.action_open_gamepad_mapper) {
                 // Navigate to gamepad mapper using NavController
-                binding.drawerLayout.close();
-                navController.navigate(R.id.action_open_gamepad_mapper);
+                navigateFromDrawer(R.id.action_open_gamepad_mapper);
                 return true;
             } else if (item.getItemId() == R.id.action_open_install_mod) {
                 // Navigate to Mod installation
-                binding.drawerLayout.close();
-                navController.navigate(R.id.action_open_install_mod);
+                navigateFromDrawer(R.id.action_open_install_mod);
                 return true;
             } else if (item.getItemId() == R.id.action_install_controls) {
-                binding.drawerLayout.close();
-                navController.navigate(R.id.action_install_controls);
+                navigateFromDrawer(R.id.action_install_controls);
+                return true;
+            } else if (item.getItemId() == R.id.action_install_saves) {
+                navigateFromDrawer(R.id.action_install_saves);
+                return true;
+            } else if (item.getItemId() == R.id.action_install_driver) {
+                navigateFromDrawer(R.id.action_install_driver);
+                return true;
+            } else if (item.getItemId() == R.id.action_export_log) {
+                navigateFromDrawer(R.id.action_export_log);
                 return true;
             } else if (item.getItemId() == R.id.action_open_optimization) {
-                binding.drawerLayout.close();
-                navController.navigate(R.id.action_open_optimization);
+                navigateFromDrawer(R.id.action_open_optimization);
                 return true;
             } else if (item.getItemId() == R.id.action_install_native_libs) {
-                binding.drawerLayout.close();
-                navController.navigate(R.id.action_install_native_libs);
+                navigateFromDrawer(R.id.action_install_native_libs);
                 return true;
             } else if (item.getItemId() == R.id.action_download_steam) {
-                binding.drawerLayout.close();
-                navController.navigate(R.id.action_download_steam);
+                navigateFromDrawer(R.id.action_download_steam);
                 return true;
             } else if (item.getItemId() == R.id.action_open_workshop_download_center) {
-                binding.drawerLayout.close();
-                navController.navigate(R.id.action_open_workshop_download_center);
+                navigateFromDrawer(R.id.action_open_workshop_download_center);
                 return true;
             } else if (item.getItemId() == R.id.action_open_workshop) {
-                binding.drawerLayout.close();
-                navController.navigate(R.id.action_open_workshop);
+                navigateFromDrawer(R.id.action_open_workshop);
                 return true;
             } else if (item.getItemId() == R.id.action_open_workshop_account) {
-                binding.drawerLayout.close();
-                navController.navigate(R.id.action_open_workshop_account);
+                navigateFromDrawer(R.id.action_open_workshop_account);
                 return true;
             } else if (item.getItemId() == R.id.action_open_workshop_library) {
-                binding.drawerLayout.close();
-                navController.navigate(R.id.action_open_workshop_library);
+                navigateFromDrawer(R.id.action_open_workshop_library);
                 return true;
             } else if (item.getItemId() == R.id.action_bug_report) {
-                binding.drawerLayout.close();
+                closeDrawerForNavigation();
                 sendBugReport();
                 return true;
         }
 
-        binding.drawerLayout.close();
+        closeDrawerForNavigation();
 
             return NavigationUI.onNavDestinationSelected(item, navController)
                     || super.onOptionsItemSelected(item);
@@ -178,8 +180,7 @@ public class LauncherActivity extends AppCompatActivity {
 
         // Bottom icon row (Wiki / Donate / Reddit / Version) — icons only, pinned to drawer bottom.
         binding.navBottomWiki.setOnClickListener(v -> {
-            binding.drawerLayout.close();
-            navController.navigate(R.id.action_open_wiki_fragment);
+            navigateFromDrawer(R.id.action_open_wiki_fragment);
         });
         binding.navBottomDonate.setOnClickListener(v -> showDonateDialog());
         binding.navBottomReddit.setOnClickListener(v -> showRedditDialog());
@@ -189,6 +190,15 @@ public class LauncherActivity extends AppCompatActivity {
         // Silent, at-most-once-a-day check so the GitHub icon can badge a newer release without
         // the user having to tap it. A manual tap still runs checkForUpdate() and shows a dialog.
         maybeDailyUpdateCheck();
+    }
+
+    private void closeDrawerForNavigation() {
+        binding.drawerLayout.closeDrawer(GravityCompat.START, false);
+    }
+
+    private void navigateFromDrawer(int actionId) {
+        closeDrawerForNavigation();
+        navController.navigate(actionId, null, MotionAnimations.forwardNavOptions());
     }
 
     private void showDonateDialog() {
@@ -304,12 +314,7 @@ public class LauncherActivity extends AppCompatActivity {
     }
 
     private NavOptions workshopForwardNavOptions() {
-        return new NavOptions.Builder()
-                .setEnterAnim(R.anim.workshop_enter)
-                .setExitAnim(R.anim.workshop_exit)
-                .setPopEnterAnim(R.anim.workshop_pop_enter)
-                .setPopExitAnim(R.anim.workshop_pop_exit)
-                .build();
+        return MotionAnimations.forwardNavOptions();
     }
 
     private void checkForUpdate() {

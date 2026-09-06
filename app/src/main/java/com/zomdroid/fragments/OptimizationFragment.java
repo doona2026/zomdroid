@@ -35,6 +35,7 @@ import com.zomdroid.databinding.FragmentOptimizationBinding;
 import com.zomdroid.databinding.TaskProgressDialogBinding;
 import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
+import com.zomdroid.ui.MotionAnimations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -212,7 +213,8 @@ public class OptimizationFragment extends Fragment {
             if (selected != null) {
                 args.putString(SettingsFragment.ARG_INSTANCE, selected.getName());
             }
-            Navigation.findNavController(v).navigate(R.id.settings_fragment, args);
+            Navigation.findNavController(v).navigate(
+                    R.id.settings_fragment, args, MotionAnimations.forwardNavOptions());
         });
 
         // BetterFPS help
@@ -642,7 +644,7 @@ public class OptimizationFragment extends Fragment {
                                   android.widget.ImageView expandIcon) {
         header.setOnClickListener(v -> {
             boolean expanded = content.getVisibility() == android.view.View.VISIBLE;
-            content.setVisibility(expanded ? android.view.View.GONE : android.view.View.VISIBLE);
+            MotionAnimations.setExpanded(content, !expanded);
             expandIcon.setImageResource(expanded
                     ? R.drawable.mt_icon_expand_more
                     : R.drawable.mt_icon_expand_less);

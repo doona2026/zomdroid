@@ -73,6 +73,29 @@
 
 ## Stage 7 Full Validation
 
+## Unified Animation System
+
+- Stage 1 completed: 2026-09-06
+- Design doc: `docs/superpowers/specs/2026-09-06-unified-animation-design.md`
+- Stage 2 completed: 2026-09-06
+- Plan doc: `docs/superpowers/plans/2026-09-06-unified-animation-plan.md`
+- Stage 3 completed: 2026-09-06
+- Stage 4 completed: 2026-09-06
+- Implementation: Added shared motion tokens/resources and `com.zomdroid.ui.MotionAnimations`; unified
+  navigation and direct navigation transitions; replaced Workshop/list layout animations with one-shot
+  visible-child entry, async loading/empty transitions, collapsible panels, favorite feedback, and
+  control-editor timing; added lifecycle cancellation and removed obsolete Workshop animation resources.
+- Validation: `git diff --check`, `:app:testDebugUnitTest`, and `:app:assembleDebug` pass. APK:
+  `app/build/outputs/apk/debug/zomdroid-debug-1.4.9.apk`.
+- Follow-up fix: Restored the original Workshop page transition cadence globally: 8% horizontal
+  push with alpha, 220ms enter and 180ms exit; the animation resources keep the original XML
+  percentage form so Android's animation inflater resolves the values correctly.
+- Navigation follow-up: Drawer navigation now closes the drawer without competing animation and
+  explicitly passes the shared page NavOptions for every navigable drawer entry, including app settings,
+  saves, driver, and export-log pages; parameterized action and detail entry points do the same.
+- Current status: Code implementation and host-side validation complete. MuMu real-device verification is
+  pending with the user.
+
 ## Workshop Direct Access Follow-up
 
 - Implemented at: 2026-09-04

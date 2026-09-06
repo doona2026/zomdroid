@@ -29,6 +29,7 @@ import com.zomdroid.workshop.library.ModLibraryRepository;
 import com.zomdroid.workshop.install.WorkshopLibraryInstaller;
 import com.zomdroid.workshop.install.WorkshopInstallCoordinator;
 import com.zomdroid.workshop.WorkshopFileAccess;
+import com.zomdroid.ui.MotionAnimations;
 
 import java.util.List;
 import java.util.HashMap;
@@ -54,6 +55,13 @@ public class WorkshopModLibraryFragment extends Fragment {
     }
 
     @Override
+    public void onDestroyView() {
+        MotionAnimations.cancel(list);
+        list = null;
+        super.onDestroyView();
+    }
+
+    @Override
     public void onDestroy() {
         installPreflightExecutor.shutdownNow();
         super.onDestroy();
@@ -69,6 +77,7 @@ public class WorkshopModLibraryFragment extends Fragment {
             return;
         }
         for (ModLibraryEntry entry : entries) addEntry(entry);
+        list.post(() -> MotionAnimations.animateFirstVisibleChildren(list));
     }
 
     private void addEntry(ModLibraryEntry entry) {

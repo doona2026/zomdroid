@@ -32,6 +32,7 @@ import com.zomdroid.workshop.auth.SteamAccountSummary;
 import com.zomdroid.workshop.auth.SteamAccountsSnapshot;
 import com.zomdroid.workshop.auth.SteamAuthRuntime;
 import com.zomdroid.workshop.steam.protocol.SteamAccountSession;
+import com.zomdroid.ui.MotionAnimations;
 import androidx.navigation.fragment.NavHostFragment;
 
 import java.util.concurrent.CompletableFuture;
@@ -50,6 +51,7 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
     private TextView tvStatus, tvAccountStatus;
     private MaterialButtonToggleGroup buildToggle;
     private Context appCtx;
+    private Boolean busyUiState;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -99,23 +101,22 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
         scrollLogToBottom();
         boolean busy = st.isDownloading();
         setControlsEnabled(!busy);
-        btnCancel.setVisibility(busy ? View.VISIBLE : View.GONE);
+        updateBusyUi(busy, false);
         if (busy) {
-            progress.setVisibility(View.VISIBLE);
             if (st.isIndeterminate() || st.getPercent() < 0) {
                 progress.setIndeterminate(true);
             } else {
                 progress.setIndeterminate(false);
                 progress.setProgress(st.getPercent());
             }
-        } else {
-            progress.setVisibility(View.GONE);
         }
     }
 
     @Override
     public void onDestroyView() {
         SteamDownloadState.get().clearView(this);
+        MotionAnimations.cancel(btnStart, btnCancel, progress);
+        busyUiState = null;
         super.onDestroyView();
     }
 
@@ -247,16 +248,31 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
 
     private void openAccountManagement() {
         if (!isAdded()) return;
-        NavHostFragment.findNavController(this).navigate(R.id.workshop_account_fragment);
+        NavHostFragment.findNavController(this).navigate(
+                R.id.workshop_account_fragment, null, MotionAnimations.forwardNavOptions());
     }
 
     private void beginUi() {
         setControlsEnabled(false);
-        btnCancel.setVisibility(View.VISIBLE);
+        updateBusyUi(true, true);
         tvStatus.setText("");
-        progress.setVisibility(View.VISIBLE);
         progress.setIndeterminate(true);
         appendLog("Connecting to Steam…");
+    }
+
+    private void updateBusyUi(boolean busy, boolean animate) {
+        if (btnStart == null || btnCancel == null || progress == null) return;
+        boolean changed = busyUiState == null || MotionAnimations.shouldCrossfade(busyUiState, busy);
+        if (animate && changed) {
+            MotionAnimations.crossfade(busy ? btnStart : btnCancel, busy ? btnCancel : btnStart);
+            MotionAnimations.setExpanded(progress, busy);
+        } else {
+            btnStart.setVisibility(busy ? View.GONE : View.VISIBLE);
+            btnCancel.setVisibility(busy ? View.VISIBLE : View.GONE);
+            if (busy) progress.setVisibility(View.VISIBLE);
+            else progress.setVisibility(View.GONE);
+        }
+        busyUiState = busy;
     }
 
     private void confirmCancel() {
@@ -320,8 +336,7 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
             refreshAccountStatus();
         }
         setControlsEnabled(true);
-        if (progress != null) progress.setVisibility(View.GONE);
-        if (btnCancel != null) btnCancel.setVisibility(View.GONE);
+        updateBusyUi(false, true);
         Toast.makeText(appCtx, message, Toast.LENGTH_LONG).show();
     }
 

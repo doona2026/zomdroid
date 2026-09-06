@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.animation.AnimationUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +33,7 @@ import com.zomdroid.workshop.download.DownloadCenterTaskState;
 import com.zomdroid.workshop.download.WorkshopDownloadForegroundService;
 import com.zomdroid.workshop.thirdparty.GgntwFallbackRuntime;
 import com.zomdroid.workshop.auth.SteamAuthRepository;
+import com.zomdroid.ui.MotionAnimations;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -90,6 +90,8 @@ public class WorkshopDownloadCenterFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        MotionAnimations.cancel(tasksContainer, emptyView);
+        for (View taskView : taskViews.values()) MotionAnimations.cancel(taskView);
         if (observation != null) observation.cancel(null);
         observation = null;
         mainHandler.removeCallbacks(scheduledRender);
@@ -150,8 +152,7 @@ public class WorkshopDownloadCenterFragment extends Fragment {
                 row = createTaskView();
                 taskViews.put(task.getId(), row);
                 tasksContainer.addView(row, index);
-                row.startAnimation(AnimationUtils.loadAnimation(
-                        requireContext(), R.anim.workshop_content_enter));
+                MotionAnimations.animateContentEnter(row, 0L);
             } else if (tasksContainer.indexOfChild(row) != index) {
                 tasksContainer.removeView(row);
                 tasksContainer.addView(row, index);
@@ -382,8 +383,9 @@ public class WorkshopDownloadCenterFragment extends Fragment {
                 .setMessage(R.string.workshop_download_center_auth_message)
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.workshop_download_center_open_accounts,
-                        (dialog, which) -> androidx.navigation.fragment.NavHostFragment.findNavController(this)
-                                .navigate(R.id.action_download_center_open_workshop_account))
+                                (dialog, which) -> androidx.navigation.fragment.NavHostFragment.findNavController(this)
+                                .navigate(R.id.action_download_center_open_workshop_account, null,
+                                        MotionAnimations.forwardNavOptions()))
                 .setNeutralButton(R.string.workshop_download_center_keep_third_party,
                         (dialog, which) -> showFallbackNotice(task))
                 .show();

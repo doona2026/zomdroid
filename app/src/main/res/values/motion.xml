@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="motion_fast">160</integer>
+    <integer name="motion_standard">220</integer>
+    <integer name="motion_emphasis">280</integer>
+    <integer name="motion_page_enter">220</integer>
+    <integer name="motion_page_exit">180</integer>
+    <dimen name="motion_content_offset_dp">12dp</dimen>
+    <integer name="motion_list_stagger_ms">24</integer>
+    <integer name="motion_list_max_staggered_items">6</integer>
+    <item name="motion_content_animated" type="id" />
+</resources>

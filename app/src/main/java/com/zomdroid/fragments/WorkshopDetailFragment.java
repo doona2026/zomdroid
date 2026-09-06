@@ -22,6 +22,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,6 +41,7 @@ import com.zomdroid.workshop.download.DownloadCenterManager;
 import com.zomdroid.workshop.download.DownloadCenterManagerProvider;
 import com.zomdroid.workshop.download.WorkshopDownloadForegroundService;
 import com.zomdroid.workshop.favorites.WorkshopFavoritesRepository;
+import com.zomdroid.ui.MotionAnimations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +69,7 @@ public class WorkshopDetailFragment extends Fragment {
         imageAdapter = new WorkshopImageAdapter();
         favoritesRepository = new WorkshopFavoritesRepository(requireContext());
         image.setLayoutManager(imageLayoutManager);
+        image.setItemAnimator(new DefaultItemAnimator());
         image.setAdapter(imageAdapter);
         new PagerSnapHelper().attachToRecyclerView(image);
         image.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -123,12 +126,12 @@ public class WorkshopDetailFragment extends Fragment {
                 : java.util.Collections.singletonList(item.getPreviewImageUrl()));
         WorkshopCatalogRuntime.detail(requireContext(), item, true, new WorkshopCatalogRuntime.DetailCallback() {
             @Override public void onSuccess(WorkshopItemDetail result) {
-                if (!isAdded()) return;
+                if (!isAdded() || getView() == null) return;
                 detail = result;
                 render(result);
             }
             @Override public void onError(String message) {
-                if (!isAdded()) return;
+                if (!isAdded() || getView() == null) return;
                 status.setText(message);
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
             }
@@ -154,15 +157,18 @@ public class WorkshopDetailFragment extends Fragment {
             galleryImageUrls = java.util.Collections.singletonList(value.getPreviewImageUrl());
         }
         imageAdapter.setItems(galleryImageUrls);
-        image.scheduleLayoutAnimation();
         download.setEnabled(true);
         dependencyDownload.setVisibility(value.getRequiredItems().isEmpty() ? View.GONE : View.VISIBLE);
         renderDependencies(value.getRequiredItems());
         renderComments(value.getComments());
         if (value.getCommentThreadContext() != null) {
             WorkshopCatalogRuntime.comments(requireContext(), value, 1, new WorkshopCatalogRuntime.CommentsCallback() {
-                @Override public void onSuccess(WorkshopCommentPage page) { if (isAdded()) renderComments(page.getComments()); }
-                @Override public void onError(String message) { if (isAdded()) renderComments(java.util.Collections.emptyList()); }
+                @Override public void onSuccess(WorkshopCommentPage page) {
+                    if (isAdded() && getView() != null) renderComments(page.getComments());
+                }
+                @Override public void onError(String message) {
+                    if (isAdded() && getView() != null) renderComments(java.util.Collections.emptyList());
+                }
             });
         }
         status.setText(R.string.workshop_loaded);
@@ -221,7 +227,7 @@ public class WorkshopDetailFragment extends Fragment {
         List<WorkshopDescriptionBlock> blocks = value.getDescriptionBlocks();
         if (blocks.isEmpty()) {
             addDescriptionText(container, value.getDescription());
-            container.scheduleLayoutAnimation();
+            container.post(() -> MotionAnimations.animateFirstVisibleChildren(container));
             return;
         }
         for (WorkshopDescriptionBlock block : blocks) {
@@ -241,7 +247,7 @@ public class WorkshopDetailFragment extends Fragment {
                 WorkshopCatalogRuntime.loadImage(requireContext(), block.getImageUrl(), imageView);
             }
         }
-        container.scheduleLayoutAnimation();
+        container.post(() -> MotionAnimations.animateFirstVisibleChildren(container));
     }
 
     private void addDescriptionText(LinearLayout container, String text) {
@@ -305,7 +311,7 @@ public class WorkshopDetailFragment extends Fragment {
             if (!urls.isEmpty()) {
                 image.scrollToPosition(0);
             }
-            image.scheduleLayoutAnimation();
+            image.post(() -> MotionAnimations.animateFirstVisibleChildren(image));
             updateImageTransforms();
             updateImagePage();
         }
@@ -351,7 +357,7 @@ public class WorkshopDetailFragment extends Fragment {
             row.findViewById(R.id.workshop_dependency_download).setOnClickListener(v -> enqueue(WorkshopCatalogRuntime.requiredPublishedFileId(dependency), dependency.getTitle()));
             container.addView(row);
         }
-        container.scheduleLayoutAnimation();
+        container.post(() -> MotionAnimations.animateFirstVisibleChildren(container));
     }
 
     private void renderComments(List<WorkshopComment> comments) {
@@ -368,13 +374,27 @@ public class WorkshopDetailFragment extends Fragment {
             empty.setText(R.string.workshop_comments_unavailable);
             container.addView(empty);
         }
-        container.scheduleLayoutAnimation();
+        container.post(() -> MotionAnimations.animateFirstVisibleChildren(container));
     }
 
     private void openSteamPage() {
         if (detail == null) return;
         try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(detail.getWorkshopUrl()))); }
         catch (Exception e) { Toast.makeText(requireContext(), R.string.workshop_open_steam_failed, Toast.LENGTH_SHORT).show(); }
+    }
+
+    @Override
+    public void onDestroyView() {
+        MotionAnimations.cancel(image, status, download, dependencyDownload);
+        image = null;
+        imagePage = null;
+        imageLayoutManager = null;
+        imageAdapter = null;
+        status = null;
+        download = null;
+        dependencyDownload = null;
+        favoritesRepository = null;
+        super.onDestroyView();
     }
 
     private void enqueueDetail() {

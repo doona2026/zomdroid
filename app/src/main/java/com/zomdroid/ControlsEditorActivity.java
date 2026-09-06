@@ -36,6 +36,7 @@ import com.zomdroid.input.GLFWBinding;
 import com.zomdroid.input.InputControlsView;
 import com.zomdroid.databinding.ActivityControlsEditorBinding;
 import com.zomdroid.databinding.ElementBindingFieldBinding;
+import com.zomdroid.ui.MotionAnimations;
 
 public class ControlsEditorActivity extends AppCompatActivity {
     public static final String EXTRA_BACKGROUND_PATH = "com.zomdroid.ControlsEditorActivity.EXTRA_BACKGROUND_PATH";
@@ -466,12 +467,13 @@ public class ControlsEditorActivity extends AppCompatActivity {
                 binding.controlElementSettingsCv.setLayoutParams(params);
 
                 float startX = this.fromLeft ? -binding.controlElementSettingsCv.getWidth() : binding.controlElementSettingsCv.getWidth();
+                MotionAnimations.cancel(binding.controlElementSettingsCv);
                 binding.controlElementSettingsCv.setTranslationX(startX);
 
                 binding.controlElementSettingsCv.animate()
                         .withStartAction(() -> binding.controlElementSettingsCv.setVisibility(View.VISIBLE))
                         .translationX(0)
-                        .setDuration(300)
+                        .setDuration(getResources().getInteger(R.integer.motion_standard))
                         .setInterpolator(new DecelerateInterpolator())
                         .start();
             }
@@ -482,10 +484,11 @@ public class ControlsEditorActivity extends AppCompatActivity {
                 boolean exitLeft = (params.gravity & Gravity.START) == Gravity.START;
                 float endX = exitLeft ? -binding.controlElementSettingsCv.getWidth() : binding.controlElementSettingsCv.getWidth();
 
+                MotionAnimations.cancel(binding.controlElementSettingsCv);
                 binding.controlElementSettingsCv.animate()
                         .withEndAction(() -> binding.controlElementSettingsCv.setVisibility(View.INVISIBLE))
                         .translationX(endX)
-                        .setDuration(300)
+                        .setDuration(getResources().getInteger(R.integer.motion_standard))
                         .setInterpolator(new AccelerateInterpolator())
                         .start();
             }

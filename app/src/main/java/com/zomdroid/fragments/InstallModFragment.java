@@ -29,6 +29,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.zomdroid.C;
 import com.zomdroid.InstallerService;
 import com.zomdroid.R;
+import com.zomdroid.ui.MotionAnimations;
 import com.zomdroid.databinding.FragmentInstallModBinding;
 import com.zomdroid.databinding.TaskProgressDialogBinding;
 import com.zomdroid.game.GameInstance;
@@ -225,7 +226,8 @@ public class InstallModFragment extends Fragment {
                 args.putString(WorkshopFragment.ARG_TARGET_INSTANCE_NAME, selected.getName());
                 args.putString(WorkshopFragment.ARG_TARGET_BUILD_VERSION, selected.getBuildVersion());
             }
-            NavHostFragment.findNavController(this).navigate(R.id.action_install_mod_open_workshop, args);
+            NavHostFragment.findNavController(this).navigate(
+                    R.id.action_install_mod_open_workshop, args, MotionAnimations.forwardNavOptions());
         });
 
         // Install button (ZIP)

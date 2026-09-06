@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,6 +22,7 @@ import com.zomdroid.workshop.data.WorkshopBrowseItem;
 import com.zomdroid.workshop.data.WorkshopCatalogRuntime;
 import com.zomdroid.workshop.favorites.WorkshopFavorite;
 import com.zomdroid.workshop.favorites.WorkshopFavoritesRepository;
+import com.zomdroid.ui.MotionAnimations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +33,7 @@ public class WorkshopFavoritesFragment extends Fragment {
     private TextView empty;
     private FavoritesAdapter adapter;
     private WorkshopFavoritesRepository favoritesRepository;
+    private Boolean lastHasFavorites;
 
     @Nullable
     @Override
@@ -42,6 +45,7 @@ public class WorkshopFavoritesFragment extends Fragment {
         favoritesRepository = new WorkshopFavoritesRepository(requireContext());
         adapter = new FavoritesAdapter();
         list.setLayoutManager(new LinearLayoutManager(requireContext()));
+        list.setItemAnimator(new DefaultItemAnimator());
         list.setAdapter(adapter);
         renderFavorites();
         return view;
@@ -66,9 +70,15 @@ public class WorkshopFavoritesFragment extends Fragment {
         }
         adapter.setItems(items);
         boolean hasFavorites = !items.isEmpty();
-        list.setVisibility(hasFavorites ? View.VISIBLE : View.GONE);
-        empty.setVisibility(hasFavorites ? View.GONE : View.VISIBLE);
-        if (hasFavorites) list.scheduleLayoutAnimation();
+        if (lastHasFavorites == null) {
+            list.setVisibility(hasFavorites ? View.VISIBLE : View.GONE);
+            empty.setVisibility(hasFavorites ? View.GONE : View.VISIBLE);
+            if (hasFavorites) list.post(() -> MotionAnimations.animateFirstVisibleChildren(list));
+        } else if (MotionAnimations.shouldCrossfade(lastHasFavorites, hasFavorites)) {
+            MotionAnimations.crossfade(hasFavorites ? empty : list, hasFavorites ? list : empty);
+            if (hasFavorites) list.post(() -> MotionAnimations.animateFirstVisibleChildren(list));
+        }
+        lastHasFavorites = hasFavorites;
     }
 
     private void openDetails(WorkshopBrowseItem item) {
@@ -86,14 +96,17 @@ public class WorkshopFavoritesFragment extends Fragment {
             args.putString(WorkshopFragment.ARG_TARGET_BUILD_VERSION,
                     parent.getString(WorkshopFragment.ARG_TARGET_BUILD_VERSION));
         }
-        NavHostFragment.findNavController(this).navigate(R.id.action_workshop_favorite_detail, args);
+        NavHostFragment.findNavController(this).navigate(
+                R.id.action_workshop_favorite_detail, args, MotionAnimations.forwardNavOptions());
     }
 
     @Override
     public void onDestroyView() {
+        MotionAnimations.cancel(list, empty);
         list = null;
         empty = null;
         adapter = null;
+        lastHasFavorites = null;
         super.onDestroyView();
     }
 

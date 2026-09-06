@@ -30,6 +30,7 @@ import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.InstallationPreset;
 import com.zomdroid.game.GameInstanceManager;
 import com.zomdroid.game.PresetManager;
+import com.zomdroid.ui.MotionAnimations;
 
 import java.nio.file.FileSystemException;
 import java.util.ArrayList;
@@ -148,7 +149,8 @@ public class NewGameInstanceFragment extends Fragment {
                     .setMessage(R.string.native_libs_dialog_message)
                     .setPositiveButton(R.string.dialog_button_ok, null)
                     .setNeutralButton(R.string.dialog_button_wiki, (dialog, which) ->
-                            Navigation.findNavController(v).navigate(R.id.wiki_fragment))
+                            Navigation.findNavController(v).navigate(
+                                    R.id.wiki_fragment, null, MotionAnimations.forwardNavOptions()))
                     .show();
         });
 

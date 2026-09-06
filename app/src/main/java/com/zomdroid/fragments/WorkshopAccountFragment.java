@@ -19,6 +19,7 @@ import com.zomdroid.R;
 import com.zomdroid.workshop.auth.SteamAccountsSnapshot;
 import com.zomdroid.workshop.auth.SteamAccountSummary;
 import com.zomdroid.workshop.auth.SteamAuthRuntime;
+import com.zomdroid.ui.MotionAnimations;
 
 public class WorkshopAccountFragment extends Fragment {
     private LinearLayout accounts;
@@ -101,7 +102,7 @@ public class WorkshopAccountFragment extends Fragment {
             remove.setOnClickListener(v -> SteamAuthRuntime.remove(requireContext(), account.getAccountId(), new Callback()));
             accounts.addView(remove);
         }
-        accounts.scheduleLayoutAnimation();
+        accounts.post(() -> MotionAnimations.animateFirstVisibleChildren(accounts));
         if (snapshot.getAccounts().isEmpty()) status.setText(R.string.workshop_account_anonymous);
     }
 
@@ -112,7 +113,7 @@ public class WorkshopAccountFragment extends Fragment {
 
     private class Callback implements SteamAuthRuntime.Callback {
         @Override public void onResult(SteamAuthRuntime.Result result) {
-            if (!isAdded()) return;
+            if (!isAdded() || getView() == null) return;
             if ("snapshot".equals(result.getKind()) || "success".equals(result.getKind())) {
                 awaitingConfirmation = false;
                 setBusy(false, R.string.workshop_account_ready);
@@ -129,5 +130,15 @@ public class WorkshopAccountFragment extends Fragment {
                 status.append("\n" + (result.getMessage() == null ? "" : result.getMessage()));
             }
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        MotionAnimations.cancel(accounts, status, username, password);
+        accounts = null;
+        status = null;
+        username = null;
+        password = null;
+        super.onDestroyView();
     }
 }

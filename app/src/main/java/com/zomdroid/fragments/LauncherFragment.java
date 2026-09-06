@@ -41,6 +41,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -57,6 +58,7 @@ import com.zomdroid.game.BackupManager;
 import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
 import com.zomdroid.game.SuggestedPreset;
+import com.zomdroid.ui.MotionAnimations;
 import android.widget.ImageView;
 
 public class LauncherFragment extends Fragment {
@@ -184,7 +186,8 @@ public class LauncherFragment extends Fragment {
                                 .setMessage(R.string.game_files_missing)
                                 .setCancelable(true)
                                 .setPositiveButton(R.string.dialog_button_view_guide, (dialog, which) -> {
-                                    Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+                                    Navigation.findNavController(v).navigate(
+                                            R.id.wiki_fragment, null, MotionAnimations.forwardNavOptions());
                                 })
                                 .setNegativeButton(R.string.dialog_button_close, null)
                                 .create()
@@ -196,7 +199,8 @@ public class LauncherFragment extends Fragment {
                                 .setMessage(R.string.game_files_not_for_linux)
                                 .setCancelable(true)
                                 .setPositiveButton(R.string.dialog_button_view_guide, (dialog, which) -> {
-                                    Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+                                    Navigation.findNavController(v).navigate(
+                                            R.id.wiki_fragment, null, MotionAnimations.forwardNavOptions());
                                 })
                                 .setNegativeButton(R.string.dialog_button_close, null)
                                 .create()
@@ -246,7 +250,7 @@ public class LauncherFragment extends Fragment {
                     Bundle args = new Bundle();
                     args.putString(SettingsFragment.ARG_INSTANCE, gameInstance.getName());
                     Navigation.findNavController(v)
-                            .navigate(R.id.action_open_instance_settings, args);
+                            .navigate(R.id.action_open_instance_settings, args, MotionAnimations.forwardNavOptions());
                 });
 
                 moreIb.setOnClickListener(v -> {
@@ -314,7 +318,10 @@ public class LauncherFragment extends Fragment {
             }
         };
         binding.gameInstancesRv.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.gameInstancesRv.setItemAnimator(new DefaultItemAnimator());
         binding.gameInstancesRv.setAdapter(adapter);
+        binding.gameInstancesRv.post(() -> MotionAnimations.animateFirstVisibleChildren(
+                binding.gameInstancesRv));
 
         binding.gameInstancesRv.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             @NonNull
@@ -342,7 +349,8 @@ public class LauncherFragment extends Fragment {
             @Override
             public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
                 if (menuItem.getItemId() == R.id.action_new_game_instance) {
-                    Navigation.findNavController(view).navigate(R.id.new_game_instance_fragment);
+                    Navigation.findNavController(view).navigate(
+                            R.id.new_game_instance_fragment, null, MotionAnimations.forwardNavOptions());
                     return true;
                 }
                 return false;
@@ -617,7 +625,8 @@ public class LauncherFragment extends Fragment {
                     Bundle presetArgs = new Bundle();
                     presetArgs.putString(SettingsFragment.ARG_INSTANCE, instanceName);
                     Navigation.findNavController(requireView())
-                            .navigate(R.id.action_open_instance_settings, presetArgs);
+                            .navigate(R.id.action_open_instance_settings, presetArgs,
+                                    MotionAnimations.forwardNavOptions());
                 })
                 .show();
     }
