@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/action_installed_mod_details"
+        android:title="@string/workshop_installed_action_details" app:showAsAction="never" />
+    <item android:id="@+id/action_installed_mod_workshop"
+        android:title="@string/workshop_installed_action_workshop" app:showAsAction="never" />
+    <item android:id="@+id/action_installed_mod_open_folder"
+        android:title="@string/workshop_installed_action_open_folder" app:showAsAction="never" />
+    <item android:id="@+id/action_installed_mod_delete"
+        android:title="@string/workshop_installed_action_delete" app:showAsAction="never" />
+</menu>

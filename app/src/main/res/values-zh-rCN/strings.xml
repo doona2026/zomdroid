@@ -680,6 +680,57 @@
     <string name="workshop_library_menu">Mod 库</string>
     <string name="workshop_library_more">更多模组库操作</string>
 
+    <!-- 已安装 Mod 库 -->
+    <string name="workshop_installed_title">已安装 Mod</string>
+    <string name="workshop_library_shared_title">共享 Workshop Mod 库</string>
+    <string name="workshop_installed_instance">实例</string>
+    <string name="workshop_installed_refresh">刷新已安装 Mod</string>
+    <string name="workshop_installed_search_hint">搜索名称、Mod ID 或文件夹</string>
+    <string name="workshop_installed_summary_format">%1$s · 已安装 %2$d 个 Mod · 忽略 %3$d 个目录 · 更新于 %4$s</string>
+    <string name="workshop_installed_summary_directory_missing">实例“%1$s”还没有 Zomboid/mods 目录。</string>
+    <string name="workshop_installed_scanning">正在扫描已安装 Mod…</string>
+    <string name="workshop_installed_empty">没有找到已安装的 Mod。</string>
+    <string name="workshop_installed_missing_directory">此实例还没有创建 Zomboid/mods 目录。</string>
+    <string name="workshop_installed_no_instance">没有可用的 Zomboid 实例。</string>
+    <string name="workshop_installed_no_instance_message">请先创建实例，再查看其中已安装的 Mod。</string>
+    <string name="workshop_installed_return_launcher">返回启动器</string>
+    <string name="workshop_installed_no_matches">没有匹配搜索条件的已安装 Mod。</string>
+    <string name="workshop_installed_retry">请再次刷新。</string>
+    <string name="workshop_installed_sort_name">名称（A–Z）</string>
+    <string name="workshop_installed_sort_recent">最近修改</string>
+    <string name="workshop_installed_sort_oldest">最早修改</string>
+    <string name="workshop_installed_icon">Mod 图标</string>
+    <string name="workshop_installed_more">更多已安装 Mod 操作</string>
+    <string name="workshop_installed_meta_format">ID：%1$s · %2$s · 修改于 %3$s</string>
+    <string name="workshop_installed_id_missing">缺失</string>
+    <string name="workshop_installed_incomplete">元数据不完整</string>
+    <string name="workshop_installed_duplicate_id">Mod ID 重复</string>
+    <string name="workshop_installed_unmatched">没有本地 Workshop 匹配</string>
+    <string name="workshop_installed_workshop_format">Workshop：%1$s（%2$d）</string>
+    <string name="workshop_installed_action_details">查看本地详情</string>
+    <string name="workshop_installed_action_workshop">打开 Workshop 详情</string>
+    <string name="workshop_installed_action_open_folder">打开 Mod 文件夹</string>
+    <string name="workshop_installed_action_delete">删除 Mod</string>
+    <string name="workshop_installed_details_instance">实例</string>
+    <string name="workshop_installed_details_folder">完整文件夹路径</string>
+    <string name="workshop_installed_details_relative_path">相对路径</string>
+    <string name="workshop_installed_details_id">Mod ID</string>
+    <string name="workshop_installed_details_size">大小</string>
+    <string name="workshop_installed_details_modified">最后修改</string>
+    <string name="workshop_installed_details_description">描述</string>
+    <string name="workshop_installed_details_mod_info">mod.info 字段</string>
+    <string name="workshop_installed_open_folder_failed">无法打开 Mod 文件夹。路径：%1$s</string>
+    <string name="workshop_installed_delete_title">删除已安装的 Mod？</string>
+    <string name="workshop_installed_delete_message_format">确定要从实例“%2$s”删除“%1$s”吗？\n\n完整路径：\n%3$s\n\n只会删除这个 Mod 文件夹。</string>
+    <string name="workshop_installed_delete_success">已删除 %1$s。</string>
+    <string name="workshop_installed_delete_failed">无法删除 Mod：%1$s</string>
+    <string name="workshop_installed_scan_failed">扫描已安装 Mod 失败：%1$s</string>
+    <string-array name="workshop_installed_sort_options">
+        <item>@string/workshop_installed_sort_name</item>
+        <item>@string/workshop_installed_sort_recent</item>
+        <item>@string/workshop_installed_sort_oldest</item>
+    </string-array>
+
     <!-- ===== Native Libs strings ===== -->
     <string name="native_libs_menu">导入多人游戏库 (B41)</string>
     <string name="native_libs_hint">🎮 在这里可以安装额外的本机库 libRakNet64.so 和 libZNetNoSteam64.so，用于 Build 41 的多人游戏支持。\n\n这些库最早出现在 Build 42.12+ 中。如需在 Build 41 上使用，请从 Build 42 实例文件夹复制：game/android/arm64-v8a — 这不是错误。</string>

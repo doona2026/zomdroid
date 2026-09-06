@@ -636,4 +636,54 @@
     <string name="preset_applied">Пресет применён: %1$s</string>
     <string name="preset_dialog_gpu_ng">Обнаружено: %1$s. Выставлен рендерер NG_GL4ES — он работает на любом GPU и не требует драйвера. Текстуры сжимаются через ETC2 в полном разрешении, поэтому память экономится без потери качества картинки.</string>
     <string name="preset_dialog_gpu_ng_unnamed">Выставлен рендерер NG_GL4ES — он работает на любом GPU и не требует драйвера. Текстуры сжимаются через ETC2 в полном разрешении, поэтому память экономится без потери качества картинки.</string>
+    <!-- Installed Mod library -->
+    <string name="workshop_installed_title">Установленные моды</string>
+    <string name="workshop_library_shared_title">Общая библиотека Workshop</string>
+    <string name="workshop_installed_instance">Экземпляр</string>
+    <string name="workshop_installed_refresh">Обновить список установленных модов</string>
+    <string name="workshop_installed_search_hint">Поиск по названию, Mod ID или папке</string>
+    <string name="workshop_installed_summary_format">%1$s · установлено модов: %2$d · пропущено папок: %3$d · обновлено: %4$s</string>
+    <string name="workshop_installed_summary_directory_missing">В экземпляре %1$s пока нет каталога Zomboid/mods.</string>
+    <string name="workshop_installed_scanning">Сканирование установленных модов…</string>
+    <string name="workshop_installed_empty">Установленные моды не найдены.</string>
+    <string name="workshop_installed_missing_directory">Этот экземпляр ещё не создал каталог Zomboid/mods.</string>
+    <string name="workshop_installed_no_instance">Нет доступных экземпляров Zomboid.</string>
+    <string name="workshop_installed_no_instance_message">Сначала создайте экземпляр, чтобы просмотреть его установленные моды.</string>
+    <string name="workshop_installed_return_launcher">Вернуться к лаунчеру</string>
+    <string name="workshop_installed_no_matches">Нет установленных модов, соответствующих поиску.</string>
+    <string name="workshop_installed_retry">Попробуйте обновить список ещё раз.</string>
+    <string name="workshop_installed_sort_name">Название (А–Я)</string>
+    <string name="workshop_installed_sort_recent">Недавно изменённые</string>
+    <string name="workshop_installed_sort_oldest">Давно изменённые</string>
+    <string name="workshop_installed_icon">Значок мода</string>
+    <string name="workshop_installed_more">Другие действия с установленным модом</string>
+    <string name="workshop_installed_meta_format">ID: %1$s · %2$s · изменён: %3$s</string>
+    <string name="workshop_installed_id_missing">отсутствует</string>
+    <string name="workshop_installed_incomplete">неполные метаданные</string>
+    <string name="workshop_installed_duplicate_id">повторяющийся Mod ID</string>
+    <string name="workshop_installed_unmatched">нет локального совпадения Workshop</string>
+    <string name="workshop_installed_workshop_format">Workshop: %1$s (%2$d)</string>
+    <string name="workshop_installed_action_details">Локальные сведения</string>
+    <string name="workshop_installed_action_workshop">Открыть сведения Workshop</string>
+    <string name="workshop_installed_action_open_folder">Открыть папку мода</string>
+    <string name="workshop_installed_action_delete">Удалить мод</string>
+    <string name="workshop_installed_details_instance">Экземпляр</string>
+    <string name="workshop_installed_details_folder">Полный путь к папке</string>
+    <string name="workshop_installed_details_relative_path">Относительный путь</string>
+    <string name="workshop_installed_details_id">Mod ID</string>
+    <string name="workshop_installed_details_size">Размер</string>
+    <string name="workshop_installed_details_modified">Последнее изменение</string>
+    <string name="workshop_installed_details_description">Описание</string>
+    <string name="workshop_installed_details_mod_info">Поля mod.info</string>
+    <string name="workshop_installed_open_folder_failed">Не удалось открыть папку мода. Путь: %1$s</string>
+    <string name="workshop_installed_delete_title">Удалить установленный мод?</string>
+    <string name="workshop_installed_delete_message_format">Удалить «%1$s» из экземпляра «%2$s»?\n\nПолный путь:\n%3$s\n\nБудет удалена только эта папка мода.</string>
+    <string name="workshop_installed_delete_success">Удалён мод: %1$s.</string>
+    <string name="workshop_installed_delete_failed">Не удалось удалить мод: %1$s</string>
+    <string name="workshop_installed_scan_failed">Не удалось просканировать установленные моды: %1$s</string>
+    <string-array name="workshop_installed_sort_options">
+        <item>@string/workshop_installed_sort_name</item>
+        <item>@string/workshop_installed_sort_recent</item>
+        <item>@string/workshop_installed_sort_oldest</item>
+    </string-array>
 </resources>

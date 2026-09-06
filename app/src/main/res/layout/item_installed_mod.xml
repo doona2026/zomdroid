@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/installed_mod_card"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp" android:clickable="true" android:focusable="true">
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
+        <ImageView
+            android:id="@+id/installed_mod_icon"
+            android:layout_width="52dp" android:layout_height="52dp"
+            android:contentDescription="@string/workshop_installed_icon"
+            android:scaleType="centerCrop" android:src="@drawable/mt_icon_mods" />
+        <LinearLayout
+            android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_marginStart="12dp" android:layout_weight="1" android:orientation="vertical">
+            <TextView
+                android:id="@+id/installed_mod_title"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceTitleSmall" />
+            <TextView
+                android:id="@+id/installed_mod_meta"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" android:textColor="?attr/colorOnSurfaceVariant" />
+            <TextView
+                android:id="@+id/installed_mod_path"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:ellipsize="end" android:maxLines="1" android:textColor="?attr/colorOnSurfaceVariant" />
+            <TextView
+                android:id="@+id/installed_mod_status"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" android:textColor="?attr/colorPrimary" />
+        </LinearLayout>
+        <ImageButton
+            android:id="@+id/installed_mod_more_ib"
+            style="@style/AppTheme.ImageButton"
+            android:contentDescription="@string/workshop_installed_more"
+            android:src="@drawable/mt_icon_more_vert" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

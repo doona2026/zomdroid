@@ -1,6 +1,8 @@
 package com.zomdroid.workshop.install
 
+import com.zomdroid.workshop.library.ModInfoParser
 import java.io.File
+import java.nio.charset.StandardCharsets
 import java.util.Locale
 import java.util.zip.ZipFile
 
@@ -56,6 +58,25 @@ object WorkshopModArchiveInspector {
         return findModRootNames(archive).filter { modName ->
             File(modsDirectory, modName).exists()
         }
+    }
+
+    /** Reads Mod IDs from local archive metadata without extracting the archive. */
+    @JvmStatic
+    fun findModInfoIds(archive: File): Set<String> {
+        require(archive.isFile) { "Workshop archive is unavailable: ${archive.absolutePath}" }
+        val ids = linkedSetOf<String>()
+        ZipFile(archive).use { zip ->
+            zip.entries().asSequence()
+                .filter { entry -> entry.name.substringAfterLast('/').equals("mod.info", ignoreCase = true) }
+                .forEach { entry ->
+                    runCatching {
+                        zip.getInputStream(entry).bufferedReader(StandardCharsets.UTF_8).use { reader ->
+                            ModInfoParser.parseLines(reader.readLines()).id
+                        }
+                    }.getOrNull()?.trim()?.takeIf(String::isNotEmpty)?.let(ids::add)
+                }
+        }
+        return ids
     }
 
     private fun normalize(rawName: String): String? {

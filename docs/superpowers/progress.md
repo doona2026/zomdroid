@@ -73,6 +73,23 @@
 
 ## Stage 7 Full Validation
 
+## Installed Mod Library Enhancement
+
+- Stage 1 requirement exploration: design drafted on 2026-09-06.
+- Design doc: `docs/superpowers/specs/2026-09-06-installed-mod-library-design.md`.
+- Stage 1 design approved by the user.
+- Stage 2 implementation planning: plan drafted on 2026-09-06.
+- Plan doc: `docs/superpowers/plans/2026-09-06-installed-mod-library-plan.md`.
+- Stage 2 plan approved by the user.
+- Stage 3 plan execution: completed on 2026-09-06.
+- Current progress: All approved implementation tasks are complete: core model, parser, scanner, query,
+  Workshop matcher, safe file actions, instance selector, background scan, local search/sort, details,
+  open-folder action, confirmed delete, localization, regression tests and Debug APK build.
+- Scope: Add per-instance filesystem Mod scanning, local search/sort/details, Workshop matching when uniquely known, safe delete confirmation, and open-folder action while preserving the shared Mod library.
+- Validation: `:app:testDebugUnitTest`, `:app:assembleDebug`, Java/Kotlin compilation and `git diff --check` pass.
+  APK: `app/build/outputs/apk/debug/zomdroid-debug-1.4.9.apk` (168,028,342 bytes). MuMu/real-device
+  instance selection, real directory scanning, folder opening and delete confirmation remain for user validation.
+
 ## Unified Animation System
 
 - Stage 1 completed: 2026-09-06

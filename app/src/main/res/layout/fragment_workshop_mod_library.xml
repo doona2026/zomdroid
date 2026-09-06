@@ -1,9 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:fillViewport="true">
     <LinearLayout
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:orientation="vertical" android:padding="16dp">
+        <LinearLayout
+            android:id="@+id/workshop_installed_section"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:text="@string/workshop_installed_title"
+                    android:textAppearance="?attr/textAppearanceTitleMedium" />
+                <ImageButton
+                    android:id="@+id/workshop_installed_refresh_ib"
+                    style="@style/AppTheme.ImageButton"
+                    android:contentDescription="@string/workshop_installed_refresh"
+                    android:src="@drawable/mt_icon_refresh" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center_vertical" android:layout_marginTop="4dp">
+                <TextView
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="@string/workshop_installed_instance" />
+                <Spinner
+                    android:id="@+id/workshop_installed_instance_spinner"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:spinnerMode="dropdown" />
+            </LinearLayout>
+            <TextView
+                android:id="@+id/workshop_installed_summary"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" android:textColor="?attr/colorOnSurfaceVariant" />
+            <LinearLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center_vertical" android:layout_marginTop="8dp">
+                <EditText
+                    android:id="@+id/workshop_installed_search_et"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:hint="@string/workshop_installed_search_hint"
+                    android:imeOptions="actionDone" android:inputType="text"
+                    android:maxLines="1" />
+                <Spinner
+                    android:id="@+id/workshop_installed_sort_spinner"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:entries="@array/workshop_installed_sort_options"
+                    android:spinnerMode="dropdown" />
+            </LinearLayout>
+            <ProgressBar
+                android:id="@+id/workshop_installed_progress"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal" android:visibility="gone" />
+            <TextView
+                android:id="@+id/workshop_installed_empty"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:visibility="gone" />
+            <Button
+                android:id="@+id/workshop_installed_return_launcher"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:text="@string/workshop_installed_return_launcher"
+                android:visibility="gone" />
+            <LinearLayout
+                android:id="@+id/workshop_installed_list"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:layout_marginTop="8dp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent" android:layout_height="1dp"
+            android:layout_marginTop="16dp" android:background="?attr/colorOutline" />
+        <TextView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" android:text="@string/workshop_library_shared_title"
+            android:textAppearance="?attr/textAppearanceTitleMedium" />
         <TextView
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="8dp" android:text="@string/workshop_library_note"

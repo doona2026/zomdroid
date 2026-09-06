@@ -837,6 +837,57 @@
     <string name="workshop_library_menu">Mod library</string>
     <string name="workshop_library_more">More library actions</string>
 
+    <!-- Installed Mod library -->
+    <string name="workshop_installed_title">Installed Mods</string>
+    <string name="workshop_library_shared_title">Shared Workshop library</string>
+    <string name="workshop_installed_instance">Instance</string>
+    <string name="workshop_installed_refresh">Refresh installed Mods</string>
+    <string name="workshop_installed_search_hint">Search name, Mod ID or folder</string>
+    <string name="workshop_installed_summary_format">%1$s · %2$d installed Mod(s) · %3$d ignored folder(s) · refreshed %4$s</string>
+    <string name="workshop_installed_summary_directory_missing">%1$s has no Zomboid/mods directory yet.</string>
+    <string name="workshop_installed_scanning">Scanning installed Mods…</string>
+    <string name="workshop_installed_empty">No installed Mods were found.</string>
+    <string name="workshop_installed_missing_directory">This instance has not created its Zomboid/mods directory yet.</string>
+    <string name="workshop_installed_no_instance">No Zomboid instance is available.</string>
+    <string name="workshop_installed_no_instance_message">Create an instance first to inspect its installed Mods.</string>
+    <string name="workshop_installed_return_launcher">Return to launcher</string>
+    <string name="workshop_installed_no_matches">No installed Mods match this search.</string>
+    <string name="workshop_installed_retry">Try refreshing again.</string>
+    <string name="workshop_installed_sort_name">Name (A–Z)</string>
+    <string name="workshop_installed_sort_recent">Recently modified</string>
+    <string name="workshop_installed_sort_oldest">Oldest modified</string>
+    <string name="workshop_installed_icon">Mod icon</string>
+    <string name="workshop_installed_more">More installed Mod actions</string>
+    <string name="workshop_installed_meta_format">ID: %1$s · %2$s · modified %3$s</string>
+    <string name="workshop_installed_id_missing">missing</string>
+    <string name="workshop_installed_incomplete">metadata incomplete</string>
+    <string name="workshop_installed_duplicate_id">duplicate Mod ID</string>
+    <string name="workshop_installed_unmatched">no local Workshop match</string>
+    <string name="workshop_installed_workshop_format">Workshop: %1$s (%2$d)</string>
+    <string name="workshop_installed_action_details">View local details</string>
+    <string name="workshop_installed_action_workshop">Open Workshop details</string>
+    <string name="workshop_installed_action_open_folder">Open Mod folder</string>
+    <string name="workshop_installed_action_delete">Delete Mod</string>
+    <string name="workshop_installed_details_instance">Instance</string>
+    <string name="workshop_installed_details_folder">Full folder</string>
+    <string name="workshop_installed_details_relative_path">Relative path</string>
+    <string name="workshop_installed_details_id">Mod ID</string>
+    <string name="workshop_installed_details_size">Size</string>
+    <string name="workshop_installed_details_modified">Last modified</string>
+    <string name="workshop_installed_details_description">Description</string>
+    <string name="workshop_installed_details_mod_info">mod.info fields</string>
+    <string name="workshop_installed_open_folder_failed">Could not open the Mod folder. Path: %1$s</string>
+    <string name="workshop_installed_delete_title">Delete installed Mod?</string>
+    <string name="workshop_installed_delete_message_format">Delete “%1$s” from instance “%2$s”?\n\nFull path:\n%3$s\n\nOnly this exact Mod folder will be removed.</string>
+    <string name="workshop_installed_delete_success">Deleted %1$s.</string>
+    <string name="workshop_installed_delete_failed">Could not delete the Mod: %1$s</string>
+    <string name="workshop_installed_scan_failed">Could not scan installed Mods: %1$s</string>
+    <string-array name="workshop_installed_sort_options">
+        <item>@string/workshop_installed_sort_name</item>
+        <item>@string/workshop_installed_sort_recent</item>
+        <item>@string/workshop_installed_sort_oldest</item>
+    </string-array>
+
     <!-- ===== Native Libs strings ===== -->
     <string name="native_libs_menu">Import libs for MP (B41)</string>
     <string name="native_libs_hint">🎮 Here you can install additional native libraries libRakNet64.so and libZNetNoSteam64.so for multiplayer support on Build 41.\n\nThese libraries first appeared in Build 42.12+. To use them on Build 41, copy them from a Build 42 instance folder: game/android/arm64-v8a — this is not a bug.</string>
