@@ -15,6 +15,9 @@ import java.util.ArrayList;
 
 public class GameLauncher {
     public static void launch(GameInstance gameInstance) throws ErrnoException {
+        // Everything the launch path used to read from the global preferences now belongs to this
+        // instance. Read once: InstanceSettings is a view over shared prefs, not a snapshot.
+        final com.zomdroid.game.InstanceSettings settings = gameInstance.settings();
 
         // B42: make sure ShaderUnit.class carries the combineShaderSources patch (needed by
         // NG_GL4ES). Normally done at instance creation; doing it here too picks up instances
@@ -35,10 +38,11 @@ public class GameLauncher {
         // (renamed in 42.15, native never rebuilt -> NoSuchFieldError on statistics-enabled
         // servers). Runs at every launch, so instances created by any launcher version are covered.
         com.zomdroid.patch.ZNetStatisticsPatchApplier.applyIfNeeded(gameInstance);
-        // 42.15/42.17: empty MainScreenState.printSpecs(), whose oshi hardware walk dies on
-        // Android before the player can reach anything. Same deal as above — every launch, so
-        // older instances are covered too.
-        com.zomdroid.patch.PrintSpecsPatchApplier.applyIfNeeded(gameInstance);
+        // Build 42: empty MainScreenState.printSpecs(), whose oshi hardware walk dies on Android
+        // before the player can reach anything, and make renderVideo() return false so the game
+        // draws its own static background instead of loading a Bink library that does not exist
+        // for ARM64. Same deal as above — every launch, so older instances are covered too.
+        com.zomdroid.patch.MainScreenStatePatchApplier.applyIfNeeded(gameInstance);
         // Select safe native implementations after the class-level patches are known to be ready.
         com.zomdroid.patch.NativeLibraryWorkarounds.disableIncompleteNativeLibraries(gameInstance);
         // Build 42.12+'s ARM64 PathFind implementation is under test after reports of characters
@@ -118,7 +122,7 @@ public class GameLauncher {
         Os.setenv("LIBGL_MIPMAP", "1", false);
 
         boolean verboseNativeLogs = BuildConfig.DEBUG
-                || LauncherPreferences.requireSingleton().isDebug();
+                || settings.isDebug();
         Os.setenv("BOX64_LOG", verboseNativeLogs ? "1" : "0", false);
         Os.setenv("BOX64_SHOWBT", verboseNativeLogs ? "1" : "0", false);
         Os.setenv("BOX64_LD_LIBRARY_PATH", gameInstance.getLdLibraryPathForEmulation(), false);
@@ -137,14 +141,25 @@ public class GameLauncher {
         Os.setenv("GALLIUM_DRIVER", "zink", false);
 
         Os.setenv("ZOMDROID_CACHE_DIR", AppStorage.requireSingleton().getCachePath(), false);
-        Os.setenv("ZOMDROID_RENDERER", LauncherPreferences.requireSingleton().getRenderer().name(), false);
-        switch (LauncherPreferences.requireSingleton().getRenderer()) {
+        Os.setenv("ZOMDROID_RENDERER", settings.getRenderer().name(), false);
+        switch (settings.getRenderer()) {
             case ZINK_ZFA:
             case ZINK_OSMESA:
-                String vulkanDriverName = LauncherPreferences.requireSingleton().getVulkanDriver().libName;
+                String vulkanDriverName = settings.getVulkanDriver().libName;
                 if (vulkanDriverName != null) {
                     Os.setenv("ZOMDROID_VULKAN_DRIVER_NAME", vulkanDriverName, false);
                 }
+                // Our Mesa carries an ETC2 encoder for large RGBA8 uploads (zomdroid_texetc2.c).
+                // On unless the instance's "Texture compression" switch is off; a value typed
+                // into the env vars still wins, they are applied after this block. Its disk
+                // cache is the same store NG_GL4ES uses (same encoder, same hash), which is why
+                // the "Clear" button in Settings covers both. The path is passed explicitly: the
+                // library's built-in default is /data/data/..., and on some devices the app's
+                // real data directory is /data/user/0/... instead.
+                Os.setenv("ZOMDROID_ZINK_ETC2", settings.isTextureCompression() ? "1" : "0", false);
+                Os.setenv("ZOMDROID_ETC2_CACHE_DIR",
+                        AppStorage.requireSingleton().getHomePath() + "/" + C.NGG_ETC2_CACHE_DIR,
+                        false);
                 break;
             case NG_GL4ES: {
                 //Os.setenv("LIBGL_ES", "3", true);
@@ -171,7 +186,7 @@ public class GameLauncher {
                 // threshold NG_GL4ES loads new large textures at half resolution — caps runaway
                 // texture memory at the cost of tile detail. Unset = 0 = the mechanism sleeps.
                 // override=false so a manual LIBGL_TEXBUDGET in the env-vars field still wins.
-                if (LauncherPreferences.requireSingleton().isMemorySaver()) {
+                if (settings.isMemorySaver()) {
                     Os.setenv("LIBGL_TEXBUDGET", "800", false);
                 }
                 boolean isQualcomm = isQualcommGpu();
@@ -181,6 +196,12 @@ public class GameLauncher {
                 Os.setenv("LIBGL_MIPMAP", "1", false);
                 Os.setenv("LIBGL_LOGSHADERERROR", "1", false);
                 Os.setenv("LIBGL_VGPU_DUMP", "1", false);
+                // NG's ETC2 texture compression (LIBGL_ETC2, off in the library itself): same
+                // switch, same disk cache as the ZINK path above. Note it takes every texture
+                // of 512x512 and up at full resolution BEFORE the shrink logic runs, so with it
+                // on LIBGL_SHRINK=7 has nothing left to halve - that is why the tile grid is
+                // gone, not because the two combine. Needs a GLES 3 context (esversion >= 300).
+                Os.setenv("LIBGL_ETC2", settings.isTextureCompression() ? "1" : "0", false);
                 // DEBUG: red-clear bisection — disabled now that swap/context are
                 // confirmed alive; uncomment to mask frames again if needed.
                 //Os.setenv("ZOMDROID_DEBUG_RED_CLEAR", "1", false);
@@ -205,7 +226,7 @@ public class GameLauncher {
 
         // JVM args [variables] from user settings
         ArrayList<String> jvmArgs = gameInstance.getJvmArgsAsList();
-        String rawArgs = LauncherPreferences.requireSingleton().getJvmArgs();
+        String rawArgs = settings.getJvmArgs();
 
         if (rawArgs != null && !rawArgs.trim().isEmpty()) {
             String[] splitArgs = rawArgs.trim().split("\\s+");
@@ -215,7 +236,7 @@ public class GameLauncher {
         }
 
         // Environment variables from user settings
-        String rawEnvVars = LauncherPreferences.requireSingleton().getEnvVars();
+        String rawEnvVars = settings.getEnvVars();
         if (rawEnvVars != null && !rawEnvVars.trim().isEmpty()) {
             for (String token : rawEnvVars.trim().split("\\s+")) {
                 String[] parts = token.split("=", 2);
@@ -225,26 +246,26 @@ public class GameLauncher {
             }
         }
 
-        jvmArgs.add("-Dorg.lwjgl.opengl.libname=" + LauncherPreferences.requireSingleton().getRenderer().libName);
-        jvmArgs.add("-Dzomdroid.renderer=" + LauncherPreferences.requireSingleton().getRenderer().name());
-        // Presence of backup.dir is what arms the F10 backup in the agent. Build 42 only: the
-        // flush sequence it relies on was verified against 42.20's classes, and the mod it is read
-        // from targets 42 - Build 41 keeps the plain quick save. Multiplayer is refused inside the
-        // agent, where GameClient.client is visible.
+        jvmArgs.add("-Dorg.lwjgl.opengl.libname=" + settings.getRenderer().libName);
+        jvmArgs.add("-Dzomdroid.renderer=" + settings.getRenderer().name());
+        // Presence of backup.dir is what arms the F10 backup in the agent. Both builds: the flush
+        // sequence was written against 42.20 and every class, method and field it touches was then
+        // read out of a 41.78.16 install and found identical - the sole difference, GameClient's
+        // multiplayer flag, is handled inside the agent. Multiplayer is refused there too, where
+        // that flag is visible.
         //
-        // When the feature is OFF on Build 42, that is said explicitly with backup=off: F10 then
-        // tells the player the feature is disabled instead of silently doing a plain save. The
-        // plain save resumes convincingly after a kill (the game streams the world anyway), which
-        // is exactly how two testers and we misread it as a working checkpoint - better no save
-        // and an honest message than a convincing illusion. No property at all (Build 41, or an
-        // older launcher) keeps the plain save: there the backup was never on offer.
-        if (gameInstance.getBuildVersion() != null && gameInstance.getBuildVersion().startsWith("42")) {
-            if (LauncherPreferences.requireSingleton().isQuickSaveBackup()) {
-                jvmArgs.add("-Dzomdroid.backup.dir=" + gameInstance.getHomePath() + "/"
-                        + com.zomdroid.game.BackupManager.BACKUP_DIR_NAME);
-            } else {
-                jvmArgs.add("-Dzomdroid.backup=off");
-            }
+        // When the feature is OFF, that is said explicitly with backup=off: F10 then tells the
+        // player the feature is disabled instead of silently doing a plain save. The plain save
+        // resumes convincingly after a kill (the game streams the world anyway), which is exactly
+        // how two testers and we misread it as a working checkpoint - better no save and an honest
+        // message than a convincing illusion. An agent older than this change simply fails to
+        // resolve the Build 41 flag and turns its own backup half off, which is what Build 41
+        // already does today.
+        if (settings.isQuickSaveBackup()) {
+            jvmArgs.add("-Dzomdroid.backup.dir=" + gameInstance.getHomePath() + "/"
+                    + com.zomdroid.game.BackupManager.BACKUP_DIR_NAME);
+        } else {
+            jvmArgs.add("-Dzomdroid.backup=off");
         }
 
         if (BuildConfig.DEBUG) {
@@ -264,11 +285,11 @@ public class GameLauncher {
         Log.i("Zomdroid", "JVM ARGS: " + jvmArgs);
         Log.i("Zomdroid", "GAME ARGS: " + args);
 
-        if (BuildConfig.DEBUG || LauncherPreferences.requireSingleton().isDebug()) {
+        if (BuildConfig.DEBUG || settings.isDebug()) {
             args.add("-debug");
         }
 
-        if (LauncherPreferences.requireSingleton().getRenderer() == LauncherPreferences.Renderer.NG_GL4ES) {
+        if (settings.getRenderer() == LauncherPreferences.Renderer.NG_GL4ES) {
             args.add("-debuglog=Shader");
         }
 
@@ -277,7 +298,7 @@ public class GameLauncher {
 
         // Prefer JRE21 when using GL4ES-style renderers (Build 41 tends to rely on that path).
         // This isolates "old GL4ES pipeline" from "new Java 25 runtime" regressions.
-        boolean preferJre21ForRenderer = isLegacyRendererNeedingJre21(LauncherPreferences.requireSingleton().getRenderer());
+        boolean preferJre21ForRenderer = isLegacyRendererNeedingJre21(settings.getRenderer());
         // ZombieBuddy agent — loaded if jar present in game folder AND enabled in settings
         android.content.SharedPreferences zbPrefs = LauncherPreferences.requireSingleton().getSharedPrefs();
 

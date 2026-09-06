@@ -13,6 +13,8 @@ import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.PointerIcon;
+import android.view.ScaleGestureDetector;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.View;
@@ -71,6 +73,11 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
 
     private boolean leftMouseDown  = false;
     private boolean rightMouseDown = false;
+    // Pinch-to-zoom on the game surface: two fingers become mouse-wheel notches, which is
+    // what the game zooms on. While a pinch is in progress single-finger mouse emulation is
+    // suspended, so the second finger is not taken for a click and the spread is not a drag.
+    private ScaleGestureDetector pinchDetector;
+    private boolean pinching = false;
 
     private boolean systemKeyboardVisible = false;
     private String gameInstanceName;
@@ -78,6 +85,10 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     private boolean exitInProgress = false;
     // Helps to calculate mouse cursor position
     private float renderScale = 1f;
+
+    // Launch settings of the instance being played. Resolved from the intent extra in onCreate();
+    // with a null name it reads the global values, which is the same thing it did before.
+    private com.zomdroid.game.InstanceSettings instanceSettings;
 
     @SuppressLint({"UnsafeDynamicallyLoadedCode", "ClickableViewAccessibility"})
     @Override
@@ -101,13 +112,18 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         if (gameInstanceName != null) {
             binding.inputControlsV.setInstanceName(gameInstanceName);
         }
+        // Render scale and the two on-screen-control toggles belong to the instance being played.
+        // The control elements never read preferences themselves — they ask the view — so handing
+        // the view these two values here is the whole of it.
+        instanceSettings = new com.zomdroid.game.InstanceSettings(gameInstanceName);
+        binding.inputControlsV.setVibrateOnTouch(instanceSettings.isVibrateOnTouch());
 
         binding.gameSv.setFocusable(true);
         binding.gameSv.setFocusableInTouchMode(true);
         binding.gameSv.requestFocus();
 
         // Initializing the cursor calsulation pos helper
-        renderScale = LauncherPreferences.requireSingleton().getRenderScale();
+        renderScale = instanceSettings.getRenderScale();
 
         // Initialize and register GamepadManager for gamepad hotplug and input events
         try {
@@ -115,7 +131,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
             //gamepadManager.register();
 
             // Apply touch override based on saved preference
-            boolean isTouchEnabled = LauncherPreferences.requireSingleton().isTouchControlsEnabled();
+            boolean isTouchEnabled = instanceSettings.isTouchControlsEnabled();
             GamepadManager.setTouchOverride(isTouchEnabled);
         } catch (Exception e) {
             Log.e(LOG_TAG, "Failed to initialize GamepadManager", e);
@@ -127,7 +143,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
             //keyboardManager.register();
 
           // Apply touch override based on saved preference
-          boolean isTouchEnabled = LauncherPreferences.requireSingleton().isTouchControlsEnabled();
+          boolean isTouchEnabled = instanceSettings.isTouchControlsEnabled();
           KeyboardManager.setTouchOverride(isTouchEnabled);
         } catch (Exception e) {
             Toast.makeText(this, "Failed to initialize keyboardManager", Toast.LENGTH_SHORT).show();
@@ -169,6 +185,8 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         // so they keep the exact code path they have today and need no retesting.
         GamepadManager.setBipolarTriggers(gameInstance.isBuild4220Plus());
 
+        hideSystemPointerIfGameDrawsItsOwn(gameInstance);
+
         System.loadLibrary("zomdroid");
 
         System.load(AppStorage.requireSingleton().getHomePath() + "/" + gameInstance.getFmodLibraryPath() + "/libfmod.so");
@@ -180,7 +198,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
             @Override
             public void surfaceCreated(@NonNull SurfaceHolder holder) {
                 Log.d(LOG_TAG, "Game surface created.");
-                renderScale = LauncherPreferences.requireSingleton().getRenderScale();
+                renderScale = instanceSettings.getRenderScale();
                 int width = (int) (binding.gameSv.getWidth() * renderScale);
                 int height = (int) (binding.gameSv.getHeight() * renderScale);
                 binding.gameSv.getHolder().setFixedSize(width, height);
@@ -220,8 +238,38 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
             }
         });
 
+      pinchDetector = new ScaleGestureDetector(this, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+          // One wheel notch per 10% of spread, either way. The game's zoom is a stepped wheel
+          // zoom, so the smooth factor has to be quantised somewhere. RimDroid uses 15%; on
+          // the phone that felt one step too coarse for this game, 10% was picked by hand.
+          private static final float NOTCH = 0.10f;
+          private float accumulated = 0f;
+
+          @Override
+          public boolean onScaleBegin(@NonNull ScaleGestureDetector detector) {
+              accumulated = 0f;
+              return true;
+          }
+
+          @Override
+          public boolean onScale(@NonNull ScaleGestureDetector detector) {
+              accumulated += detector.getScaleFactor() - 1f;
+              while (accumulated > NOTCH) {
+                  accumulated -= NOTCH;
+                  InputNativeInterface.sendMouseScroll(0.0, 1.0);
+              }
+              while (accumulated < -NOTCH) {
+                  accumulated += NOTCH;
+                  InputNativeInterface.sendMouseScroll(0.0, -1.0);
+              }
+              return true;
+          }
+      });
+      // A double-tap-and-drag must stay a double click for the game's inventory, not a zoom.
+      pinchDetector.setQuickScaleEnabled(false);
+
       binding.gameSv.setOnTouchListener(new View.OnTouchListener() {
-        //float renderScale = LauncherPreferences.requireSingleton().getRenderScale();
+        //float renderScale = instanceSettings.getRenderScale();
         int activePointerId = -1;
         boolean leftPressedFinger = false;
 
@@ -237,6 +285,30 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
 
           int action = e.getActionMasked();
           int idx = e.getActionIndex();
+
+          // Fingers only: a real mouse or touchpad has its own wheel and buttons, handled below.
+          if (!isMouseEvent(e, idx)) {
+              pinchDetector.onTouchEvent(e);
+              if (action == MotionEvent.ACTION_POINTER_DOWN && e.getPointerCount() == 2) {
+                  // Second finger down: this is a pinch, not another click. Let go of the
+                  // button the first finger is holding so the spread does not drag anything.
+                  if (leftPressedFinger || leftMouseDown) {
+                      InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false);
+                      leftPressedFinger = false;
+                      leftMouseDown = false;
+                  }
+                  pinching = true;
+                  return true;
+              }
+              if (pinching) {
+                  // Stay silent until every finger is up; only the detector sees the moves.
+                  if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                      pinching = false;
+                      activePointerId = -1;
+                  }
+                  return true;
+              }
+          }
 
           switch (action) {
               case MotionEvent.ACTION_DOWN:
@@ -597,7 +669,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     // Handle gamepad/keyboard motion events
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
-      //float renderScale = LauncherPreferences.requireSingleton().getRenderScale();
+      //float renderScale = instanceSettings.getRenderScale();
 
       boolean isPointerDevice = event.isFromSource(InputDevice.SOURCE_MOUSE) || event.isFromSource(InputDevice.SOURCE_TOUCHPAD) || event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE;
 
@@ -720,6 +792,46 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         if (gamepadManager != null)  gamepadManager.unregister();
         if (keyboardManager != null) keyboardManager.unregister();
         super.onPause();
+    }
+
+    /**
+     * With a mouse attached Android draws its own pointer on top of the game. The game has a
+     * cursor of its own - {@code Mouse.renderCursorTexture()} draws media/ui/cursor_white.png at
+     * the mouse position - but only when its "Lock cursor to window" option is on, and it cannot
+     * hide the system pointer itself: every cursor entry point in our GLFW backend is a stub
+     * ({@code _glfwSetCursorMode} is a NOOP, {@code _glfwCreateCursor} returns false), and the
+     * game never calls them anyway.
+     *
+     * <p>So we hide the system pointer here - but only when the game's option is actually on.
+     * Hiding it unconditionally would leave a player who never enabled that option with no cursor
+     * at all, which is worse than two. The option lives in the instance's own options.ini, so this
+     * follows the game's setting with nothing to configure on our side.
+     */
+    private void hideSystemPointerIfGameDrawsItsOwn(GameInstance gameInstance) {
+        if (!readsLockCursorToWindow(gameInstance)) return;
+        PointerIcon none = PointerIcon.getSystemIcon(this, PointerIcon.TYPE_NULL);
+        // Both views: the pointer is resolved from the view under it, so the controls overlay
+        // would bring the arrow back over itself.
+        binding.gameSv.setPointerIcon(none);
+        binding.inputControlsV.setPointerIcon(none);
+        Log.i(LOG_TAG, "Lock cursor to window is on - hiding the system pointer, the game draws its own");
+    }
+
+    /** {@code lockCursorToWindow=true} in the instance's Zomboid/options.ini. Absent file = false. */
+    private static boolean readsLockCursorToWindow(GameInstance gameInstance) {
+        java.io.File ini = new java.io.File(gameInstance.getHomePath(), "Zomboid/options.ini");
+        if (!ini.isFile()) return false;
+        try {
+            for (String line : java.nio.file.Files.readAllLines(ini.toPath(),
+                    java.nio.charset.StandardCharsets.UTF_8)) {
+                String s = line.trim();
+                if (s.startsWith("lockCursorToWindow"))
+                    return s.endsWith("true");
+            }
+        } catch (Exception e) {
+            Log.w(LOG_TAG, "Could not read options.ini, leaving the system pointer alone", e);
+        }
+        return false;
     }
 
     private boolean isMouseEvent(MotionEvent e, int pointerIndex) {

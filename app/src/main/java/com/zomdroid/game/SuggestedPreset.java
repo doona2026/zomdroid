@@ -28,10 +28,10 @@ import java.util.Locale;
  *
  * <p>ZINK draws a cleaner picture and is genuinely lighter on the GPU. It also only works on
  * Adreno, wants a driver picked by hand, and needs ANGLE on Mali. NG_GL4ES is heavier, but has no
- * preconditions at all and its texture shrinking buys the performance back - at the cost of a
- * faint grid of seams on the ground. Chosen by "how likely is someone to reach a playable state
- * without help", the heavier renderer wins everywhere except Adreno, where ZINK needs nothing
- * special.
+ * preconditions at all and ETC2 texture compression buys the memory back - at full resolution,
+ * which is why the preset no longer turns shrinking on and the grid of seams it used to draw is
+ * gone. Chosen by "how likely is someone to reach a playable state without help", the heavier
+ * renderer wins everywhere except Adreno, where ZINK needs nothing special.
  */
 public enum SuggestedPreset {
 
@@ -39,9 +39,19 @@ public enum SuggestedPreset {
     BUILD_42_QUALITY(R.string.preset_name_b42, LauncherPreferences.Renderer.ZINK_ZFA,
             null, LauncherPreferences.BUILD_42_JVM_ARGS, Boolean.FALSE),
 
-    /** Build 42 everywhere else, and the fallback offered on Adreno when ZINK misbehaves. */
+    /**
+     * Build 42 everywhere else, and the fallback offered on Adreno when ZINK misbehaves.
+     *
+     * <p>Shrinking is switched off rather than cleared: NG_GL4ES now compresses textures with
+     * ETC2, which claims every upload of 512x512 and up at full resolution before the shrink
+     * logic can halve it. The two end up costing the same memory - a half-size RGBA8 texture and
+     * a full-size ETC2 one are both one byte per original pixel - so shrinking no longer buys
+     * anything, it only used to pay for it with the grid of seams on the ground. Writing
+     * {@code LIBGL_SHRINK=0} instead of removing the line keeps the setting visible and one edit
+     * away for anyone who wants it back.
+     */
     BUILD_42_COMPATIBILITY(R.string.preset_name_b42_compat, LauncherPreferences.Renderer.NG_GL4ES,
-            SuggestedPreset.SHRINK_BALANCED, LauncherPreferences.BUILD_42_JVM_ARGS, null),
+            SuggestedPreset.SHRINK_OFF, LauncherPreferences.BUILD_42_JVM_ARGS, null),
 
     /**
      * Build 41. NG_GL4ES does not run on it at all, and ZINK would need an Adreno GPU and a driver,
@@ -60,6 +70,9 @@ public enum SuggestedPreset {
      * not a scale.
      */
     public static final String SHRINK_BALANCED = "7";
+
+    /** No shrinking, stated explicitly - see the note on BUILD_42_COMPATIBILITY. */
+    public static final String SHRINK_OFF = "0";
     public static final String SHRINK_KEY = "LIBGL_SHRINK";
 
     /** Field-proven on every device we have data from; also what the reports run at. */
@@ -161,17 +174,15 @@ public enum SuggestedPreset {
         return forBuild42(gpuVendor) == BUILD_42_QUALITY;
     }
 
-    /** Write this combination into the launcher preferences. */
-    public void apply(Context context) {
-        LauncherPreferences prefs = LauncherPreferences.requireSingleton();
+    /** Write this combination into one instance's settings. */
+    public void apply(Context context, InstanceSettings prefs) {
         prefs.setRenderer(renderer);
         prefs.setEnvVars(withShrink(prefs.getEnvVars(), shrink));
         prefs.setJvmArgs(jvmArgs);
         prefs.setRenderScale(RENDER_SCALE);
         prefs.setMemorySaver(resolveMemorySaver(context));
-        LauncherPreferences.VulkanDriver driver = resolveDriver();
+        LauncherPreferences.VulkanDriver driver = resolveDriver(prefs);
         if (driver != null) prefs.setVulkanDriver(driver);
-        prefs.saveToPreferences();
     }
 
     /**
@@ -182,13 +193,12 @@ public enum SuggestedPreset {
      * driver black-screens on plenty of phones, and we papered over that by asking people to go and
      * pick Freedreno by hand. The GPU says which one - see {@link GpuInfo}.
      */
-    private LauncherPreferences.VulkanDriver resolveDriver() {
+    private LauncherPreferences.VulkanDriver resolveDriver(InstanceSettings prefs) {
         if (renderer != LauncherPreferences.Renderer.ZINK_ZFA
                 && renderer != LauncherPreferences.Renderer.ZINK_OSMESA) return null;
         // Never overwrite a driver someone imported themselves - that is a deliberate act, usually
         // after a bad experience with everything we ship.
-        if (LauncherPreferences.requireSingleton().getVulkanDriver()
-                == LauncherPreferences.VulkanDriver.CUSTOM_DRIVER) return null;
+        if (prefs.getVulkanDriver() == LauncherPreferences.VulkanDriver.CUSTOM_DRIVER) return null;
         return GpuInfo.query().recommendedDriver();
     }
 
@@ -197,8 +207,7 @@ public enum SuggestedPreset {
      * when the current settings already match - the caller can then say so instead of showing an
      * empty confirmation.
      */
-    public List<String> describeChanges(Context context) {
-        LauncherPreferences prefs = LauncherPreferences.requireSingleton();
+    public List<String> describeChanges(Context context, InstanceSettings prefs) {
         List<String> changes = new ArrayList<>();
 
         if (prefs.getRenderer() != renderer)
@@ -217,7 +226,7 @@ public enum SuggestedPreset {
             changes.add(context.getString(R.string.preset_change_render_scale,
                     percent(prefs.getRenderScale()), percent(RENDER_SCALE)));
 
-        LauncherPreferences.VulkanDriver driver = resolveDriver();
+        LauncherPreferences.VulkanDriver driver = resolveDriver(prefs);
         if (driver != null && prefs.getVulkanDriver() != driver)
             changes.add(context.getString(R.string.preset_change_vulkan_driver,
                     prefs.getVulkanDriver().name(), driver.name()));
