@@ -46,22 +46,53 @@
             android:textSize="11sp"
             android:textColor="?attr/colorOnSurfaceVariant" />
         <LinearLayout
+            android:id="@+id/workshop_task_actions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:gravity="end"
             android:orientation="horizontal">
-            <Button android:id="@+id/workshop_task_pause" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/workshop_download_pause" />
-            <Button android:id="@+id/workshop_task_resume" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/workshop_download_resume" />
-            <Button android:id="@+id/workshop_task_retry" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/workshop_download_retry" />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <Button android:id="@+id/workshop_task_cancel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/workshop_download_cancel" />
-            <Button android:id="@+id/workshop_task_delete" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/workshop_download_delete" />
-            <Button android:id="@+id/workshop_task_install" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/workshop_download_install" />
-            <Button android:id="@+id/workshop_task_fallback" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/workshop_download_fallback" />
+            <ImageButton
+                android:id="@+id/workshop_task_pause"
+                style="@style/AppTheme.ImageButton"
+                android:contentDescription="@string/workshop_download_pause"
+                android:src="@drawable/mt_icon_pause"
+                android:visibility="gone" />
+            <ImageButton
+                android:id="@+id/workshop_task_resume"
+                style="@style/AppTheme.ImageButton"
+                android:contentDescription="@string/workshop_download_resume"
+                android:src="@drawable/mt_icon_play"
+                android:visibility="gone" />
+            <ImageButton
+                android:id="@+id/workshop_task_retry"
+                style="@style/AppTheme.ImageButton"
+                android:contentDescription="@string/workshop_download_retry"
+                android:src="@drawable/mt_icon_refresh"
+                android:visibility="gone" />
+            <ImageButton
+                android:id="@+id/workshop_task_cancel"
+                style="@style/AppTheme.ImageButton"
+                android:contentDescription="@string/workshop_download_cancel"
+                android:src="@drawable/mt_icon_close"
+                android:visibility="gone" />
+            <ImageButton
+                android:id="@+id/workshop_task_install"
+                style="@style/AppTheme.ImageButton"
+                android:contentDescription="@string/workshop_download_install"
+                android:src="@drawable/ic_download"
+                android:visibility="gone" />
+            <ImageButton
+                android:id="@+id/workshop_task_fallback"
+                style="@style/AppTheme.ImageButton"
+                android:contentDescription="@string/workshop_download_fallback"
+                android:src="@drawable/ic_workshop_download"
+                android:visibility="gone" />
+            <ImageButton
+                android:id="@+id/workshop_task_delete"
+                style="@style/AppTheme.ImageButton"
+                android:contentDescription="@string/workshop_download_delete"
+                android:src="@drawable/mt_icon_delete" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

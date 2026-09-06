@@ -730,6 +730,14 @@
     <string name="workshop_detail_title">Workshop item</string>
     <string name="workshop_search_hint">Search Workshop</string>
     <string name="workshop_search">Search</string>
+    <string name="workshop_download_by_id">Download by Workshop ID</string>
+    <string name="workshop_download_by_id_short">Download</string>
+    <string name="workshop_download_by_id_title">Download Workshop items by ID</string>
+    <string name="workshop_download_by_id_message">Enter one or more numbers from a Workshop URL. Separate IDs with spaces or commas. Public items use anonymous access; the tasks will appear in the Workshop download center.</string>
+    <string name="workshop_download_by_id_hint">Workshop IDs (space or comma separated)</string>
+    <string name="workshop_download_by_id_empty">Enter at least one valid Workshop ID.</string>
+    <string name="workshop_download_by_id_enqueued">Added %1$d Workshop item(s) to the download center.</string>
+    <string name="workshop_download_by_id_task_title">Workshop item %1$d</string>
     <string name="workshop_previous">Previous</string>
     <string name="workshop_next">Next</string>
     <string name="workshop_to_top">Back to top</string>
@@ -812,6 +820,7 @@
     <string name="workshop_library_cleanup_message">Keep the newest recorded version for each Workshop item and remove older archives.</string>
     <string name="workshop_library_cleanup_done">Removed %1$d old version(s).</string>
     <string name="workshop_library_menu">Mod library</string>
+    <string name="workshop_library_more">More library actions</string>
 
     <!-- ===== Native Libs strings ===== -->
     <string name="native_libs_menu">Import libs for MP (B41)</string>

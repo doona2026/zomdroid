@@ -10,7 +10,7 @@ import android.view.animation.AnimationUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -192,13 +192,13 @@ public class WorkshopDownloadCenterFragment extends Fragment {
                     formatBytes(writtenBytes)));
         }
 
-        Button pause = row.findViewById(R.id.workshop_task_pause);
-        Button resume = row.findViewById(R.id.workshop_task_resume);
-        Button retry = row.findViewById(R.id.workshop_task_retry);
-        Button cancel = row.findViewById(R.id.workshop_task_cancel);
-        Button delete = row.findViewById(R.id.workshop_task_delete);
-        Button install = row.findViewById(R.id.workshop_task_install);
-        Button fallback = row.findViewById(R.id.workshop_task_fallback);
+        ImageButton pause = row.findViewById(R.id.workshop_task_pause);
+        ImageButton resume = row.findViewById(R.id.workshop_task_resume);
+        ImageButton retry = row.findViewById(R.id.workshop_task_retry);
+        ImageButton cancel = row.findViewById(R.id.workshop_task_cancel);
+        ImageButton delete = row.findViewById(R.id.workshop_task_delete);
+        ImageButton install = row.findViewById(R.id.workshop_task_install);
+        ImageButton fallback = row.findViewById(R.id.workshop_task_fallback);
         pause.setVisibility(task.getState() == DownloadCenterTaskState.Running
                 || task.getState() == DownloadCenterTaskState.Queued ? View.VISIBLE : View.GONE);
         resume.setVisibility(task.getState() == DownloadCenterTaskState.Paused ? View.VISIBLE : View.GONE);
@@ -223,7 +223,15 @@ public class WorkshopDownloadCenterFragment extends Fragment {
         if (task.getState() == DownloadCenterTaskState.Failed && task.getErrorMessage() != null) {
             return task.getState().name() + " — " + task.getErrorMessage();
         }
-        return String.format(Locale.US, "%s · %s", task.getState().name(), task.getPhase());
+        if (task.getState() == DownloadCenterTaskState.Success) {
+            return task.getState().name();
+        }
+        String phase = task.getPhase();
+        if (phase == null || phase.trim().isEmpty()
+                || task.getState().name().equalsIgnoreCase(phase.trim())) {
+            return task.getState().name();
+        }
+        return String.format(Locale.US, "%s · %s", task.getState().name(), phase);
     }
 
     private static String formatBytes(long bytes) {

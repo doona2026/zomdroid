@@ -134,7 +134,15 @@
     <fragment
         android:id="@+id/install_mod_fragment"
         android:name="com.zomdroid.fragments.InstallModFragment"
-        android:label="@string/nav_menu_install_mod" />
+        android:label="@string/nav_menu_install_mod">
+        <action
+            android:id="@+id/action_install_mod_open_workshop"
+            app:destination="@id/workshop_fragment"
+            app:enterAnim="@anim/workshop_enter"
+            app:exitAnim="@anim/workshop_exit"
+            app:popEnterAnim="@anim/workshop_pop_enter"
+            app:popExitAnim="@anim/workshop_pop_exit" />
+    </fragment>
 
     <fragment
         android:id="@+id/installControlsFragment"

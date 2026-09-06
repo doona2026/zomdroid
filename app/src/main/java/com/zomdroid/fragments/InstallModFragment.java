@@ -225,7 +225,7 @@ public class InstallModFragment extends Fragment {
                 args.putString(WorkshopFragment.ARG_TARGET_INSTANCE_NAME, selected.getName());
                 args.putString(WorkshopFragment.ARG_TARGET_BUILD_VERSION, selected.getBuildVersion());
             }
-            NavHostFragment.findNavController(this).navigate(R.id.action_open_workshop, args);
+            NavHostFragment.findNavController(this).navigate(R.id.action_install_mod_open_workshop, args);
         });
 
         // Install button (ZIP)

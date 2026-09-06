@@ -548,6 +548,14 @@
     <string name="workshop_detail_title">创意工坊项目</string>
     <string name="workshop_search_hint">搜索创意工坊</string>
     <string name="workshop_search">搜索</string>
+    <string name="workshop_download_by_id">按创意工坊 ID 下载</string>
+    <string name="workshop_download_by_id_short">下载</string>
+    <string name="workshop_download_by_id_title">按创意工坊 ID 下载</string>
+    <string name="workshop_download_by_id_message">输入创意工坊 URL 中的数字。多个 ID 用空格或逗号分隔。公开项目使用匿名访问，任务会出现在创意工坊下载中心。</string>
+    <string name="workshop_download_by_id_hint">创意工坊 ID（用空格或逗号分隔）</string>
+    <string name="workshop_download_by_id_empty">请输入至少一个有效的创意工坊 ID。</string>
+    <string name="workshop_download_by_id_enqueued">已将 %1$d 个创意工坊项目加入下载中心。</string>
+    <string name="workshop_download_by_id_task_title">创意工坊项目 %1$d</string>
     <string name="workshop_previous">上一页</string>
     <string name="workshop_next">下一页</string>
     <string name="workshop_to_top">返回顶部</string>
@@ -666,6 +674,7 @@
     <string name="workshop_library_cleanup_message">每个创意工坊项目仅保留最新记录，并删除较旧的压缩包。</string>
     <string name="workshop_library_cleanup_done">已删除 %1$d 个旧版本。</string>
     <string name="workshop_library_menu">Mod 库</string>
+    <string name="workshop_library_more">更多模组库操作</string>
 
     <!-- ===== Native Libs strings ===== -->
     <string name="native_libs_menu">导入多人游戏库 (B41)</string>
@@ -787,7 +796,7 @@
     <string name="settings_etc2_cache_hint">所有实例共用。可以随时清除：渲染器会在下次加载时重新编码需要的内容，可能需要几秒钟。</string>
     <string name="settings_etc2_cache_cleared">纹理缓存已清除</string>
     <string name="settings_texture_compression">纹理压缩（ETC2）</string>
-    <string name="settings_texture_compression_hint">以极小的画质损失压缩大型纹理，适用于手机和平板屏幕，并提供可手动清除的缓存。首次启动会建立缓存，可能需要更长时间。ZINK 和 NG_GL4ES 共用此缓存。<b>注意：</b>启用 ETC2 后，LIBGL_SHRINK 变量几乎没有作用，纹理也不会绘制网格。</string>
+    <string name="settings_texture_compression_hint">以极小的画质损失压缩大型纹理，适用于手机和平板，并提供可手动清除的缓存。首次启动会建立缓存，可能需要更长时间。ZINK 和 NG_GL4ES 共用此缓存。<b>注意：</b>启用 ETC2 后，LIBGL_SHRINK 变量几乎没有作用，纹理也不会绘制网格。</string>
     <string name="app_settings_instance_hint">渲染器、驱动、Java 参数、分辨率和屏幕控制都属于具体游戏实例。请点击实例卡片上的齿轮按钮进行设置。</string>
     <string name="game_instance_settings">实例设置</string>
     <string name="steam_dl_mods_official_note">官方 Steam 创意工坊下载对公开项目无需登录。请输入创意工坊 URL 中的 ID，多个 ID 用空格或逗号分隔。完成的 ZIP 文件会保存到 Downloads/zomdroid/workshop。</string>

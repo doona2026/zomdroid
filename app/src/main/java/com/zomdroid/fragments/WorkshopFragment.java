@@ -1,10 +1,13 @@
 package com.zomdroid.fragments;
 
 import android.os.Bundle;
+import android.text.InputType;
 import android.os.Parcelable;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -17,16 +20,22 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.zomdroid.R;
+import com.zomdroid.steam.SteamModDownloader;
 import com.zomdroid.workshop.data.WorkshopBrowseItem;
 import com.zomdroid.workshop.data.WorkshopBrowsePage;
 import com.zomdroid.workshop.data.WorkshopCatalogRuntime;
 import com.zomdroid.workshop.favorites.WorkshopFavoritesRepository;
+import com.zomdroid.workshop.download.DownloadCenterManager;
+import com.zomdroid.workshop.download.DownloadCenterManagerProvider;
+import com.zomdroid.workshop.download.WorkshopDownloadForegroundService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,6 +92,8 @@ public class WorkshopFragment extends Fragment {
         list.setAdapter(adapter);
         sort.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item,
                 getResources().getStringArray(R.array.workshop_sort_options)));
+        header.findViewById(R.id.workshop_download_by_id_btn).setOnClickListener(
+                v -> showDownloadByIdDialog());
         if (state != null) {
             search.setText(state.getString(STATE_SEARCH, ""));
             sort.setSelection(Math.max(0, Math.min(
@@ -100,6 +111,23 @@ public class WorkshopFragment extends Fragment {
         }
         appliedSearch = search.getText().toString().trim();
         appliedSort = sort.getSelectedItemPosition();
+        search.setOnEditorActionListener((v, actionId, event) -> {
+            boolean physicalEnter = event != null
+                    && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                    && event.getAction() == KeyEvent.ACTION_DOWN;
+            if (actionId == EditorInfo.IME_ACTION_SEARCH || physicalEnter) {
+                submitSearch();
+                return true;
+            }
+            return false;
+        });
+        search.setOnKeyListener((v, keyCode, event) -> {
+            if (keyCode != KeyEvent.KEYCODE_ENTER) return false;
+            if (event != null && event.getAction() == KeyEvent.ACTION_DOWN) {
+                submitSearch();
+            }
+            return true;
+        });
         sort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View itemView, int position, long id) {
                 if (position == appliedSort) return;
@@ -110,11 +138,7 @@ public class WorkshopFragment extends Fragment {
 
             @Override public void onNothingSelected(AdapterView<?> parent) { }
         });
-        header.findViewById(R.id.workshop_search_btn).setOnClickListener(v -> {
-            appliedSearch = search.getText().toString().trim();
-            appliedSort = sort.getSelectedItemPosition();
-            refreshFromFirstPage();
-        });
+        header.findViewById(R.id.workshop_search_btn).setOnClickListener(v -> submitSearch());
         previous.setOnClickListener(v -> load(page - 1));
         next.setOnClickListener(v -> load(page + 1));
         toTop.setOnClickListener(v -> scrollToTop());
@@ -144,6 +168,51 @@ public class WorkshopFragment extends Fragment {
         pendingListState = null;
         WorkshopCatalogRuntime.clearBrowseCache();
         load(1);
+    }
+
+    private void submitSearch() {
+        if (!isAdded() || search == null || sort == null) return;
+        appliedSearch = search.getText().toString().trim();
+        appliedSort = sort.getSelectedItemPosition();
+        refreshFromFirstPage();
+    }
+
+    private void showDownloadByIdDialog() {
+        if (!isAdded()) return;
+        EditText input = new EditText(requireContext());
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        input.setHint(R.string.workshop_download_by_id_hint);
+        input.setSingleLine(false);
+        input.setMinLines(1);
+        input.setMaxLines(4);
+
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.workshop_download_by_id_title)
+                .setMessage(R.string.workshop_download_by_id_message)
+                .setView(input)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.workshop_download_by_id, (dialog, which) -> {
+                    List<Long> ids = SteamModDownloader.parseWorkshopIds(input.getText().toString());
+                    if (ids.isEmpty()) {
+                        Toast.makeText(requireContext(),
+                                R.string.workshop_download_by_id_empty,
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    DownloadCenterManager manager = DownloadCenterManagerProvider.get(requireContext());
+                    for (Long id : ids) {
+                        manager.enqueue(
+                                108600L,
+                                id,
+                                getString(R.string.workshop_download_by_id_task_title, id),
+                                null);
+                    }
+                    WorkshopDownloadForegroundService.start(requireContext());
+                    Toast.makeText(requireContext(),
+                            getString(R.string.workshop_download_by_id_enqueued, ids.size()),
+                            Toast.LENGTH_SHORT).show();
+                })
+                .show();
     }
 
     @Override

@@ -6,10 +6,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,10 +77,29 @@ public class WorkshopModLibraryFragment extends Fragment {
         ((TextView) row.findViewById(R.id.workshop_library_meta)).setText(
                 getString(R.string.workshop_library_meta, entry.getPublishedFileId(), entry.getSource(), entry.getInstalledInstances().size()));
         ((TextView) row.findViewById(R.id.workshop_library_description)).setText(entry.getDescription());
-        row.findViewById(R.id.workshop_library_install).setOnClickListener(v -> chooseInstance(entry));
-        row.findViewById(R.id.workshop_library_update).setOnClickListener(v -> checkUpdate(entry));
-        row.findViewById(R.id.workshop_library_share).setOnClickListener(v -> share(entry));
-        row.findViewById(R.id.workshop_library_delete).setOnClickListener(v -> confirmDelete(entry));
+        row.findViewById(R.id.workshop_library_more_ib).setOnClickListener(v -> {
+            PopupMenu popupMenu = new PopupMenu(requireContext(), v);
+            popupMenu.getMenuInflater().inflate(R.menu.menu_workshop_library, popupMenu.getMenu());
+            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    int itemId = item.getItemId();
+                    if (itemId == R.id.action_workshop_library_install) {
+                        chooseInstance(entry);
+                    } else if (itemId == R.id.action_workshop_library_check_update) {
+                        checkUpdate(entry);
+                    } else if (itemId == R.id.action_workshop_library_share) {
+                        share(entry);
+                    } else if (itemId == R.id.action_workshop_library_delete) {
+                        confirmDelete(entry);
+                    } else {
+                        return false;
+                    }
+                    return true;
+                }
+            });
+            popupMenu.show();
+        });
         list.addView(row);
     }
 
