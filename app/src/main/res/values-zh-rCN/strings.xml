@@ -779,4 +779,46 @@
     <string name="preset_applied">已应用预设：%1$s</string>
     <string name="preset_dialog_gpu_ng">检测到 %1$s。已设置 NG_GL4ES 渲染器——它可在任何 GPU 上运行，无需驱动。纹理以 ETC2 全分辨率压缩，因此在不损失画质的情况下节省内存。</string>
     <string name="preset_dialog_gpu_ng_unnamed">已设置 NG_GL4ES 渲染器——它可在任何 GPU 上运行，无需驱动。纹理以 ETC2 全分辨率压缩，因此在不损失画质的情况下节省内存。</string>
+
+    <!-- 1.4.9 settings, launcher and preset strings -->
+    <string name="fragment_label_instance_settings">实例设置</string>
+    <string name="settings_etc2_cache_clear">清除</string>
+    <string name="settings_etc2_cache_label">纹理缓存：%1$s</string>
+    <string name="settings_etc2_cache_hint">所有实例共用。可以随时清除：渲染器会在下次加载时重新编码需要的内容，可能需要几秒钟。</string>
+    <string name="settings_etc2_cache_cleared">纹理缓存已清除</string>
+    <string name="settings_texture_compression">纹理压缩（ETC2）</string>
+    <string name="settings_texture_compression_hint">以极小的画质损失压缩大型纹理，适用于手机和平板屏幕，并提供可手动清除的缓存。首次启动会建立缓存，可能需要更长时间。ZINK 和 NG_GL4ES 共用此缓存。<b>注意：</b>启用 ETC2 后，LIBGL_SHRINK 变量几乎没有作用，纹理也不会绘制网格。</string>
+    <string name="app_settings_instance_hint">渲染器、驱动、Java 参数、分辨率和屏幕控制都属于具体游戏实例。请点击实例卡片上的齿轮按钮进行设置。</string>
+    <string name="game_instance_settings">实例设置</string>
+    <string name="steam_dl_mods_official_note">官方 Steam 创意工坊下载对公开项目无需登录。请输入创意工坊 URL 中的 ID，多个 ID 用空格或逗号分隔。完成的 ZIP 文件会保存到 Downloads/zomdroid/workshop。</string>
+    <string name="release_notes_title">%1$s 更新内容</string>
+    <string name="release_notes_body">主要功能\n\n• ETC2 纹理压缩——NG_GL4ES 和两种 ZINK 渲染器默认启用。所有实例共用磁盘缓存（ZINK 与 NG_GL4ES 使用同一缓存），可在设置中清除，也可以按实例关闭。\n\n• 双指缩放——在游戏画面上用两根手指可以缩放镜头。\n\n• Build 41 快速存档（F10）——世界备份和恢复不再仅限 Build 42，两个版本都支持。\n\n• 每实例设置——渲染器、Java 参数、环境变量、分辨率缩放和内存节省现在按游戏实例保存。\n\n• 游戏自己的鼠标光标——连接鼠标后，若游戏启用了“将光标锁定在窗口内”，Android 指针会被隐藏。\n\n变更\n\n• NG_GL4ES 不再附带纹理缩小功能，推荐预设现在会设置 LIBGL_SHRINK=0。\n\n技术修复\n\n• 修复 NG_GL4ES 低画质下湿地面和水坑显示为黑色的问题。\n• ZBBetterFPS：移除在启用 optimizeIsoMovingObject 时会导致 Build 42.20 崩溃的补丁。\n• 即使未安装游戏实例，现在也会生成错误报告。</string>
+    <string name="backup_warning_title">启用前请注意</string>
+    <string name="backup_warning_message">按下 F10 会完整复制你的世界，之后可以在崩溃或角色死亡后回到这个存档点。\n\n存档越大（角色生存时间越长），复制所需时间越久。请在按下 F10 前预留几分钟的安全时间：写入副本时游戏可能看起来像卡住了，但其实没有。请耐心等待，不要关闭游戏。\n\nF10 按钮属于新版控制布局。如果你继续使用旧版本的自定义布局，请在控制编辑器中手动添加：输入类型选择 MNK，绑定选择 KEY_F10。\n\n每个世界只保留一个副本；新副本会替换旧副本。Build 41 和 42 均支持，仅限单人游戏。</string>
+    <string name="backup_restore_title">上次会话发生崩溃</string>
+    <string name="backup_restore_message">发现“%1$s”在 %2$s 创建的备份（%3$d MB），也就是你按下 F10 的时刻。\n\n恢复它会删除备份创建之后发生的所有进度。</string>
+    <string name="backup_restore_continue">继续当前进度</string>
+    <string name="backup_restore_do">恢复备份</string>
+    <string name="backup_restoring">正在恢复备份…</string>
+    <string name="backup_restore_done">备份已恢复</string>
+    <string name="backup_restore_failed">恢复失败：%1$s</string>
+    <string name="backup_manual_restore_message">发现“%1$s”在 %2$s 创建的备份（%3$d MB）。\n\n恢复它会将该世界替换为备份创建时的状态，且无法撤销。</string>
+    <string name="bug_report_pick_instance">这份报告对应哪个游戏？</string>
+    <string name="backup_none_found">没有找到上次游玩世界的备份</string>
+    <string name="nav_bottom_github">GitHub</string>
+    <string name="rimdroid_dialog_message">RimDroid 可以在 Android 上运行 RimWorld，方式与本启动器运行 Project Zomboid 类似。作者相同，思路也相同。\n\nhttps://github.com/udarmolota/RimDroid/releases</string>
+    <string name="preset_card_title">推荐预设</string>
+    <string name="preset_card_subtitle">为对应游戏版本一次性设置渲染器、纹理缩小、Java 参数和分辨率。</string>
+    <string name="preset_name_b42">Build 42</string>
+    <string name="preset_name_b41">Build 41</string>
+    <string name="preset_current">当前应用：%1$s</string>
+    <string name="preset_current_none">当前应用：自定义设置</string>
+    <string name="preset_button_apply_suggested">推荐预设</string>
+    <string name="renderer_ng_shrink_enabled">纹理缩小已启用——这是 NG_GL4ES 保持稳定帧率的功能。可在“高级 → 纹理缩小”中修改。</string>
+    <string name="renderer_gl4es_build41_title">GL4ES 适用于 Build 41</string>
+    <string name="renderer_gl4es_build41_message">对于 Build 41，这是合适的选择：它可以在任何 GPU 上运行，不需要配置驱动。\n\nBuild 42 无法使用它，否则会出现黑屏。请使用 NG_GL4ES（任何 GPU）或 ZINK（Adreno）。</string>
+    <string name="preset_dialog_gpu_zink">已检测到 %1$s。已设置 ZINK_ZFA 渲染器和适合你 GPU 的 Vulkan 驱动。如果画面异常，请尝试其他驱动，或在设置中导入自定义驱动。</string>
+    <string name="preset_dialog_gpu_zink_unnamed">已设置 ZINK_ZFA 渲染器和 Vulkan 驱动。如果画面异常，请尝试其他驱动，或在设置中导入自定义驱动。</string>
+    <string name="preset_dialog_troubleshoot">如果游戏无法使用这些设置启动，或启动后很快关闭，请尝试使用下方按钮应用一个现成预设。</string>
+    <string name="preset_dialog_b41_applied">已设置 GL4ES 渲染器——它可以在任何 GPU 上运行，不需要配置驱动。</string>
 </resources>

@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.os.LocaleListCompat;
 import androidx.fragment.app.Fragment;
 
 import com.zomdroid.LauncherPreferences;
@@ -16,7 +17,8 @@ import com.zomdroid.R;
 import com.zomdroid.databinding.FragmentAppSettingsBinding;
 
 /**
- * App-wide settings, which after the per-instance split is just the theme.
+ * App-wide settings: appearance and language. Per-instance runtime settings stay behind the
+ * instance card's gear button.
  *
  * <p>Renderer, Vulkan driver, JVM arguments, environment variables, render scale, the memory
  * saver, quick-save backup, debug and the on-screen control toggles all belong to a single game
@@ -52,6 +54,42 @@ public class AppSettingsFragment extends Fragment {
                         (LauncherPreferences.ThemeMode) parent.getSelectedItem();
                 LauncherPreferences.requireSingleton().setThemeMode(mode);
                 AppCompatDelegate.setDefaultNightMode(mode.nightMode);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        // Language is app-wide as well. Keep it beside the theme so the instance settings page
+        // only contains values that affect the selected game instance.
+        String[] languageLabels = {
+                getString(R.string.settings_language_system),
+                getString(R.string.settings_language_english),
+                getString(R.string.settings_language_simplified_chinese),
+                getString(R.string.settings_language_indonesian),
+                getString(R.string.settings_language_portuguese_brazil),
+                getString(R.string.settings_language_russian)
+        };
+        ArrayAdapter<String> languageAdapter = new ArrayAdapter<>(
+                requireContext(),
+                R.layout.spinner_item,
+                languageLabels);
+        languageAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        binding.appSettingsLanguageS.setAdapter(languageAdapter);
+        binding.appSettingsLanguageS.setSelection(
+                LauncherPreferences.requireSingleton().getLanguageMode().ordinal());
+        binding.appSettingsLanguageS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                LauncherPreferences.LanguageMode mode =
+                        LauncherPreferences.LanguageMode.values()[position];
+                LauncherPreferences.requireSingleton().setLanguageMode(mode);
+                LocaleListCompat locales = mode == LauncherPreferences.LanguageMode.SYSTEM
+                        ? LocaleListCompat.getEmptyLocaleList()
+                        : LocaleListCompat.forLanguageTags(mode.localeTag);
+                if (!AppCompatDelegate.getApplicationLocales().equals(locales)) {
+                    AppCompatDelegate.setApplicationLocales(locales);
+                }
             }
 
             @Override

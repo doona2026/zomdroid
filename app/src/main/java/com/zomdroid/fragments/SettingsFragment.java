@@ -13,8 +13,6 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.core.os.LocaleListCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
@@ -254,46 +252,6 @@ public class SettingsFragment extends Fragment {
 
         // The Audio API selector is gone: OpenSL ES is retired and AAudio is the only backend now.
         // See LauncherPreferences.getAudioAPI() for why.
-
-        // The theme is app-wide and lives in AppSettingsFragment now; this screen edits one
-        // instance.
-
-        // Launcher language. An empty AppCompat locale list means the launcher follows the
-        // device language; a non-empty list pins the app to the selected locale and recreates
-        // the activity so every visible string is refreshed together.
-        String[] languageLabels = {
-                getString(R.string.settings_language_system),
-                getString(R.string.settings_language_english),
-                getString(R.string.settings_language_simplified_chinese),
-                getString(R.string.settings_language_indonesian),
-                getString(R.string.settings_language_portuguese_brazil),
-                getString(R.string.settings_language_russian)
-        };
-        ArrayAdapter<String> languageAdapter = new ArrayAdapter<>(
-                requireContext(),
-                R.layout.spinner_item,
-                languageLabels);
-        languageAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        binding.settingsLanguageS.setAdapter(languageAdapter);
-        binding.settingsLanguageS.setSelection(
-                LauncherPreferences.requireSingleton().getLanguageMode().ordinal());
-        binding.settingsLanguageS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                LauncherPreferences.LanguageMode mode =
-                        LauncherPreferences.LanguageMode.values()[position];
-                LauncherPreferences.requireSingleton().setLanguageMode(mode);
-                LocaleListCompat locales = mode == LauncherPreferences.LanguageMode.SYSTEM
-                        ? LocaleListCompat.getEmptyLocaleList()
-                        : LocaleListCompat.forLanguageTags(mode.localeTag);
-                if (!AppCompatDelegate.getApplicationLocales().equals(locales)) {
-                    AppCompatDelegate.setApplicationLocales(locales);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
 
         binding.settingsJargsEt.setText(settings.getJvmArgs());
 
