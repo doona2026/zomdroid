@@ -38,7 +38,7 @@
             android:id="@+id/workshop_download_by_id_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/workshop_download_by_id_short" />
+            android:text="@string/workshop_download_by_id" />
     </LinearLayout>
     <TextView
         android:id="@+id/workshop_status"

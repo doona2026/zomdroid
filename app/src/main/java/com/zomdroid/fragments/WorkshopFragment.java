@@ -191,7 +191,7 @@ public class WorkshopFragment extends Fragment {
                 .setMessage(R.string.workshop_download_by_id_message)
                 .setView(input)
                 .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.workshop_download_by_id, (dialog, which) -> {
+                .setPositiveButton(R.string.workshop_download_by_id_short, (dialog, which) -> {
                     List<Long> ids = SteamModDownloader.parseWorkshopIds(input.getText().toString());
                     if (ids.isEmpty()) {
                         Toast.makeText(requireContext(),

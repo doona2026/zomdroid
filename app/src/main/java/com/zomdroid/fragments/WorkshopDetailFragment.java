@@ -5,6 +5,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -16,7 +19,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -34,6 +39,7 @@ import com.zomdroid.workshop.auth.SteamAuthRuntime;
 import com.zomdroid.workshop.download.DownloadCenterManager;
 import com.zomdroid.workshop.download.DownloadCenterManagerProvider;
 import com.zomdroid.workshop.download.WorkshopDownloadForegroundService;
+import com.zomdroid.workshop.favorites.WorkshopFavoritesRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +53,8 @@ public class WorkshopDetailFragment extends Fragment {
     private WorkshopImageAdapter imageAdapter;
     private Button download;
     private Button dependencyDownload;
+    private WorkshopFavoritesRepository favoritesRepository;
+    private MenuItem favoriteMenuItem;
 
     @Nullable
     @Override
@@ -57,6 +65,7 @@ public class WorkshopDetailFragment extends Fragment {
         imagePage = view.findViewById(R.id.workshop_detail_image_page);
         imageLayoutManager = new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
         imageAdapter = new WorkshopImageAdapter();
+        favoritesRepository = new WorkshopFavoritesRepository(requireContext());
         image.setLayoutManager(imageLayoutManager);
         image.setAdapter(imageAdapter);
         new PagerSnapHelper().attachToRecyclerView(image);
@@ -77,6 +86,28 @@ public class WorkshopDetailFragment extends Fragment {
         dependencyDownload.setOnClickListener(v -> confirmDependencyDownload());
         load();
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle state) {
+        super.onViewCreated(view, state);
+        requireActivity().addMenuProvider(new MenuProvider() {
+            @Override
+            public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
+                menuInflater.inflate(R.menu.menu_workshop_detail_toolbar, menu);
+                favoriteMenuItem = menu.findItem(R.id.action_workshop_detail_favorite);
+                bindFavoriteMenuItem();
+            }
+
+            @Override
+            public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
+                if (menuItem.getItemId() == R.id.action_workshop_detail_favorite) {
+                    toggleFavorite();
+                    return true;
+                }
+                return false;
+            }
+        }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
     }
 
     private void load() {
@@ -135,6 +166,53 @@ public class WorkshopDetailFragment extends Fragment {
             });
         }
         status.setText(R.string.workshop_loaded);
+        bindFavoriteMenuItem();
+    }
+
+    private void bindFavoriteMenuItem() {
+        if (favoriteMenuItem == null || favoritesRepository == null) return;
+        long publishedFileId = detail == null
+                ? getArguments() == null ? 0L : getArguments().getLong("published_file_id", 0L)
+                : WorkshopCatalogRuntime.detailPublishedFileId(detail);
+        if (publishedFileId <= 0L) {
+            favoriteMenuItem.setVisible(false);
+            return;
+        }
+        boolean added = favoritesRepository.contains(108600L, publishedFileId);
+        favoriteMenuItem.setVisible(true);
+        favoriteMenuItem.setIcon(added
+                ? R.drawable.ic_favorite_filled
+                : R.drawable.ic_favorite_outline);
+        favoriteMenuItem.setTitle(getString(added
+                ? R.string.workshop_favorite_remove
+                : R.string.workshop_favorite_add));
+        favoriteMenuItem.setContentDescription(getString(added
+                ? R.string.workshop_favorite_remove
+                : R.string.workshop_favorite_add));
+    }
+
+    private void toggleFavorite() {
+        if (favoritesRepository == null) return;
+        Bundle args = getArguments();
+        long publishedFileId = detail == null
+                ? args == null ? 0L : args.getLong("published_file_id", 0L)
+                : WorkshopCatalogRuntime.detailPublishedFileId(detail);
+        if (publishedFileId <= 0L) return;
+
+        String title = detail == null ? args == null ? "Workshop item" :
+                args.getString("title", "Workshop item") : detail.getTitle();
+        String author = detail == null ? args == null ? "" : args.getString("author", "") :
+                detail.getAuthorName();
+        String previewUrl = detail == null ? args == null ? "" : args.getString("preview_url", "") :
+                detail.getPreviewImageUrl();
+        String description = detail == null ? args == null ? "" : args.getString("description", "") :
+                detail.getDescription();
+        boolean added = favoritesRepository.toggle(
+                108600L, publishedFileId, title, author, previewUrl, description);
+        bindFavoriteMenuItem();
+        Toast.makeText(requireContext(), added
+                ? R.string.workshop_favorite_added
+                : R.string.workshop_favorite_removed, Toast.LENGTH_SHORT).show();
     }
 
     private void renderDescription(WorkshopItemDetail value) {
