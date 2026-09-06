@@ -146,7 +146,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
           boolean isTouchEnabled = instanceSettings.isTouchControlsEnabled();
           KeyboardManager.setTouchOverride(isTouchEnabled);
         } catch (Exception e) {
-            Toast.makeText(this, "Failed to initialize keyboardManager", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.game_keyboard_init_failed, Toast.LENGTH_SHORT).show();
             keyboardManager = null;
         }
         // Display on/off buttons overlay

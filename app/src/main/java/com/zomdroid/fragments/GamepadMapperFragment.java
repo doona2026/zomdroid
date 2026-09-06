@@ -154,7 +154,7 @@ public class GamepadMapperFragment extends Fragment {
           // Save as "axis a4/a5" sentinel so GamepadManager can later normalize to a4/a5.
           int code = encodeAxis(currentStep == STEP_LT ? AXIS_LT_INDEX : AXIS_RT_INDEX);
           if (isDuplicate(code)) {
-            Toast.makeText(getContext(), "Button already assigned!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.gamepad_mapper_duplicate, Toast.LENGTH_SHORT).show();
             return true;
           }
           assignCurrentStep(code);
@@ -219,7 +219,7 @@ public class GamepadMapperFragment extends Fragment {
     if (currentStep == STEP_LT && keyCode == KC_BUTTON_L2) {
       int code = encodeButton(KC_BUTTON_L2);
       if (isDuplicate(code)) {
-        Toast.makeText(getContext(), "Button already assigned!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), R.string.gamepad_mapper_duplicate, Toast.LENGTH_SHORT).show();
         return true;
       }
       assignCurrentStep(code);
@@ -228,7 +228,7 @@ public class GamepadMapperFragment extends Fragment {
     if (currentStep == STEP_RT && keyCode == KC_BUTTON_R2) {
       int code = encodeButton(KC_BUTTON_R2);
       if (isDuplicate(code)) {
-        Toast.makeText(getContext(), "Button already assigned!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), R.string.gamepad_mapper_duplicate, Toast.LENGTH_SHORT).show();
         return true;
       }
       assignCurrentStep(code);
@@ -237,7 +237,7 @@ public class GamepadMapperFragment extends Fragment {
     // Prevent duplicate button
     for (int i = 0; i < currentStep; i++) {
       if (mapping[i] == keyCode) {
-        Toast.makeText(getContext(), "Button already assigned!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), R.string.gamepad_mapper_duplicate, Toast.LENGTH_SHORT).show();
         return true;
       }
     }
@@ -349,7 +349,7 @@ public class GamepadMapperFragment extends Fragment {
     // - (TYPE_AXIS << 24) | axisIndex  => normalize to a4/a5
     // - (TYPE_BUTTON << 24) | keyCode  => synthesize axis 1.0/0.0 on key down/up
     GamepadManager.setCustomMapping(base, ctx);
-    Toast.makeText(ctx, "Success", Toast.LENGTH_SHORT).show();
+        Toast.makeText(ctx, R.string.gamepad_mapper_success, Toast.LENGTH_SHORT).show();
   }
 
   @Override

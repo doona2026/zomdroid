@@ -105,6 +105,7 @@
     <string name="gamepad_mapper_save">映射完成！</string>
     <string name="gamepad_mapper_success">手柄映射保存成功</string>
     <string name="gamepad_mapper_reset_confirmation">手柄映射已重置为默认</string>
+    <string name="gamepad_mapper_duplicate">该按钮已被分配！</string>
 
     <!-- Gamepad Button Names -->
     <string name="gamepad_mapper_button_a">A 键</string>
@@ -142,6 +143,7 @@
     <string name="touch_controls_enabled_toast">触摸控制已启用</string>
     <string name="touch_controls_disabled_toast">触摸控制已禁用</string>
     <string name="fragment_label_touch_controls">触摸控制</string>
+    <string name="game_keyboard_init_failed">键盘支持初始化失败</string>
 
     <!-- Import Mod -->
     <string name="install_mod_title">导入模组</string>
@@ -403,11 +405,11 @@
     <string name="optimization_copy">复制</string>
     <string name="optimization_open_settings">→ 打开设置</string>
     <string name="optimization_group_betterfps">BetterFPS b41</string>
-    <string name="optimization_betterfps_hint">减少玩家周围的渲染区域。 \n\nSteam Workshop ID: 3022543997。下载模组，上传 ZIP 文件，并选择三种最常用模式之一。</string>
+    <string name="optimization_betterfps_hint">减少玩家周围的渲染区域。 \n\nSteam 创意工坊 ID：3022543997。下载模组，上传 ZIP 文件，并选择三种最常用模式之一。</string>
     <string name="optimization_betterfps_file_label">BetterFPS 模组（zip 压缩包）</string>
     <string name="optimization_install">安装</string>
     <string name="optimization_betterfps_help_title">BetterFPS 原理</string>
-    <string name="optimization_betterfps_help_message">Steam Workshop ID：3022543997\n\n“Project Zomboid 会渲染玩家周围 190×190 格的区域。这个模组会缩小该区域的大小，并避免加载不必要的区块。”\n— 模组说明\n\n选项：\n• PotatoePC — 最高性能\n• 1080 — 平衡模式\n• 4k — 最佳画质（仍然低于原版）\n• All_Settings — 可自定义区域大小，从 30×30 到 190×190；必须手动安装\n\n建议从 PotatoePC 开始。如有需要，可以手动选择更低的设置。</string>
+    <string name="optimization_betterfps_help_message">Steam 创意工坊 ID：3022543997\n\n“Project Zomboid 会渲染玩家周围 190×190 格的区域。这个模组会缩小该区域的大小，并避免加载不必要的区块。”\n— 模组说明\n\n选项：\n• PotatoePC — 最高性能\n• 1080 — 平衡模式\n• 4k — 最佳画质（仍然低于原版）\n• All_Settings — 可自定义区域大小，从 30×30 到 190×190；必须手动安装\n\n建议从 PotatoePC 开始。如有需要，可以手动选择更低的设置。</string>
     <string name="optimization_betterfps_installed">BetterFPS 安装成功</string>
     <string name="optimization_betterfps_installing">正在安装 BetterFPS…</string>
     <string name="optimization_betterfps_mode_label">模式</string>
@@ -482,7 +484,7 @@
     <string name="optimization_group_eto">Every Texture Optimized</string>
     <string name="optimization_eto_hint">安装优化纹理以提升性能。 \n⚠️ 可以通过游戏内模组管理器作为普通模组安装，但对于只有 4GB 内存的低端设备，强烈建议进行一次性纹理替换。 \n\n选择游戏实例，系统将自动应用正确的纹理版本（B41 或 B42）。</string>
     <string name="optimization_eto_help_title">Every Texture Optimized</string>
-    <string name="optimization_eto_help_message">Steam Workshop ID：3119788162 [B42] 和 ID：2812026801 [B41]\n\n从 Steam Workshop 或 Skymods 下载该模组的 ZIP 文件。\n\n选择游戏实例和 ZIP 文件，然后点击 Install。启动器会自动选择适用于你版本的纹理文件夹，并将文件复制到游戏的 media/textures 目录中，替换原始文件。\n\n原始的 textures 文件夹将被重命名为 textures.bak。若需回滚模组，请删除新的 textures 文件夹，并将 textures.bak 重命名回 textures。</string>
+    <string name="optimization_eto_help_message">Steam 创意工坊 ID：3119788162 [B42] 和 ID：2812026801 [B41]\n\n从 Steam 创意工坊或 Skymods 下载该模组的 ZIP 文件。\n\n选择游戏实例和 ZIP 文件，然后点击“安装”。启动器会自动选择适用于你版本的纹理文件夹，并将文件复制到游戏的 media/textures 目录中，替换原始文件。\n\n原始的 textures 文件夹将被重命名为 textures.bak。若需回滚模组，请删除新的 textures 文件夹，并将 textures.bak 重命名回 textures。</string>
     <string name="optimization_eto_installing">正在安装纹理…</string>
     <string name="optimization_eto_installed">纹理安装成功</string>
     <string name="optimization_eto_error_no_textures">在此 ZIP 中找不到纹理文件夹。</string>
@@ -492,7 +494,7 @@
     <string name="optimization_zombiebuddy_hint">框架模组。 \n⚠️ 使用 ZombieBuddy 的模组可能与其他模组不兼容。如出现问题，请尝试调整加载顺序或更换模组版本。\n\n要禁用：在此关闭开关，并在游戏中禁用该模组，然后重启。</string>
     <string name="optimization_zombiebuddy_enabled">启用 ZombieBuddy 代理</string>
     <string name="optimization_zombiebuddy_help_title">ZombieBuddy</string>
-    <string name="optimization_zombiebuddy_help_message">一个支持 Project Zomboid 高级 Java mod 的框架。\n\n从 Steam 下载 ZombieBuddy，Workshop ID：3619862853，在此上传 ZIP 文件并点击安装。</string>
+    <string name="optimization_zombiebuddy_help_message">一个支持 Project Zomboid 高级 Java mod 的框架。\n\n从 Steam 下载 ZombieBuddy，创意工坊 ID：3619862853，在此上传 ZIP 文件并点击安装。</string>
     <string name="optimization_zombiebuddy_installing">正在安装 ZombieBuddy…</string>
     <string name="optimization_zombiebuddy_installed">ZombieBuddy 安装成功</string>
      
@@ -500,7 +502,7 @@
     <string name="optimization_zbbetterfps_hint">优化 mod。所有选项默认关闭。安装 mod 后在 Mod 选项中启用。\n\n此 mod 已为 Zomdroid 修改以兼容 Android。\n\n⚠️ ZBBetterFPS 与 BetterFPS 不兼容，只能使用其中一个。</string>
     <string name="optimization_zbbetterfps_enabled">启用 ZBBetterFPS</string>
     <string name="optimization_zbbetterfps_help_title">ZBBetterFPS</string>
-    <string name="optimization_zbbetterfps_help_message">一个全面的性能优化模组，用于优化 Project Zomboid 的渲染、游戏逻辑和 CPU 使用。作者：Zed。\n\n需要已安装并启用 ZombieBuddy（B41 还需 ModOptions）。\n⚠️ 使用 ZombieBuddy 的模组可能与其他模组不兼容。如出现问题，请尝试调整加载顺序或更换模组版本。 \n\n从 Steam Workshop 或 Skymods 下载 ZBBetterFPS（ID：3622986450），上传 ZIP 文件并点击 Install。</string>
+    <string name="optimization_zbbetterfps_help_message">一个全面的性能优化模组，用于优化 Project Zomboid 的渲染、游戏逻辑和 CPU 使用。作者：Zed。\n\n需要已安装并启用 ZombieBuddy（B41 还需 ModOptions）。\n⚠️ 使用 ZombieBuddy 的模组可能与其他模组不兼容。如出现问题，请尝试调整加载顺序或更换模组版本。 \n\n从 Steam 创意工坊或 Skymods 下载 ZBBetterFPS（ID：3622986450），上传 ZIP 文件并点击“安装”。</string>
     <string name="optimization_zbbetterfps_installing">正在安装 ZBBetterFPS…</string>
     <string name="optimization_zbbetterfps_installed">ZBBetterFPS 安装成功</string>
     <string name="optimization_zbbetterfps_gl4es_warning">⚠️ ZBBetterFPS 仅支持 ZINK 渲染器。如使用 GL4ES，请改用普通的 BetterFPS mod。</string>
@@ -523,13 +525,13 @@
     <string name="export_label">导出</string>
 
     <!-- ===== Workshop Download strings ===== -->
-    <string name="install_mod_workshop_section">从 Steam Workshop 下载</string>
+    <string name="install_mod_workshop_section">从 Steam 创意工坊下载</string>
     <string name="install_mod_workshop_disclaimer">由 ggntw.com 提供 — 第三方服务，随时可能停止运行。\n首次使用时，下载前可能会显示大量广告。</string>
-    <string name="install_mod_workshop_btn">从 Workshop 下载</string>
-    <string name="install_mod_workshop_dialog_title">Steam Workshop ID</string>
-    <string name="install_mod_workshop_dialog_message">从 mod 页面 URL 中输入 Workshop ID。\n\n示例：Workshop ID：3619862853</string>
+    <string name="install_mod_workshop_btn">从创意工坊下载</string>
+    <string name="install_mod_workshop_dialog_title">Steam 创意工坊 ID</string>
+    <string name="install_mod_workshop_dialog_message">从 mod 页面 URL 中输入创意工坊 ID。\n\n示例：创意工坊 ID：3619862853</string>
     <string name="install_mod_workshop_download">下载</string>
-    <string name="install_mod_workshop_id_empty">请输入 Workshop ID</string>
+    <string name="install_mod_workshop_id_empty">请输入创意工坊 ID</string>
     <string name="install_mod_workshop_requesting">正在请求下载链接…</string>
     <string name="install_mod_workshop_error">无法获取下载链接，请稍后重试。</string>
     <string name="install_mod_workshop_webview_title">完成下载</string>
@@ -681,8 +683,10 @@
     <string name="workshop_library_more">更多模组库操作</string>
 
     <!-- 已安装 Mod 库 -->
+    <string name="workshop_library_mode_installed">实例 Mod</string>
+    <string name="workshop_library_mode_shared">共享创意工坊 Mod</string>
     <string name="workshop_installed_title">已安装 Mod</string>
-    <string name="workshop_library_shared_title">共享 Workshop Mod 库</string>
+    <string name="workshop_library_shared_title">共享创意工坊 Mod 库</string>
     <string name="workshop_installed_instance">实例</string>
     <string name="workshop_installed_refresh">刷新已安装 Mod</string>
     <string name="workshop_installed_search_hint">搜索名称、Mod ID 或文件夹</string>
@@ -705,10 +709,10 @@
     <string name="workshop_installed_id_missing">缺失</string>
     <string name="workshop_installed_incomplete">元数据不完整</string>
     <string name="workshop_installed_duplicate_id">Mod ID 重复</string>
-    <string name="workshop_installed_unmatched">没有本地 Workshop 匹配</string>
-    <string name="workshop_installed_workshop_format">Workshop：%1$s（%2$d）</string>
+    <string name="workshop_installed_unmatched">没有本地创意工坊匹配</string>
+    <string name="workshop_installed_workshop_format">创意工坊：%1$s（%2$d）</string>
     <string name="workshop_installed_action_details">查看本地详情</string>
-    <string name="workshop_installed_action_workshop">打开 Workshop 详情</string>
+    <string name="workshop_installed_action_workshop">打开创意工坊详情</string>
     <string name="workshop_installed_action_open_folder">打开 Mod 文件夹</string>
     <string name="workshop_installed_action_delete">删除 Mod</string>
     <string name="workshop_installed_details_instance">实例</string>

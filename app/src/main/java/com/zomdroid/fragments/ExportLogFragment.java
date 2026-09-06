@@ -135,7 +135,7 @@ public class ExportLogFragment extends Fragment {
 
         instances = GameInstanceManager.requireSingleton().getInstances();
         if (instances == null || instances.isEmpty()) {
-            Toast.makeText(requireContext(), "No game instances found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), R.string.install_mod_no_instances, Toast.LENGTH_SHORT).show();
             return;
         }
 

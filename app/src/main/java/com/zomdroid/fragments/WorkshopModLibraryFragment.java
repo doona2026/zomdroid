@@ -51,6 +51,7 @@ import com.zomdroid.workshop.library.InstalledModSortOrder;
 import com.zomdroid.workshop.library.InstalledModWorkshopMatcher;
 import com.zomdroid.workshop.library.ModLibraryEntry;
 import com.zomdroid.workshop.library.ModLibraryRepository;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -67,6 +68,9 @@ import java.util.concurrent.Executors;
 public class WorkshopModLibraryFragment extends Fragment {
     private static final String SELECTED_INSTANCE_PREF = "workshopModLibraryInstance";
 
+    private View installedSection;
+    private View sharedSection;
+    private MaterialButtonToggleGroup modeGroup;
     private LinearLayout list;
     private LinearLayout installedList;
     private Spinner instanceSpinner;
@@ -92,11 +96,15 @@ public class WorkshopModLibraryFragment extends Fragment {
     private long installedScanGeneration;
     private long installedLastScanAt;
     private boolean suppressInstanceSelection;
+    private boolean showingInstalledMods = true;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle state) {
         View view = inflater.inflate(R.layout.fragment_workshop_mod_library, container, false);
+        installedSection = view.findViewById(R.id.workshop_installed_section);
+        sharedSection = view.findViewById(R.id.workshop_shared_section);
+        modeGroup = view.findViewById(R.id.workshop_library_mode_group);
         list = view.findViewById(R.id.workshop_library_list);
         installedList = view.findViewById(R.id.workshop_installed_list);
         instanceSpinner = view.findViewById(R.id.workshop_installed_instance_spinner);
@@ -109,6 +117,7 @@ public class WorkshopModLibraryFragment extends Fragment {
         installedReturnLauncher = view.findViewById(R.id.workshop_installed_return_launcher);
         repository = new ModLibraryRepository(requireContext());
 
+        setupModeToggle();
         view.findViewById(R.id.workshop_library_cleanup).setOnClickListener(v -> confirmCleanup());
         installedRefresh.setOnClickListener(v -> refreshInstalledMods());
         installedReturnLauncher.setOnClickListener(v -> NavHostFragment.findNavController(this).popBackStack());
@@ -120,10 +129,36 @@ public class WorkshopModLibraryFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (installedList != null) {
+        if (installedList != null && showingInstalledMods) {
             refreshInstances();
             refreshInstalledMods();
         }
+    }
+
+    private void setupModeToggle() {
+        modeGroup.check(R.id.workshop_library_mode_installed);
+        modeGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) return;
+            boolean showInstalled = checkedId == R.id.workshop_library_mode_installed;
+            if (showInstalled == showingInstalledMods) return;
+            showingInstalledMods = showInstalled;
+            updateModeVisibility();
+            if (showInstalled) {
+                refreshInstances();
+                refreshInstalledMods();
+            } else {
+                // Let an in-flight scan finish in the background, but never let it update a
+                // hidden/stale view after the user switched to the shared library.
+                installedScanGeneration++;
+            }
+        });
+        updateModeVisibility();
+    }
+
+    private void updateModeVisibility() {
+        if (installedSection == null || sharedSection == null) return;
+        installedSection.setVisibility(showingInstalledMods ? View.VISIBLE : View.GONE);
+        sharedSection.setVisibility(showingInstalledMods ? View.GONE : View.VISIBLE);
     }
 
     private void setupInstalledControls() {
@@ -488,6 +523,9 @@ public class WorkshopModLibraryFragment extends Fragment {
         installedProgress = null;
         installedRefresh = null;
         installedReturnLauncher = null;
+        installedSection = null;
+        sharedSection = null;
+        modeGroup = null;
         super.onDestroyView();
     }
 

@@ -90,6 +90,14 @@
   APK: `app/build/outputs/apk/debug/zomdroid-debug-1.4.9.apk` (168,028,342 bytes). MuMu/real-device
   instance selection, real directory scanning, folder opening and delete confirmation remain for user validation.
 
+### Installed/shared library view toggle
+
+- Implemented: Added a required two-way toggle at the top of the Mod Library page. “Instance Mods”
+  and “Shared Workshop Mods” are now mutually exclusive sections; switching back to Instance Mods
+  refreshes the selected instance scan, while the shared archive flow remains unchanged.
+- Validation: Debug resources, Java/Kotlin compilation, full JVM unit tests, `assembleDebug`, and
+  `git diff --check` pass.
+
 ## Unified Animation System
 
 - Stage 1 completed: 2026-09-06

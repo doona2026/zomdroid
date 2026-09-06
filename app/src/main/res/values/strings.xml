@@ -195,6 +195,7 @@
     <string name="gamepad_mapper_save">Mapping Complete!</string>
     <string name="gamepad_mapper_success">Gamepad mapping saved successfully</string>
     <string name="gamepad_mapper_reset_confirmation">Gamepad mapping reset to default</string>
+    <string name="gamepad_mapper_duplicate">Button already assigned!</string>
 
     <!-- Gamepad Button Names -->
     <string name="gamepad_mapper_button_a">A Button</string>
@@ -233,6 +234,7 @@
     <string name="touch_controls_enabled_toast">Touch controls enabled</string>
     <string name="touch_controls_disabled_toast">Touch controls disabled</string>
     <string name="fragment_label_touch_controls">Touch Controls</string>
+    <string name="game_keyboard_init_failed">Failed to initialize keyboard support</string>
 
     <!-- Import Mod -->
     <string name="install_mod_title">Import Mods</string>
@@ -838,6 +840,8 @@
     <string name="workshop_library_more">More library actions</string>
 
     <!-- Installed Mod library -->
+    <string name="workshop_library_mode_installed">Instance Mods</string>
+    <string name="workshop_library_mode_shared">Shared Workshop Mods</string>
     <string name="workshop_installed_title">Installed Mods</string>
     <string name="workshop_library_shared_title">Shared Workshop library</string>
     <string name="workshop_installed_instance">Instance</string>
