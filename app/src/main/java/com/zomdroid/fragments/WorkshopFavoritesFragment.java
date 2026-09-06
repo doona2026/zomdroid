@@ -123,7 +123,7 @@ public class WorkshopFavoritesFragment extends Fragment {
         @Override
         public FavoriteHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new FavoriteHolder(LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_workshop, parent, false));
+                    .inflate(R.layout.item_workshop_favorite, parent, false));
         }
 
         @Override
