@@ -737,7 +737,7 @@
     <string name="workshop_download_by_id_hint">Workshop IDs (space or comma separated)</string>
     <string name="workshop_download_by_id_empty">Enter at least one valid Workshop ID.</string>
     <string name="workshop_download_by_id_enqueued">Added %1$d Workshop item(s) to the download center.</string>
-    <string name="workshop_download_by_id_task_title">Workshop item %1$d</string>
+    <string name="workshop_mod_id_format">Mod ID: %1$s</string>
     <string name="workshop_previous">Previous</string>
     <string name="workshop_next">Next</string>
     <string name="workshop_to_top">Back to top</string>

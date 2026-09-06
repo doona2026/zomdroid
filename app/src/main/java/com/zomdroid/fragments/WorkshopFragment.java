@@ -204,7 +204,7 @@ public class WorkshopFragment extends Fragment {
                         manager.enqueue(
                                 108600L,
                                 id,
-                                getString(R.string.workshop_download_by_id_task_title, id),
+                                null,
                                 null);
                     }
                     WorkshopDownloadForegroundService.start(requireContext());

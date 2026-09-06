@@ -112,6 +112,9 @@ public class WorkshopDetailFragment extends Fragment {
                 value.getSubscriptions() == null ? "?" : value.getSubscriptions().toString(),
                 value.getViews() == null ? "?" : value.getViews().toString());
         ((TextView) requireView().findViewById(R.id.workshop_detail_meta)).setText(stats);
+        ((TextView) requireView().findViewById(R.id.workshop_detail_id)).setText(
+                getString(R.string.workshop_mod_id_format,
+                        WorkshopCatalogRuntime.detailPublishedFileId(value)));
         ((TextView) requireView().findViewById(R.id.workshop_detail_tags)).setText(TextUtils.join(" · ", value.getTags()));
         renderDescription(value);
         ((TextView) requireView().findViewById(R.id.workshop_detail_changes)).setText(value.getChangeNotes());

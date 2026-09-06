@@ -269,11 +269,22 @@ class DownloadCenterManager(
         val outputDir = File(stagingRoot, task.id)
         try {
             val files = runner.run(task, outputDir) { event -> handleEvent(taskId, event) }
+            val metadata = File(outputDir, "metadata.json")
+                .takeIf(File::isFile)
+                ?.let { file -> runCatching { file.readText() }.getOrNull() }
+            val metadataTitle = WorkshopArchiveNaming.titleFromMetadata(
+                metadata,
+                task.publishedFileId,
+            )
+            val archiveTitle = metadataTitle
+                .takeUnless { it == "Workshop ${task.publishedFileId}" }
+                ?: task.title
+            val completedTask = task.copy(title = archiveTitle)
             val archive = File(
                 completionRoot,
                 WorkshopArchiveNaming.forWorkshop(
                     task.publishedFileId,
-                    task.title,
+                    archiveTitle,
                     task.createdAtMillis,
                 ),
             )
@@ -283,16 +294,17 @@ class DownloadCenterManager(
                 destination = archive,
             )
             libraryRepository?.recordCompletedTask(
-                task = task,
+                task = completedTask,
                 completedPath = archive,
                 files = files.map(::toCenterFile),
-                metadataJson = File(outputDir, "metadata.json").takeIf(File::isFile)?.readText(),
+                metadataJson = metadata,
             )
             val completed = synchronized(lock) {
                 val current = findLocked(taskId)
                 if (current?.state == DownloadCenterTaskState.Running) {
                     replaceLocked(taskId) {
                         it.copy(
+                            title = archiveTitle,
                             state = DownloadCenterTaskState.Success,
                             phase = "Success",
                             errorMessage = null,

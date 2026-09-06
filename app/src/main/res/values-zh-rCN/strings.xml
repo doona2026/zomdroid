@@ -555,7 +555,7 @@
     <string name="workshop_download_by_id_hint">创意工坊 ID（用空格或逗号分隔）</string>
     <string name="workshop_download_by_id_empty">请输入至少一个有效的创意工坊 ID。</string>
     <string name="workshop_download_by_id_enqueued">已将 %1$d 个创意工坊项目加入下载中心。</string>
-    <string name="workshop_download_by_id_task_title">创意工坊项目 %1$d</string>
+    <string name="workshop_mod_id_format">Mod ID：%1$s</string>
     <string name="workshop_previous">上一页</string>
     <string name="workshop_next">下一页</string>
     <string name="workshop_to_top">返回顶部</string>

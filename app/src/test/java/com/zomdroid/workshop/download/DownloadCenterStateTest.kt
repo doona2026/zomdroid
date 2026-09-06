@@ -32,6 +32,21 @@ class DownloadCenterStateTest {
     }
 
     @Test
+    fun `metadata title is used for an id-only task and its archive`() = runBlocking {
+        val root = Files.createTempDirectory("download-center-metadata-title").toFile()
+        val manager = manager(root, MetadataRunner("Coffee Fluid"))
+        val task = manager.enqueue(108600, 12345)
+
+        manager.start()
+        manager.awaitIdle()
+
+        val saved = manager.tasks.value.single()
+        assertEquals(task.id, saved.id)
+        assertEquals("Coffee Fluid", saved.title)
+        assertTrue(saved.outputPath?.let(::File)?.name?.startsWith("Coffee Fluid [12345]_") == true)
+    }
+
+    @Test
     fun `paused task resumes and failed task retries`() = runBlocking {
         val root = Files.createTempDirectory("download-center-transitions").toFile()
         val runner = FakeRunner(failFirstRun = true)
@@ -205,6 +220,30 @@ class DownloadCenterStateTest {
             outputDir.mkdirs()
             outputDir.resolve("partial.bin").writeText("partial")
             error("simulated failure after staging")
+        }
+    }
+
+    private class MetadataRunner(private val title: String) : DownloadCenterRunner {
+        override suspend fun run(
+            task: DownloadCenterTask,
+            outputDir: File,
+            emit: suspend (DownloadEvent) -> Unit,
+        ): List<DownloadedFileInfo> {
+            outputDir.mkdirs()
+            outputDir.resolve("metadata.json").writeText(
+                """{"response":{"publishedfiledetails":[{"title":"$title"}]}}""",
+            )
+            val file = outputDir.resolve("media/mod.info").apply {
+                parentFile?.mkdirs()
+                writeText("name=Example")
+            }
+            return listOf(
+                DownloadedFileInfo(
+                    relativePath = "media/mod.info",
+                    sizeBytes = file.length(),
+                    modifiedEpochMillis = file.lastModified(),
+                ),
+            )
         }
     }
 }
