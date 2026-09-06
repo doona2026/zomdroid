@@ -194,13 +194,13 @@
                     <ImageView
                         style="@style/GameMenuIcon"
                         android:src="@drawable/mt_icon_exit"
-                        android:tint="@color/md_theme_error"
+                            android:tint="?attr/colorError"
                         android:contentDescription="@null" />
 
                     <TextView
                         style="@style/GameMenuRowText"
                         android:text="@string/game_menu_exit"
-                        android:textColor="@color/md_theme_error" />
+                        android:textColor="?attr/colorError" />
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>

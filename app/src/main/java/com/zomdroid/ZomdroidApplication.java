@@ -27,6 +27,14 @@ public class ZomdroidApplication extends Application {
         installFullBouncyCastle();
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
+            public void onActivityPreCreated(@NonNull Activity activity, Bundle savedInstanceState) {
+                if (!inited) init();
+                // Apply the palette before AppCompatActivity inflates any XML so every view sees
+                // the same semantic colour attributes on its first render.
+                ThemeManager.applyColorTheme(activity);
+            }
+
+            @Override
             public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {
                 currentActivity = activity;
                 if (!inited) init();

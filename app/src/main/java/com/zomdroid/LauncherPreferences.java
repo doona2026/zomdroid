@@ -342,6 +342,29 @@ public class LauncherPreferences {
     public ThemeMode getThemeMode() { return themeMode != null ? themeMode : ThemeMode.SYSTEM; }
     public void setThemeMode(ThemeMode mode) { themeMode = mode; saveToPreferences(); }
 
+    /**
+     * The colour palette is deliberately independent from light/dark mode. Keeping the two
+     * choices separate means adding a palette does not multiply the number of night-mode options,
+     * and old preference JSON remains readable because a missing field falls back to BLUE_GRAY.
+     */
+    public enum ColorTheme {
+        BLUE_GRAY,
+        FOREST,
+        PURPLE,
+        CLASSIC_AMBER
+    }
+
+    private ColorTheme colorTheme = ColorTheme.BLUE_GRAY;
+
+    public ColorTheme getColorTheme() {
+        return colorTheme != null ? colorTheme : ColorTheme.BLUE_GRAY;
+    }
+
+    public void setColorTheme(ColorTheme mode) {
+        colorTheme = mode != null ? mode : ColorTheme.BLUE_GRAY;
+        saveToPreferences();
+    }
+
     public enum LanguageMode {
         SYSTEM(""),
         ENGLISH("en"),

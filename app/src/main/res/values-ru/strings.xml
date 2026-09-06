@@ -585,6 +585,11 @@
     <string name="steam_dl_guard_email">Код отправлен на %1$s</string>
 
     <!-- Appearance / controls / detection -->
+    <string name="settings_color_theme">Цветовая тема</string>
+    <string name="settings_color_theme_blue_gray">Сине-серая</string>
+    <string name="settings_color_theme_forest">Лесная</string>
+    <string name="settings_color_theme_purple">Фиолетово-серая</string>
+    <string name="settings_color_theme_classic_amber">Классическая янтарная</string>
     <string name="settings_group_appearance">Оформление</string>
     <string name="settings_theme">Тема лаунчера</string>
     <string name="settings_language">Язык лаунчера</string>

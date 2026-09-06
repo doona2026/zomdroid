@@ -39,20 +39,51 @@ public class AppSettingsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        LauncherPreferences preferences = LauncherPreferences.requireSingleton();
+
+        String[] colorThemeLabels = {
+                getString(R.string.settings_color_theme_blue_gray),
+                getString(R.string.settings_color_theme_forest),
+                getString(R.string.settings_color_theme_purple),
+                getString(R.string.settings_color_theme_classic_amber)
+        };
+        ArrayAdapter<String> colorThemeAdapter = new ArrayAdapter<>(
+                requireContext(),
+                R.layout.spinner_item,
+                colorThemeLabels);
+        colorThemeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        binding.appSettingsColorThemeS.setAdapter(colorThemeAdapter);
+        binding.appSettingsColorThemeS.setSelection(preferences.getColorTheme().ordinal());
+        binding.appSettingsColorThemeS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                LauncherPreferences.ColorTheme colorTheme =
+                        LauncherPreferences.ColorTheme.values()[position];
+                if (colorTheme != preferences.getColorTheme()) {
+                    preferences.setColorTheme(colorTheme);
+                    // Theme overlays are applied before layout inflation, so recreate once after
+                    // the preference changes instead of trying to recolour individual views.
+                    requireActivity().recreate();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
         ArrayAdapter<LauncherPreferences.ThemeMode> themeAdapter = new ArrayAdapter<>(
                 requireContext(),
                 R.layout.spinner_item,
                 LauncherPreferences.ThemeMode.values());
         themeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         binding.appSettingsThemeS.setAdapter(themeAdapter);
-        binding.appSettingsThemeS.setSelection(
-                themeAdapter.getPosition(LauncherPreferences.requireSingleton().getThemeMode()));
+        binding.appSettingsThemeS.setSelection(themeAdapter.getPosition(preferences.getThemeMode()));
         binding.appSettingsThemeS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 LauncherPreferences.ThemeMode mode =
                         (LauncherPreferences.ThemeMode) parent.getSelectedItem();
-                LauncherPreferences.requireSingleton().setThemeMode(mode);
+                preferences.setThemeMode(mode);
                 AppCompatDelegate.setDefaultNightMode(mode.nightMode);
             }
 
@@ -76,14 +107,13 @@ public class AppSettingsFragment extends Fragment {
                 languageLabels);
         languageAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         binding.appSettingsLanguageS.setAdapter(languageAdapter);
-        binding.appSettingsLanguageS.setSelection(
-                LauncherPreferences.requireSingleton().getLanguageMode().ordinal());
+        binding.appSettingsLanguageS.setSelection(preferences.getLanguageMode().ordinal());
         binding.appSettingsLanguageS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 LauncherPreferences.LanguageMode mode =
                         LauncherPreferences.LanguageMode.values()[position];
-                LauncherPreferences.requireSingleton().setLanguageMode(mode);
+                preferences.setLanguageMode(mode);
                 LocaleListCompat locales = mode == LauncherPreferences.LanguageMode.SYSTEM
                         ? LocaleListCompat.getEmptyLocaleList()
                         : LocaleListCompat.forLanguageTags(mode.localeTag);

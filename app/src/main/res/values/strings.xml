@@ -475,6 +475,11 @@
     <!-- Settings groups -->
     <string name="settings_group_rendering">Rendering</string>
     <string name="settings_group_appearance">Appearance</string>
+    <string name="settings_color_theme">Color theme</string>
+    <string name="settings_color_theme_blue_gray">Blue gray</string>
+    <string name="settings_color_theme_forest">Forest</string>
+    <string name="settings_color_theme_purple">Purple gray</string>
+    <string name="settings_color_theme_classic_amber">Classic amber</string>
     <string name="settings_theme">Launcher theme</string>
     <string name="settings_language">Launcher language</string>
     <string name="settings_language_system">System default</string>

@@ -21,7 +21,7 @@
             android:id="@+id/appbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@drawable/toolbar_gradient"
+            android:background="?attr/colorSurface"
             app:theme="@style/AppTheme.Toolbar"/>
 
         <fragment
@@ -48,13 +48,13 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            app:dividerColor="@color/pz_orange"
+            app:dividerColor="?attr/colorOutline"
             app:menu="@menu/menu_nav"/>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/pz_orange"/>
+            android:background="?attr/colorOutline"/>
 
         <!-- Bottom row: Wiki / Donate / Reddit / GitHub / RimDroid.
              Labelled now. Unlabelled glyphs meant nobody knew what any of them did without tapping,
@@ -201,7 +201,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/pz_orange"/>
+            android:background="?attr/colorOutline"/>
     </LinearLayout>
 
 </androidx.drawerlayout.widget.DrawerLayout>
