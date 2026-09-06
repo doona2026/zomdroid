@@ -370,6 +370,9 @@ public class WorkshopModLibraryFragment extends Fragment {
 
     private String installedStatus(InstalledMod mod) {
         ArrayList<String> status = new ArrayList<>();
+        if (mod.getVariants().size() > 1) {
+            status.add(getString(R.string.workshop_installed_variants_format, mod.getVariants().size()));
+        }
         if (!mod.getMetadataComplete()) status.add(getString(R.string.workshop_installed_incomplete));
         if (mod.getDuplicateModId()) status.add(getString(R.string.workshop_installed_duplicate_id));
         if (mod.getMatchedWorkshopId() != null) {
@@ -414,6 +417,15 @@ public class WorkshopModLibraryFragment extends Fragment {
         appendDetail(details, R.string.workshop_installed_details_size,
                 android.text.format.Formatter.formatFileSize(requireContext(), mod.getSizeBytes()));
         appendDetail(details, R.string.workshop_installed_details_modified, formatDate(mod.getLastModifiedEpochMillis()));
+        if (!mod.getInfoRootPath().equals(mod.getRootPath())) {
+            appendDetail(details, R.string.workshop_installed_details_metadata_root, mod.getInfoRootPath());
+        }
+        if (mod.getVariants().size() > 1) {
+            details.append('\n').append(getString(R.string.workshop_installed_details_variants)).append('\n');
+            for (com.zomdroid.workshop.library.InstalledModVariant variant : mod.getVariants()) {
+                details.append("• ").append(variant.getRelativePath()).append('\n');
+            }
+        }
         if (!mod.getDescription().isBlank()) {
             appendDetail(details, R.string.workshop_installed_details_description, mod.getDescription());
         }

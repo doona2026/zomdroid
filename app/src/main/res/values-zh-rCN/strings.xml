@@ -706,6 +706,7 @@
     <string name="workshop_installed_icon">Mod 图标</string>
     <string name="workshop_installed_more">更多已安装 Mod 操作</string>
     <string name="workshop_installed_meta_format">ID：%1$s · %2$s · 修改于 %3$s</string>
+    <string name="workshop_installed_variants_format">包含 %1$d 个版本目录</string>
     <string name="workshop_installed_id_missing">缺失</string>
     <string name="workshop_installed_incomplete">元数据不完整</string>
     <string name="workshop_installed_duplicate_id">Mod ID 重复</string>
@@ -721,11 +722,13 @@
     <string name="workshop_installed_details_id">Mod ID</string>
     <string name="workshop_installed_details_size">大小</string>
     <string name="workshop_installed_details_modified">最后修改</string>
+    <string name="workshop_installed_details_metadata_root">元数据来源文件夹</string>
+    <string name="workshop_installed_details_variants">包含的版本文件夹</string>
     <string name="workshop_installed_details_description">描述</string>
     <string name="workshop_installed_details_mod_info">mod.info 字段</string>
     <string name="workshop_installed_open_folder_failed">无法打开 Mod 文件夹。路径：%1$s</string>
-    <string name="workshop_installed_delete_title">删除已安装的 Mod？</string>
-    <string name="workshop_installed_delete_message_format">确定要从实例“%2$s”删除“%1$s”吗？\n\n完整路径：\n%3$s\n\n只会删除这个 Mod 文件夹。</string>
+    <string name="workshop_installed_delete_title">删除已安装的 Mod 包？</string>
+    <string name="workshop_installed_delete_message_format">确定要从实例“%2$s”删除“%1$s”吗？\n\nMod 包文件夹：\n%3$s\n\n这会删除整个 Mod 文件夹，包括所有嵌套版本和共享文件。</string>
     <string name="workshop_installed_delete_success">已删除 %1$s。</string>
     <string name="workshop_installed_delete_failed">无法删除 Mod：%1$s</string>
     <string name="workshop_installed_scan_failed">扫描已安装 Mod 失败：%1$s</string>

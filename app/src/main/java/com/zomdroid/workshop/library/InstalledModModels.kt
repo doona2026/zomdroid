@@ -1,5 +1,12 @@
 package com.zomdroid.workshop.library
 
+data class InstalledModVariant(
+    val rootPath: String,
+    val relativePath: String,
+    val name: String,
+    val modId: String? = null,
+)
+
 data class InstalledMod(
     val instanceName: String,
     val rootPath: String,
@@ -15,6 +22,10 @@ data class InstalledMod(
     val matchedWorkshopId: Long? = null,
     val matchedWorkshopTitle: String? = null,
     val infoFields: Map<String, String> = emptyMap(),
+    /** The physical Mod root whose mod.info supplied the displayed metadata. */
+    val infoRootPath: String = rootPath,
+    /** Nested version roots grouped under this logical package, if any. */
+    val variants: List<InstalledModVariant> = emptyList(),
 )
 
 enum class InstalledModSortOrder {

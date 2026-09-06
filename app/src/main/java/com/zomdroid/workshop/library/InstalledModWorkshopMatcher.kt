@@ -8,11 +8,13 @@ object InstalledModWorkshopMatcher {
     @JvmStatic
     fun match(mod: InstalledMod, entries: List<ModLibraryEntry>): ModLibraryEntry? {
         val currentInstanceEntries = entries.filter { it.installedInstances.contains(mod.instanceName) }
-        val rootName = File(mod.rootPath).name
+        val rootNames = (listOf(mod.infoRootPath, mod.rootPath) + mod.variants.map { it.rootPath })
+            .map { File(it).name }
+            .distinctBy { it.lowercase(Locale.ROOT) }
         val rootMatches = currentInstanceEntries.filter { entry ->
             runCatching {
                 WorkshopModArchiveInspector.findModRootNames(File(entry.completedPath))
-                    .any { it.equals(rootName, ignoreCase = true) }
+                    .any { archiveRoot -> rootNames.any { it.equals(archiveRoot, ignoreCase = true) } }
             }.getOrDefault(false)
         }
         if (rootMatches.size == 1) return rootMatches.single()

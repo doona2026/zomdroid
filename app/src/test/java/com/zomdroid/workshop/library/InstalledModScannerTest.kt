@@ -30,6 +30,41 @@ class InstalledModScannerTest {
     }
 
     @Test
+    fun doesNotTreatNestedVersionsOrSubmodsAsAdditionalRoots() {
+        val instanceHome = Files.createTempDirectory("instance").toFile()
+        val mods = instanceHome.resolve("Zomboid/mods")
+        mods.mkdirs()
+        writeMod(mods, "Parent", "name=Parent Mod\nid=parent.mod")
+        writeMod(mods, "Parent/41", "name=Parent Legacy\nid=parent.legacy")
+        writeMod(mods, "Parent/42/Child", "name=Child Mod\nid=child.mod")
+
+        val result = InstalledModScanner().scan("Demo", instanceHome)
+
+        assertThat(result.mods.map { it.name }).containsExactly("Parent Mod")
+        assertThat(result.mods.single().relativePath).isEqualTo("Parent")
+    }
+
+    @Test
+    fun groupsVersionRootsUnderOneLogicalModPackage() {
+        val instanceHome = Files.createTempDirectory("instance").toFile()
+        val mods = instanceHome.resolve("Zomboid/mods")
+        mods.mkdirs()
+        writeMod(mods, "MS/42", "name=Modern Status [B42]\nid=modern.status")
+        writeMod(mods, "MS/42.13", "name=Modern Status [Legacy B42]\nid=modern.status")
+        mods.resolve("MS/common").mkdirs()
+
+        val result = InstalledModScanner().scan("Demo", instanceHome)
+        val mod = result.mods.single()
+
+        assertThat(mod.name).isEqualTo("Modern Status [Legacy B42]")
+        assertThat(mod.rootPath).isEqualTo(mods.resolve("MS").canonicalPath)
+        assertThat(mod.infoRootPath).isEqualTo(mods.resolve("MS/42.13").canonicalPath)
+        assertThat(mod.variants.map { it.relativePath }).containsExactly(
+            "MS/42", "MS/42.13",
+        ).inOrder()
+    }
+
+    @Test
     fun readsMetadataThumbnailSizeAndRootLastModified() {
         val instanceHome = Files.createTempDirectory("instance").toFile()
         val mods = instanceHome.resolve("Zomboid/mods")

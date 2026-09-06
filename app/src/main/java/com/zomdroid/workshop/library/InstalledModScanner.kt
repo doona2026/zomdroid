@@ -2,8 +2,19 @@ package com.zomdroid.workshop.library
 
 import java.io.File
 import java.nio.file.Files
+import java.util.Locale
 
 class InstalledModScanner {
+    private data class NestedModRoot(
+        val root: File,
+        val infoFile: File,
+        val parsed: ParsedModInfo,
+    )
+
+    private val versionDirectoryPattern = Regex(
+        "(?i)^(?:b|build)?\\d{2,3}(?:[._-]\\d{1,3})?(?:[._-]\\d{1,3})?$",
+    )
+
     fun scan(instanceName: String, instanceHomePath: String): InstalledModScanResult =
         scan(instanceName, File(instanceHomePath))
 
@@ -62,6 +73,15 @@ class InstalledModScanner {
         val infoFile = children.firstOrNull { it.isFile && it.name.equals("mod.info", ignoreCase = true) }
         if (infoFile != null) {
             result += buildInstalledMod(instanceName, modsDirectory, canonical, infoFile)
+            // A root-level mod.info makes this directory the authoritative Mod root.
+            // Nested version/sub-mod directories belong to it and must not be listed separately.
+            return
+        }
+
+        val nestedRoots = findDirectNestedRoots(children, modsDirectory, issues)
+        if (shouldGroupAsLogicalMod(children, nestedRoots)) {
+            result += buildGroupedInstalledMod(instanceName, modsDirectory, canonical, nestedRoots)
+            return
         }
 
         children.asSequence()
@@ -72,34 +92,136 @@ class InstalledModScanner {
             }
     }
 
+    private fun findDirectNestedRoots(
+        children: List<File>,
+        modsDirectory: File,
+        issues: MutableList<String>,
+    ): List<NestedModRoot> = children.asSequence()
+        .filter { it.isDirectory }
+        .sortedBy { it.name.lowercase(Locale.ROOT) }
+        .mapNotNull { child ->
+            val root = canonicalDirectoryInside(child, modsDirectory) ?: return@mapNotNull null
+            val infoFile = safeList(root, issues)
+                ?.firstOrNull { it.isFile && it.name.equals("mod.info", ignoreCase = true) }
+                ?: return@mapNotNull null
+            NestedModRoot(root, infoFile, ModInfoParser.parse(infoFile))
+        }
+        .toList()
+
+    private fun shouldGroupAsLogicalMod(
+        children: List<File>,
+        nestedRoots: List<NestedModRoot>,
+    ): Boolean {
+        if (nestedRoots.size < 2 || nestedRoots.any { !versionDirectoryPattern.matches(it.root.name) }) {
+            return false
+        }
+
+        val ids = nestedRoots.mapNotNull { it.parsed.id?.trim()?.takeIf(String::isNotEmpty) }
+            .map { it.lowercase(Locale.ROOT) }
+            .toSet()
+        if (ids.size == 1 && nestedRoots.all { !it.parsed.id.isNullOrBlank() }) return true
+
+        val hasCommonDirectory = children.any { it.isDirectory && it.name.equals("common", ignoreCase = true) }
+        if (!hasCommonDirectory) return false
+        val names = nestedRoots.map { groupingName(it.parsed.name ?: it.root.name) }.toSet()
+        return names.size == 1
+    }
+
+    private fun groupingName(name: String): String {
+        return name.lowercase(Locale.ROOT)
+            .replace(Regex("\\s*\\[?\\s*(?:legacy\\s*)?(?:build\\s*)?b?\\d{2,3}(?:[._-]\\d{1,3})?\\s*\\]?\\s*$"), "")
+            .replace(Regex("[^a-z0-9]+"), "")
+    }
+
+    private fun buildGroupedInstalledMod(
+        instanceName: String,
+        modsDirectory: File,
+        packageRoot: File,
+        nestedRoots: List<NestedModRoot>,
+    ): InstalledMod {
+        val orderedRoots = nestedRoots.sortedWith(
+            compareBy<NestedModRoot> { versionRank(it.root.name) }
+                .thenBy { it.root.lastModified() }
+                .thenBy { it.root.path.lowercase(Locale.ROOT) },
+        )
+        val primary = orderedRoots.last()
+        val variants = orderedRoots.map { nested ->
+            InstalledModVariant(
+                rootPath = nested.root.path,
+                relativePath = relativePath(modsDirectory, nested.root),
+                name = nested.parsed.name ?: nested.root.name,
+                modId = nested.parsed.id,
+            )
+        }
+        return buildInstalledMod(
+            instanceName = instanceName,
+            modsDirectory = modsDirectory,
+            packageRoot = packageRoot,
+            infoRoot = primary.root,
+            parsed = primary.parsed,
+            variants = variants,
+        )
+    }
+
+    private fun versionRank(name: String): Long {
+        val match = Regex("(?i)^(?:b|build)?(\\d{2,3})(?:[._-](\\d{1,3}))?(?:[._-](\\d{1,3}))?$").matchEntire(name)
+            ?: return Long.MIN_VALUE
+        val major = match.groupValues[1].toLongOrNull() ?: return Long.MIN_VALUE
+        val minor = match.groupValues[2].toLongOrNull() ?: 0L
+        val patch = match.groupValues[3].toLongOrNull() ?: 0L
+        return major * 1_000_000L + minor * 1_000L + patch
+    }
+
     private fun buildInstalledMod(
         instanceName: String,
         modsDirectory: File,
         root: File,
         infoFile: File,
+    ): InstalledMod = buildInstalledMod(
+        instanceName = instanceName,
+        modsDirectory = modsDirectory,
+        packageRoot = root,
+        infoRoot = root,
+        parsed = ModInfoParser.parse(infoFile),
+        variants = emptyList(),
+    )
+
+    private fun buildInstalledMod(
+        instanceName: String,
+        modsDirectory: File,
+        packageRoot: File,
+        infoRoot: File,
+        parsed: ParsedModInfo,
+        variants: List<InstalledModVariant>,
     ): InstalledMod {
-        val parsed = ModInfoParser.parse(infoFile)
-        val relativePath = modsDirectory.toPath()
-            .relativize(root.toPath())
-            .toString()
-            .replace(File.separatorChar, '/')
-        val name = parsed.name ?: root.name.ifBlank { "mod.info" }
+        val relativePath = relativePath(modsDirectory, packageRoot)
+        val name = parsed.name ?: infoRoot.name.ifBlank { "mod.info" }
         val id = parsed.id
 
         return InstalledMod(
             instanceName = instanceName,
-            rootPath = root.path,
+            rootPath = packageRoot.path,
             relativePath = relativePath,
             name = name,
             modId = id,
             description = parsed.description.orEmpty(),
-            thumbnailPath = resolveLocalAsset(root, parsed.poster ?: parsed.icon),
-            sizeBytes = directorySize(root),
-            lastModifiedEpochMillis = root.lastModified(),
+            thumbnailPath = resolveLocalAsset(infoRoot, parsed.poster ?: parsed.icon),
+            sizeBytes = directorySize(packageRoot),
+            lastModifiedEpochMillis = maxOf(
+                packageRoot.lastModified(),
+                variants.maxOfOrNull { File(it.rootPath).lastModified() } ?: 0L,
+            ),
             metadataComplete = parsed.readable && !id.isNullOrBlank(),
             infoFields = parsed.fields,
+            infoRootPath = infoRoot.path,
+            variants = variants,
         )
     }
+
+    private fun relativePath(modsDirectory: File, root: File): String = modsDirectory.toPath()
+        .relativize(root.toPath())
+        .toString()
+        .replace(File.separatorChar, '/')
 
     private fun resolveLocalAsset(root: File, rawPath: String?): String? {
         if (rawPath.isNullOrBlank()) return null

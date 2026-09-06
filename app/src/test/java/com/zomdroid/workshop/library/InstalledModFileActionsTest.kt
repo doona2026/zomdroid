@@ -24,6 +24,28 @@ class InstalledModFileActionsTest {
     }
 
     @Test
+    fun deletesTheWholeLogicalPackageIncludingNestedVersions() {
+        val mods = Files.createTempDirectory("mods").toFile()
+        val packageRoot = mods.resolve("MS").apply { mkdirs() }
+        val version42 = packageRoot.resolve("42").apply { mkdirs() }
+        val version4213 = packageRoot.resolve("42.13").apply { mkdirs() }
+        packageRoot.resolve("common").mkdirs()
+        version42.resolve("mod.info").writeText("id=modern.status")
+        version4213.resolve("mod.info").writeText("id=modern.status")
+        val logicalMod = mod(packageRoot).copy(
+            variants = listOf(
+                InstalledModVariant(version42.absolutePath, "MS/42", "Modern Status [B42]", "modern.status"),
+                InstalledModVariant(version4213.absolutePath, "MS/42.13", "Modern Status [B42.13]", "modern.status"),
+            ),
+        )
+
+        val result = InstalledModFileActions.delete(mods, logicalMod, listOf(logicalMod))
+
+        assertThat(result.success).isTrue()
+        assertThat(packageRoot.exists()).isFalse()
+    }
+
+    @Test
     fun rejectsModsRootAndPathsOutsideTheCurrentInstance() {
         val mods = Files.createTempDirectory("mods").toFile()
         val outside = Files.createTempDirectory("outside").toFile().apply { mkdirs() }

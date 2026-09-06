@@ -863,6 +863,7 @@
     <string name="workshop_installed_icon">Mod icon</string>
     <string name="workshop_installed_more">More installed Mod actions</string>
     <string name="workshop_installed_meta_format">ID: %1$s · %2$s · modified %3$s</string>
+    <string name="workshop_installed_variants_format">Contains %1$d version folders</string>
     <string name="workshop_installed_id_missing">missing</string>
     <string name="workshop_installed_incomplete">metadata incomplete</string>
     <string name="workshop_installed_duplicate_id">duplicate Mod ID</string>
@@ -878,11 +879,13 @@
     <string name="workshop_installed_details_id">Mod ID</string>
     <string name="workshop_installed_details_size">Size</string>
     <string name="workshop_installed_details_modified">Last modified</string>
+    <string name="workshop_installed_details_metadata_root">Metadata source folder</string>
+    <string name="workshop_installed_details_variants">Included version folders</string>
     <string name="workshop_installed_details_description">Description</string>
     <string name="workshop_installed_details_mod_info">mod.info fields</string>
     <string name="workshop_installed_open_folder_failed">Could not open the Mod folder. Path: %1$s</string>
-    <string name="workshop_installed_delete_title">Delete installed Mod?</string>
-    <string name="workshop_installed_delete_message_format">Delete “%1$s” from instance “%2$s”?\n\nFull path:\n%3$s\n\nOnly this exact Mod folder will be removed.</string>
+    <string name="workshop_installed_delete_title">Delete installed Mod package?</string>
+    <string name="workshop_installed_delete_message_format">Delete “%1$s” from instance “%2$s”?\n\nPackage folder:\n%3$s\n\nThis will remove the entire Mod folder, including all nested versions and shared files.</string>
     <string name="workshop_installed_delete_success">Deleted %1$s.</string>
     <string name="workshop_installed_delete_failed">Could not delete the Mod: %1$s</string>
     <string name="workshop_installed_scan_failed">Could not scan installed Mods: %1$s</string>
