@@ -11,6 +11,8 @@ import android.widget.Toast;
 import android.content.Context;
 import android.view.KeyEvent;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.ArrayList;
 
 public abstract class AbstractControlElement {
@@ -35,6 +37,11 @@ public abstract class AbstractControlElement {
     }
 
     public static AbstractControlElement fromDescription(InputControlsView parentView, ControlElementDescription description) {
+        if (description == null || description.type == null || description.inputType == null
+                || description.icon == null || description.bindings == null) {
+            Log.w(LOG_TAG, "Skipping a control with an unrecognized required enum or binding");
+            return null;
+        }
         switch (description.type) {
             case BUTTON_CIRCLE:
             case BUTTON_RECT:
@@ -266,23 +273,31 @@ public abstract class AbstractControlElement {
     }
 
     public enum Type {
+        @SerializedName(value = "STICK", alternate = {"摇杆"})
         STICK,
         STICK_WASD,
         STICK_MOUSE,
+        @SerializedName(value = "DPAD", alternate = {"方向键"})
         DPAD,
         DPAD_UP,
         DPAD_RIGHT,
         DPAD_DOWN,
         DPAD_LEFT,
+        @SerializedName(value = "BUTTON_RECT", alternate = {"矩形按钮"})
         BUTTON_RECT,
+        @SerializedName(value = "BUTTON_CIRCLE", alternate = {"圆形按钮"})
         BUTTON_CIRCLE,
+        @SerializedName(value = "TOUCHPAD", alternate = {"触摸板"})
         TOUCHPAD,
+        @SerializedName(value = "SCROLL_BAR", alternate = {"滚动条"})
         SCROLL_BAR,
         RADIAL_MENU
     }
 
     public enum InputType {
+        @SerializedName(value = "MNK", alternate = {"键鼠"})
         MNK,
+        @SerializedName(value = "GAMEPAD", alternate = {"手柄"})
         GAMEPAD
     }
     private boolean visible = true;

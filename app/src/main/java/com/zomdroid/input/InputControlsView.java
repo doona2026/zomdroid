@@ -18,6 +18,9 @@ import androidx.annotation.Nullable;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.zomdroid.AppStorage;
 import com.zomdroid.C;
@@ -495,7 +498,7 @@ public class InputControlsView extends View {
         Type type = new TypeToken<ArrayList<ControlElementDescription>>() {}.getType();
         ArrayList<ControlElementDescription> savedDescriptions;
         try {
-            savedDescriptions = gson.fromJson(json, type);
+            savedDescriptions = gson.fromJson(normalizeControlsJsonForLoad(json), type);
         } catch (RuntimeException e) {
             Log.d(LOG_TAG, "Failed to parse controls json: " + e);
             invalidate();
@@ -504,7 +507,8 @@ public class InputControlsView extends View {
 
         if (savedDescriptions != null) {
             for (ControlElementDescription d : savedDescriptions) {
-                this.controlElements.add(AbstractControlElement.fromDescription(this, d));
+                AbstractControlElement element = AbstractControlElement.fromDescription(this, d);
+                if (element != null) this.controlElements.add(element);
             }
         }
 
@@ -513,6 +517,43 @@ public class InputControlsView extends View {
 
         if (persist) {
             saveControlElementsToDisk(); // SharedPreferences + game/controls/controls.json
+        }
+    }
+
+    /**
+     * Sanitizes enum strings from controls.json before Gson resolves them. Some exported
+     * configurations contain invisible C0 control characters before values such as STICK;
+     * Gson then resolves the enum as null and the editor used to crash while creating it.
+     * Chinese aliases are resolved by SerializedName on the enum constants after cleanup.
+     */
+    static String normalizeControlsJsonForLoad(String json) {
+        try {
+            JsonElement root = JsonParser.parseString(json);
+            if (!root.isJsonArray()) return json;
+
+            for (JsonElement item : root.getAsJsonArray()) {
+                if (!item.isJsonObject()) continue;
+                JsonObject control = item.getAsJsonObject();
+                removeControlCharacters(control, "type");
+                removeControlCharacters(control, "inputType");
+                removeControlCharacters(control, "icon");
+                removeControlCharacters(control, "style");
+            }
+            return root.toString();
+        } catch (RuntimeException e) {
+            Log.w(LOG_TAG, "Could not normalize controls json; using the original content", e);
+            return json;
+        }
+    }
+
+    private static void removeControlCharacters(JsonObject control, String field) {
+        JsonElement value = control.get(field);
+        if (value == null || !value.isJsonPrimitive() || !value.getAsJsonPrimitive().isString()) return;
+
+        String original = value.getAsString();
+        String normalized = original.replaceAll("[\\p{Cntrl}]", "").trim();
+        if (!original.equals(normalized)) {
+            control.addProperty(field, normalized);
         }
     }
 

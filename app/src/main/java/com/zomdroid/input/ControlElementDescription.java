@@ -4,12 +4,16 @@ import android.graphics.Color;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.annotations.SerializedName;
 import com.zomdroid.R;
 
 public class ControlElementDescription {
     public enum Icon {
+        @SerializedName(value = "NO_ICON", alternate = {"无"})
         NO_ICON(R.drawable.ic_void),
+        @SerializedName(value = "GAMEPAD_BACK_ICON", alternate = {"返回键"})
         GAMEPAD_BACK_ICON(R.drawable.mt_icon_stack),
+        @SerializedName(value = "GAMEPAD_START_ICON", alternate = {"开始键"})
         GAMEPAD_START_ICON(R.drawable.mt_icon_menu);
         public final int resId;
 
@@ -19,6 +23,7 @@ public class ControlElementDescription {
     }
 
     public enum Style {
+        @SerializedName(value = "OUTLINE", alternate = {"轮廓"})
         OUTLINE,
         FILLED,
         GLASS
