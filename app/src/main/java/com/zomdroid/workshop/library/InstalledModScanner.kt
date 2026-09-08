@@ -112,7 +112,12 @@ class InstalledModScanner {
         children: List<File>,
         nestedRoots: List<NestedModRoot>,
     ): Boolean {
-        if (nestedRoots.size < 2 || nestedRoots.any { !versionDirectoryPattern.matches(it.root.name) }) {
+        if (nestedRoots.size < 2) {
+            return false
+        }
+        val versionRoots = nestedRoots.filter { versionDirectoryPattern.matches(it.root.name) }
+        val commonRoots = nestedRoots.filter { it.root.name.equals("common", ignoreCase = true) }
+        if (versionRoots.isEmpty() || versionRoots.size + commonRoots.size != nestedRoots.size) {
             return false
         }
 

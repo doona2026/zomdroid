@@ -65,6 +65,23 @@ class InstalledModScannerTest {
     }
 
     @Test
+    fun groupsVersionAndCommonRootsWithTheSameModId() {
+        val instanceHome = Files.createTempDirectory("instance").toFile()
+        val mods = instanceHome.resolve("Zomboid/mods")
+        mods.mkdirs()
+        writeMod(mods, "RaccoonCityB42/42", "name=RaccoonCityB42\nid=RaccoonCityB42")
+        writeMod(mods, "RaccoonCityB42/common", "name=RaccoonCityB42\nid=RaccoonCityB42")
+
+        val result = InstalledModScanner().scan("Demo", instanceHome)
+        val mod = result.mods.single()
+
+        assertThat(mod.rootPath).isEqualTo(mods.resolve("RaccoonCityB42").canonicalPath)
+        assertThat(mod.variants.map { it.relativePath }).containsExactly(
+            "RaccoonCityB42/common", "RaccoonCityB42/42",
+        ).inOrder()
+    }
+
+    @Test
     fun readsMetadataThumbnailSizeAndRootLastModified() {
         val instanceHome = Files.createTempDirectory("instance").toFile()
         val mods = instanceHome.resolve("Zomboid/mods")
