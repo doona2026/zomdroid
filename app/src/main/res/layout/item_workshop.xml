@@ -31,6 +31,17 @@
                 android:padding="8dp"
                 android:src="@drawable/ic_favorite_outline"
                 android:tint="@null" />
+            <ImageButton
+                android:id="@+id/workshop_item_download"
+                style="@style/AppTheme.ImageButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/workshop_download"
+                android:padding="8dp"
+                android:src="@drawable/ic_workshop_download"
+                android:tint="?attr/colorOnSurfaceVariant" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

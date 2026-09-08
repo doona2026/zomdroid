@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.zomdroid.R;
 import com.zomdroid.steam.SteamModDownloader;
+import com.zomdroid.workshop.auth.SteamAuthRuntime;
 import com.zomdroid.workshop.data.WorkshopBrowseItem;
 import com.zomdroid.workshop.data.WorkshopBrowsePage;
 import com.zomdroid.workshop.data.WorkshopCatalogRuntime;
@@ -219,6 +220,23 @@ public class WorkshopFragment extends Fragment {
                 .show();
     }
 
+    private void enqueueItem(WorkshopBrowseItem item) {
+        DownloadCenterManager manager = DownloadCenterManagerProvider.get(requireContext());
+        Bundle args = getArguments();
+        manager.enqueueForInstanceWithMetadata(
+                WorkshopCatalogRuntime.appId(item),
+                WorkshopCatalogRuntime.publishedFileId(item),
+                item.getTitle(),
+                item.getDescriptionSnippet(),
+                item.getPreviewImageUrl(),
+                null,
+                SteamAuthRuntime.currentAccountId(requireContext()),
+                args == null ? null : args.getString(ARG_TARGET_INSTANCE_NAME),
+                args == null ? null : args.getString(ARG_TARGET_BUILD_VERSION));
+        WorkshopDownloadForegroundService.start(requireContext());
+        Toast.makeText(requireContext(), R.string.workshop_enqueued, Toast.LENGTH_SHORT).show();
+    }
+
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -362,6 +380,7 @@ public class WorkshopFragment extends Fragment {
         private final TextView author;
         private final TextView description;
         private final ImageButton favorite;
+        private final ImageButton download;
         WorkshopHolder(View view) {
             super(view);
             image = view.findViewById(R.id.workshop_item_image);
@@ -369,8 +388,10 @@ public class WorkshopFragment extends Fragment {
             author = view.findViewById(R.id.workshop_item_author);
             description = view.findViewById(R.id.workshop_item_description);
             favorite = view.findViewById(R.id.workshop_item_favorite);
+            download = view.findViewById(R.id.workshop_item_download);
             view.findViewById(R.id.workshop_item_details).setOnClickListener(v -> openDetails());
             favorite.setOnClickListener(v -> toggleFavorite());
+            download.setOnClickListener(v -> enqueueItem());
             view.setOnClickListener(v -> openDetails());
         }
         void bind(WorkshopBrowseItem item) {
@@ -408,6 +429,10 @@ public class WorkshopFragment extends Fragment {
                     ? R.string.workshop_favorite_remove
                     : R.string.workshop_favorite_add));
             favorite.setSelected(added);
+        }
+        private void enqueueItem() {
+            WorkshopBrowseItem item = (WorkshopBrowseItem) itemView.getTag();
+            if (item != null) WorkshopFragment.this.enqueueItem(item);
         }
         private void openDetails() {
             WorkshopBrowseItem item = (WorkshopBrowseItem) itemView.getTag();

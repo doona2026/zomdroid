@@ -45,11 +45,19 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import kotlinx.coroutines.Job;
 
 /** Displays and controls persistent Workshop tasks; downloading itself belongs to the service. */
 public class WorkshopDownloadCenterFragment extends Fragment {
+    private static final Pattern RESOLVING_METADATA_LOG = Pattern.compile(
+            "Resolving workshop metadata for app=(\\d+) publishedFileId=(\\d+)");
+    private static final Pattern UGC_MANIFEST_LOG = Pattern.compile(
+            "Using UGC manifest path manifest=(\\d+) depot=(\\d+)");
+    private static final Pattern DOWNLOADED_FILES_LOG = Pattern.compile(
+            "Download finished with (\\d+) discovered files");
     private LinearLayout tasksContainer;
     private DownloadCenterManager manager;
     private ModLibraryRepository library;
@@ -176,7 +184,7 @@ public class WorkshopDownloadCenterFragment extends Fragment {
                 ? getString(R.string.workshop_download_center_item, task.getPublishedFileId())
                 : task.getTitle());
         status.setText(formatStatus(task));
-        log.setText(String.join("\n", task.getLogs()));
+        log.setText(formatLogs(task.getLogs()));
         Long totalBytes = task.getTotalBytes();
         long writtenBytes = Math.max(0L, task.getWrittenBytes());
         if (totalBytes != null && totalBytes > 0) {
@@ -236,17 +244,72 @@ public class WorkshopDownloadCenterFragment extends Fragment {
 
     private String formatStatus(DownloadCenterTask task) {
         if (task.getState() == DownloadCenterTaskState.Failed && task.getErrorMessage() != null) {
-            return task.getState().name() + " — " + task.getErrorMessage();
+            return getString(R.string.workshop_download_status_failed_with_error,
+                    task.getErrorMessage());
         }
-        if (task.getState() == DownloadCenterTaskState.Success) {
-            return task.getState().name();
-        }
+        String state = localizeDownloadLabel(task.getState().name());
         String phase = task.getPhase();
         if (phase == null || phase.trim().isEmpty()
                 || task.getState().name().equalsIgnoreCase(phase.trim())) {
-            return task.getState().name();
+            return state;
         }
-        return String.format(Locale.US, "%s · %s", task.getState().name(), phase);
+        return getString(R.string.workshop_download_status_format,
+                state, localizeDownloadLabel(phase.trim()));
+    }
+
+    private String formatLogs(List<String> logs) {
+        ArrayList<String> localized = new ArrayList<>(logs.size());
+        for (String log : logs) localized.add(localizeDownloadLog(log));
+        return String.join("\n", localized);
+    }
+
+    private String localizeDownloadLabel(String label) {
+        switch (label) {
+            case "Queued": return getString(R.string.workshop_download_status_queued);
+            case "Running": return getString(R.string.workshop_download_status_running);
+            case "Paused": return getString(R.string.workshop_download_status_paused);
+            case "Success": return getString(R.string.workshop_download_status_success);
+            case "Failed": return getString(R.string.workshop_download_status_failed);
+            case "Cancelled": return getString(R.string.workshop_download_status_cancelled);
+            case "Idle": return getString(R.string.workshop_download_status_idle);
+            case "Starting": return getString(R.string.workshop_download_status_starting);
+            case "Resolving": return getString(R.string.workshop_download_status_resolving);
+            case "Connecting": return getString(R.string.workshop_download_status_connecting);
+            case "Downloading": return getString(R.string.workshop_download_status_downloading);
+            default: return label;
+        }
+    }
+
+    private String localizeDownloadLog(String log) {
+        Matcher resolving = RESOLVING_METADATA_LOG.matcher(log);
+        if (resolving.matches()) {
+            return getString(R.string.workshop_download_log_resolving_metadata,
+                    resolving.group(1), resolving.group(2));
+        }
+        if (log.equals("Metadata saved to metadata.json")) {
+            return getString(R.string.workshop_download_log_metadata_saved);
+        }
+        Matcher manifest = UGC_MANIFEST_LOG.matcher(log);
+        if (manifest.matches()) {
+            return getString(R.string.workshop_download_log_using_manifest,
+                    manifest.group(1), manifest.group(2));
+        }
+        if (log.equals("Loading Steam CM websocket candidates")) {
+            return getString(R.string.workshop_download_log_loading_cm_candidates);
+        }
+        if (log.equals("Using file_url direct download path")) {
+            return getString(R.string.workshop_download_log_using_direct_download);
+        }
+        Matcher downloadedFiles = DOWNLOADED_FILES_LOG.matcher(log);
+        if (downloadedFiles.matches()) {
+            return getString(R.string.workshop_download_log_finished,
+                    downloadedFiles.group(1));
+        }
+        if (log.startsWith("Download failed: ")) {
+            return getString(R.string.workshop_download_log_failed,
+                    log.substring("Download failed: ".length()));
+        }
+        return log;
     }
 
     private static String formatBytes(long bytes) {
