@@ -1,6 +1,7 @@
 package com.zomdroid.fragments;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -28,6 +29,7 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.card.MaterialCardView;
 import com.zomdroid.R;
 import com.zomdroid.workshop.data.WorkshopBrowseItem;
 import com.zomdroid.workshop.data.WorkshopCatalogRuntime;
@@ -47,6 +49,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WorkshopDetailFragment extends Fragment {
+    private static final int COLLAPSED_CHANGE_NOTE_SEGMENTS = 5;
     private WorkshopItemDetail detail;
     private TextView status;
     private RecyclerView image;
@@ -55,6 +58,8 @@ public class WorkshopDetailFragment extends Fragment {
     private WorkshopImageAdapter imageAdapter;
     private Button download;
     private Button dependencyDownload;
+    private Button changeNotesToggle;
+    private boolean changeNotesExpanded;
     private WorkshopFavoritesRepository favoritesRepository;
     private MenuItem favoriteMenuItem;
 
@@ -83,10 +88,15 @@ public class WorkshopDetailFragment extends Fragment {
         });
         download = view.findViewById(R.id.workshop_detail_download);
         dependencyDownload = view.findViewById(R.id.workshop_detail_download_dependencies);
+        changeNotesToggle = view.findViewById(R.id.workshop_detail_changes_toggle);
         download.setEnabled(false);
         view.findViewById(R.id.workshop_detail_open_steam).setOnClickListener(v -> openSteamPage());
         download.setOnClickListener(v -> enqueueDetail());
         dependencyDownload.setOnClickListener(v -> confirmDependencyDownload());
+        changeNotesToggle.setOnClickListener(v -> {
+            changeNotesExpanded = !changeNotesExpanded;
+            if (detail != null) renderChangeNotes(detail.getChangeNotes());
+        });
         load();
         return view;
     }
@@ -139,6 +149,7 @@ public class WorkshopDetailFragment extends Fragment {
     }
 
     private void render(WorkshopItemDetail value) {
+        changeNotesExpanded = false;
         ((TextView) requireView().findViewById(R.id.workshop_detail_title)).setText(value.getTitle());
         ((TextView) requireView().findViewById(R.id.workshop_detail_author)).setText(getString(R.string.workshop_author_format, value.getAuthorName()));
         String size = value.getFileSizeBytes() == null ? "?" : formatBytes(value.getFileSizeBytes());
@@ -151,7 +162,7 @@ public class WorkshopDetailFragment extends Fragment {
                         WorkshopCatalogRuntime.detailPublishedFileId(value)));
         ((TextView) requireView().findViewById(R.id.workshop_detail_tags)).setText(TextUtils.join(" · ", value.getTags()));
         renderDescription(value);
-        ((TextView) requireView().findViewById(R.id.workshop_detail_changes)).setText(value.getChangeNotes());
+        renderChangeNotes(value.getChangeNotes());
         List<String> galleryImageUrls = value.getGalleryImageUrls();
         if (galleryImageUrls.isEmpty() && !value.getPreviewImageUrl().isBlank()) {
             galleryImageUrls = java.util.Collections.singletonList(value.getPreviewImageUrl());
@@ -223,42 +234,104 @@ public class WorkshopDetailFragment extends Fragment {
 
     private void renderDescription(WorkshopItemDetail value) {
         LinearLayout container = requireView().findViewById(R.id.workshop_detail_description);
+        View title = requireView().findViewById(R.id.workshop_detail_description_title);
+        View card = requireView().findViewById(R.id.workshop_detail_description_card);
         container.removeAllViews();
-        List<WorkshopDescriptionBlock> blocks = value.getDescriptionBlocks();
-        if (blocks.isEmpty()) {
-            addDescriptionText(container, value.getDescription());
-            container.post(() -> MotionAnimations.animateFirstVisibleChildren(container));
+        List<DescriptionSegment> segments = descriptionSegments(value);
+        if (segments.isEmpty()) {
+            title.setVisibility(View.GONE);
+            card.setVisibility(View.GONE);
             return;
         }
-        for (WorkshopDescriptionBlock block : blocks) {
-            if (!block.getText().isBlank()) {
-                addDescriptionText(container, block.getText());
-            }
-            if (block.getImageUrl() != null && !block.getImageUrl().isBlank()) {
-                ImageView imageView = new ImageView(requireContext());
-                imageView.setLayoutParams(new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT));
-                imageView.setAdjustViewBounds(true);
-                imageView.setMaxHeight(dp(420));
-                imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                imageView.setContentDescription(getString(R.string.workshop_description_image));
-                container.addView(imageView);
-                WorkshopCatalogRuntime.loadImage(requireContext(), block.getImageUrl(), imageView);
+        title.setVisibility(View.VISIBLE);
+        card.setVisibility(View.VISIBLE);
+        boolean firstBodyParagraph = true;
+        for (int index = 0; index < segments.size(); index++) {
+            DescriptionSegment segment = segments.get(index);
+            if (segment.imageUrl != null) addDescriptionImage(container, segment.imageUrl);
+            else {
+                boolean heading = isDescriptionHeading(segment.text);
+                addDescriptionText(container, segment.text, heading, firstBodyParagraph && !heading);
+                if (!heading) firstBodyParagraph = false;
             }
         }
         container.post(() -> MotionAnimations.animateFirstVisibleChildren(container));
     }
 
-    private void addDescriptionText(LinearLayout container, String text) {
+    private List<DescriptionSegment> descriptionSegments(WorkshopItemDetail value) {
+        ArrayList<DescriptionSegment> segments = new ArrayList<>();
+        List<WorkshopDescriptionBlock> blocks = value.getDescriptionBlocks();
+        if (blocks.isEmpty()) {
+            appendTextSegments(segments, value.getDescription());
+            return segments;
+        }
+        for (WorkshopDescriptionBlock block : blocks) {
+            appendTextSegments(segments, block.getText());
+            if (block.getImageUrl() != null && !block.getImageUrl().isBlank()) {
+                segments.add(new DescriptionSegment(null, block.getImageUrl()));
+            }
+        }
+        return segments;
+    }
+
+    private void appendTextSegments(List<DescriptionSegment> segments, String text) {
+        if (text == null || text.isBlank()) return;
+        for (String paragraph : text.trim().split("\\n\\s*\\n")) {
+            String normalized = paragraph.trim();
+            if (!normalized.isEmpty()) segments.add(new DescriptionSegment(normalized, null));
+        }
+    }
+
+    private boolean isDescriptionHeading(String text) {
+        return text.length() <= 48
+                && !text.startsWith("•")
+                && !text.startsWith("-")
+                && !text.contains("\n")
+                && !text.matches(".*[.!?。！？:]$");
+    }
+
+    private void addDescriptionText(LinearLayout container, String text, boolean heading, boolean lead) {
         TextView textView = new TextView(requireContext());
-        textView.setLayoutParams(new LinearLayout.LayoutParams(
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-        textView.setTextSize(15);
-        textView.setLineSpacing(dp(4), 1f);
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0, heading ? dp(12) : 0, 0, heading ? dp(6) : dp(14));
+        textView.setLayoutParams(params);
+        textView.setTextSize(heading ? 17 : lead ? 17 : 16);
+        textView.setTypeface(heading ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
+        textView.setLineSpacing(dp(5), 1f);
         textView.setText(text);
         container.addView(textView);
+    }
+
+    private void addDescriptionImage(LinearLayout container, String imageUrl) {
+        MaterialCardView imageCard = new MaterialCardView(requireContext());
+        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        cardParams.setMargins(0, dp(4), 0, dp(14));
+        imageCard.setLayoutParams(cardParams);
+        imageCard.setRadius(dp(12));
+        imageCard.setCardElevation(0f);
+        ImageView imageView = new ImageView(requireContext());
+        imageView.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        imageView.setAdjustViewBounds(true);
+        imageView.setMaxHeight(dp(420));
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        imageView.setContentDescription(getString(R.string.workshop_description_image));
+        imageCard.addView(imageView);
+        container.addView(imageCard);
+        WorkshopCatalogRuntime.loadImage(requireContext(), imageUrl, imageView);
+    }
+
+    private static final class DescriptionSegment {
+        final String text;
+        final String imageUrl;
+
+        DescriptionSegment(String text, String imageUrl) {
+            this.text = text;
+            this.imageUrl = imageUrl;
+        }
     }
 
     private void updateImagePage() {
@@ -360,6 +433,53 @@ public class WorkshopDetailFragment extends Fragment {
         container.post(() -> MotionAnimations.animateFirstVisibleChildren(container));
     }
 
+    private void renderChangeNotes(String changeNotes) {
+        View title = requireView().findViewById(R.id.workshop_detail_changes_title);
+        View card = requireView().findViewById(R.id.workshop_detail_changes);
+        LinearLayout container = requireView().findViewById(R.id.workshop_detail_changes_content);
+        container.removeAllViews();
+        if (changeNotes == null || changeNotes.isBlank()) {
+            title.setVisibility(View.GONE);
+            card.setVisibility(View.GONE);
+            return;
+        }
+        title.setVisibility(View.VISIBLE);
+        card.setVisibility(View.VISIBLE);
+        List<String> segments = new ArrayList<>();
+        for (String paragraph : changeNotes.trim().split("\\n\\s*\\n")) {
+            String text = paragraph.trim();
+            if (!text.isEmpty()) segments.add(text);
+        }
+        int displayedCount = changeNotesExpanded ? segments.size()
+                : Math.min(COLLAPSED_CHANGE_NOTE_SEGMENTS, segments.size());
+        for (int index = 0; index < displayedCount; index++) {
+            addChangeNote(container, segments.get(index));
+        }
+        boolean canExpand = segments.size() > COLLAPSED_CHANGE_NOTE_SEGMENTS;
+        changeNotesToggle.setVisibility(canExpand ? View.VISIBLE : View.GONE);
+        if (canExpand) {
+            changeNotesToggle.setText(changeNotesExpanded
+                    ? R.string.workshop_change_notes_collapse
+                    : R.string.workshop_change_notes_expand);
+        }
+        container.post(() -> MotionAnimations.animateFirstVisibleChildren(container));
+    }
+
+    private void addChangeNote(LinearLayout container, String text) {
+        boolean timestamp = text.startsWith("###");
+        boolean version = text.matches("(?i)^v?\\d+(?:\\.\\d+)+(?:\\s.*)?$");
+        TextView textView = new TextView(requireContext());
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0, timestamp ? 0 : dp(4), 0, dp(14));
+        textView.setLayoutParams(params);
+        textView.setText(timestamp ? text.substring(3).trim() : text);
+        textView.setTextSize(timestamp ? 16 : version ? 17 : 15);
+        textView.setTypeface(timestamp || version ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
+        if (!timestamp && !version) textView.setLineSpacing(dp(4), 1f);
+        container.addView(textView);
+    }
+
     private void renderComments(List<WorkshopComment> comments) {
         LinearLayout container = requireView().findViewById(R.id.workshop_detail_comments);
         container.removeAllViews();
@@ -385,7 +505,7 @@ public class WorkshopDetailFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        MotionAnimations.cancel(image, status, download, dependencyDownload);
+        MotionAnimations.cancel(image, status, download, dependencyDownload, changeNotesToggle);
         image = null;
         imagePage = null;
         imageLayoutManager = null;
@@ -393,6 +513,7 @@ public class WorkshopDetailFragment extends Fragment {
         status = null;
         download = null;
         dependencyDownload = null;
+        changeNotesToggle = null;
         favoritesRepository = null;
         super.onDestroyView();
     }
