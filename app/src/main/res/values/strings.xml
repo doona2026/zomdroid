@@ -805,6 +805,7 @@
     <string name="workshop_meta_format">Size: %1$s · Subscriptions: %2$s · Views: %3$s</string>
     <string name="workshop_change_notes">Change log</string>
     <string name="workshop_dependencies">Dependencies</string>
+    <string name="workshop_dependencies_none">None</string>
     <string name="workshop_comments">Comments</string>
     <string name="workshop_comments_unavailable">Comments are not included in this response.</string>
     <string name="workshop_detail_missing">Workshop item information is missing.</string>

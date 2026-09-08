@@ -302,7 +302,15 @@
         android:id="@+id/workshop_detail_fragment"
         android:name="com.zomdroid.fragments.WorkshopDetailFragment"
         android:label="@string/workshop_detail_title"
-        tools:layout="@layout/fragment_workshop_detail" />
+        tools:layout="@layout/fragment_workshop_detail">
+        <action
+            android:id="@+id/action_workshop_dependency_detail"
+            app:destination="@id/workshop_detail_fragment"
+            app:enterAnim="@anim/motion_forward_enter"
+            app:exitAnim="@anim/motion_forward_exit"
+            app:popEnterAnim="@anim/motion_back_enter"
+            app:popExitAnim="@anim/motion_back_exit" />
+    </fragment>
 
     <fragment
         android:id="@+id/workshop_account_fragment"

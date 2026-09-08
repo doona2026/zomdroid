@@ -588,6 +588,7 @@
     <string name="workshop_meta_format">大小：%1$s · 订阅：%2$s · 浏览：%3$s</string>
     <string name="workshop_change_notes">更新日志</string>
     <string name="workshop_dependencies">依赖项</string>
+    <string name="workshop_dependencies_none">无</string>
     <string name="workshop_comments">评论</string>
     <string name="workshop_comments_unavailable">此响应未包含评论。</string>
     <string name="workshop_detail_missing">缺少创意工坊项目信息。</string>

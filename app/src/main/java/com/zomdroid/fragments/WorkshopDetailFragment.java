@@ -23,6 +23,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
@@ -424,13 +425,40 @@ public class WorkshopDetailFragment extends Fragment {
     private void renderDependencies(List<WorkshopRequiredItem> dependencies) {
         LinearLayout container = requireView().findViewById(R.id.workshop_detail_dependencies);
         container.removeAllViews();
+        if (dependencies.isEmpty()) {
+            TextView empty = new TextView(requireContext());
+            empty.setText(R.string.workshop_dependencies_none);
+            empty.setTextSize(16);
+            container.addView(empty);
+            return;
+        }
         for (WorkshopRequiredItem dependency : dependencies) {
             View row = getLayoutInflater().inflate(R.layout.item_workshop_dependency, container, false);
             ((TextView) row.findViewById(R.id.workshop_dependency_title)).setText(dependency.getTitle());
+            row.setOnClickListener(v -> openDependencyDetail(dependency));
             row.findViewById(R.id.workshop_dependency_download).setOnClickListener(v -> enqueue(WorkshopCatalogRuntime.requiredPublishedFileId(dependency), dependency.getTitle()));
             container.addView(row);
         }
         container.post(() -> MotionAnimations.animateFirstVisibleChildren(container));
+    }
+
+    private void openDependencyDetail(WorkshopRequiredItem dependency) {
+        Bundle args = new Bundle();
+        args.putInt("app_id", WorkshopCatalogRuntime.requiredAppId(dependency));
+        args.putLong("published_file_id", WorkshopCatalogRuntime.requiredPublishedFileId(dependency));
+        args.putString("title", dependency.getTitle());
+        args.putString("author", dependency.getAuthorName());
+        args.putString("preview_url", dependency.getPreviewImageUrl());
+        args.putString("description", dependency.getDescriptionSnippet());
+        Bundle parent = getArguments();
+        if (parent != null) {
+            args.putString(WorkshopFragment.ARG_TARGET_INSTANCE_NAME,
+                    parent.getString(WorkshopFragment.ARG_TARGET_INSTANCE_NAME));
+            args.putString(WorkshopFragment.ARG_TARGET_BUILD_VERSION,
+                    parent.getString(WorkshopFragment.ARG_TARGET_BUILD_VERSION));
+        }
+        NavHostFragment.findNavController(this).navigate(
+                R.id.action_workshop_dependency_detail, args, MotionAnimations.forwardNavOptions());
     }
 
     private void renderChangeNotes(String changeNotes) {
