@@ -316,7 +316,7 @@
     <string name="version_check_error">无法检查更新\n当前版本：%1$s</string>
     <string name="version_check_ahead_of_release">已安装：%1$s\n此版本比最新发布版本（%2$s）更新</string>
     <string name="nav_menu_version">检查更新</string>
-    <string name="modified_github_repo">本魔改版启动器Github仓库地址：\nhttps://github.com/doona2026/zomdroid/tree/Modified</string>
+    <string name="modified_github_repo">本修改版启动器Github仓库地址：\nhttps://github.com/doona2026/zomdroid/tree/Modified</string>
 
     <!-- Bug report -->
     <string name="nav_bug_report">报告错误</string>

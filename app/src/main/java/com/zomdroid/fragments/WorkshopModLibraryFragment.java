@@ -31,6 +31,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.zomdroid.C;
 import com.zomdroid.R;
@@ -71,8 +73,10 @@ public class WorkshopModLibraryFragment extends Fragment {
     private View installedSection;
     private View sharedSection;
     private MaterialButtonToggleGroup modeGroup;
+    private MaterialButtonToggleGroup sharedModeGroup;
     private LinearLayout list;
-    private LinearLayout installedList;
+    private RecyclerView installedList;
+    private InstalledModAdapter installedAdapter;
     private Spinner instanceSpinner;
     private Spinner sortSpinner;
     private EditText installedSearch;
@@ -96,6 +100,7 @@ public class WorkshopModLibraryFragment extends Fragment {
     private long installedScanGeneration;
     private long installedLastScanAt;
     private boolean suppressInstanceSelection;
+    private boolean suppressModeSelection;
     private boolean showingInstalledMods = true;
 
     @Nullable
@@ -104,17 +109,22 @@ public class WorkshopModLibraryFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_workshop_mod_library, container, false);
         installedSection = view.findViewById(R.id.workshop_installed_section);
         sharedSection = view.findViewById(R.id.workshop_shared_section);
-        modeGroup = view.findViewById(R.id.workshop_library_mode_group);
+        sharedModeGroup = sharedSection.findViewById(R.id.workshop_library_mode_group);
         list = view.findViewById(R.id.workshop_library_list);
         installedList = view.findViewById(R.id.workshop_installed_list);
-        instanceSpinner = view.findViewById(R.id.workshop_installed_instance_spinner);
-        sortSpinner = view.findViewById(R.id.workshop_installed_sort_spinner);
-        installedSearch = view.findViewById(R.id.workshop_installed_search_et);
-        installedSummary = view.findViewById(R.id.workshop_installed_summary);
-        installedEmpty = view.findViewById(R.id.workshop_installed_empty);
-        installedProgress = view.findViewById(R.id.workshop_installed_progress);
-        installedRefresh = view.findViewById(R.id.workshop_installed_refresh_ib);
-        installedReturnLauncher = view.findViewById(R.id.workshop_installed_return_launcher);
+        installedList.setLayoutManager(new LinearLayoutManager(requireContext()));
+        View installedHeader = inflater.inflate(R.layout.item_installed_mod_header, installedList, false);
+        modeGroup = installedHeader.findViewById(R.id.workshop_library_mode_group);
+        instanceSpinner = installedHeader.findViewById(R.id.workshop_installed_instance_spinner);
+        sortSpinner = installedHeader.findViewById(R.id.workshop_installed_sort_spinner);
+        installedSearch = installedHeader.findViewById(R.id.workshop_installed_search_et);
+        installedSummary = installedHeader.findViewById(R.id.workshop_installed_summary);
+        installedEmpty = installedHeader.findViewById(R.id.workshop_installed_empty);
+        installedProgress = installedHeader.findViewById(R.id.workshop_installed_progress);
+        installedRefresh = installedHeader.findViewById(R.id.workshop_installed_refresh_ib);
+        installedReturnLauncher = installedHeader.findViewById(R.id.workshop_installed_return_launcher);
+        installedAdapter = new InstalledModAdapter(installedHeader);
+        installedList.setAdapter(installedAdapter);
         repository = new ModLibraryRepository(requireContext());
 
         setupModeToggle();
@@ -131,28 +141,47 @@ public class WorkshopModLibraryFragment extends Fragment {
         super.onResume();
         if (installedList != null && showingInstalledMods) {
             refreshInstances();
-            refreshInstalledMods();
+            refreshInstalledModsIfNeeded();
         }
     }
 
     private void setupModeToggle() {
-        modeGroup.check(R.id.workshop_library_mode_installed);
-        modeGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            if (!isChecked) return;
-            boolean showInstalled = checkedId == R.id.workshop_library_mode_installed;
-            if (showInstalled == showingInstalledMods) return;
-            showingInstalledMods = showInstalled;
-            updateModeVisibility();
-            if (showInstalled) {
-                refreshInstances();
-                refreshInstalledMods();
-            } else {
-                // Let an in-flight scan finish in the background, but never let it update a
-                // hidden/stale view after the user switched to the shared library.
-                installedScanGeneration++;
-            }
-        });
+        addModeToggleListener(modeGroup);
+        addModeToggleListener(sharedModeGroup);
+        syncModeToggles();
         updateModeVisibility();
+    }
+
+    private void addModeToggleListener(MaterialButtonToggleGroup group) {
+        group.addOnButtonCheckedListener((ignored, checkedId, isChecked) -> {
+            if (suppressModeSelection || !isChecked) return;
+            setShowingInstalledMods(checkedId == R.id.workshop_library_mode_installed);
+        });
+    }
+
+    private void setShowingInstalledMods(boolean showInstalled) {
+        if (showInstalled == showingInstalledMods) return;
+        showingInstalledMods = showInstalled;
+        syncModeToggles();
+        updateModeVisibility();
+        if (showInstalled) {
+            refreshInstances();
+            refreshInstalledModsIfNeeded();
+        } else {
+            // Let an in-flight scan finish in the background, but never let it update a
+            // hidden/stale view after the user switched to the shared library.
+            installedScanGeneration++;
+        }
+    }
+
+    private void syncModeToggles() {
+        suppressModeSelection = true;
+        int checkedId = showingInstalledMods
+                ? R.id.workshop_library_mode_installed
+                : R.id.workshop_library_mode_shared;
+        modeGroup.check(checkedId);
+        sharedModeGroup.check(checkedId);
+        suppressModeSelection = false;
     }
 
     private void updateModeVisibility() {
@@ -185,9 +214,13 @@ public class WorkshopModLibraryFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (suppressInstanceSelection || position < 0 || position >= instances.size()) return;
-                selectedInstance = instances.get(position);
+                GameInstance nextInstance = instances.get(position);
+                boolean instanceChanged = selectedInstance == null ||
+                        !nextInstance.getName().equals(selectedInstance.getName());
+                selectedInstance = nextInstance;
                 requireContext().getSharedPreferences(C.shprefs.NAME, android.content.Context.MODE_PRIVATE)
                         .edit().putString(SELECTED_INSTANCE_PREF, selectedInstance.getName()).apply();
+                if (!instanceChanged) return;
                 installedMods = Collections.emptyList();
                 installedScanResult = null;
                 renderInstalledStateForInstance();
@@ -293,6 +326,10 @@ public class WorkshopModLibraryFragment extends Fragment {
         });
     }
 
+    private void refreshInstalledModsIfNeeded() {
+        if (installedScanResult == null) refreshInstalledMods();
+    }
+
     private void renderInstalledStateForInstance() {
         if (selectedInstance == null) {
             instanceSpinner.setVisibility(View.GONE);
@@ -301,7 +338,7 @@ public class WorkshopModLibraryFragment extends Fragment {
             installedEmpty.setVisibility(View.VISIBLE);
             installedReturnLauncher.setVisibility(View.VISIBLE);
             installedProgress.setVisibility(View.GONE);
-            installedList.removeAllViews();
+            installedAdapter.setItems(Collections.emptyList());
             installedList.setVisibility(View.GONE);
             return;
         }
@@ -310,11 +347,11 @@ public class WorkshopModLibraryFragment extends Fragment {
         installedReturnLauncher.setVisibility(View.GONE);
         installedList.setVisibility(View.VISIBLE);
         if (installedScanResult == null) {
-            installedList.removeAllViews();
+            installedAdapter.setItems(Collections.emptyList());
             installedEmpty.setVisibility(View.GONE);
             installedSummary.setText(R.string.workshop_installed_scanning);
         } else if (!installedScanResult.getModsDirectoryExists()) {
-            installedList.removeAllViews();
+            installedAdapter.setItems(Collections.emptyList());
             installedSummary.setText(getString(R.string.workshop_installed_summary_directory_missing,
                     selectedInstance.getName()));
             installedEmpty.setText(R.string.workshop_installed_missing_directory);
@@ -334,8 +371,8 @@ public class WorkshopModLibraryFragment extends Fragment {
         List<InstalledMod> visible = InstalledModQuery.filterAndSort(
                 installedMods, installedSearch == null ? "" : installedSearch.getText().toString(), selectedSortOrder);
         installedList.setTag(R.id.motion_content_animated, null);
-        installedList.removeAllViews();
         if (visible.isEmpty()) {
+            installedAdapter.setItems(Collections.emptyList());
             installedEmpty.setText(installedMods.isEmpty()
                     ? R.string.workshop_installed_empty
                     : R.string.workshop_installed_no_matches);
@@ -343,12 +380,11 @@ public class WorkshopModLibraryFragment extends Fragment {
             return;
         }
         installedEmpty.setVisibility(View.GONE);
-        for (InstalledMod mod : visible) addInstalledMod(mod);
+        installedAdapter.setItems(visible);
         installedList.post(() -> MotionAnimations.animateFirstVisibleChildren(installedList));
     }
 
-    private void addInstalledMod(InstalledMod mod) {
-        View row = getLayoutInflater().inflate(R.layout.item_installed_mod, installedList, false);
+    private void bindInstalledMod(View row, InstalledMod mod) {
         ImageView icon = row.findViewById(R.id.installed_mod_icon);
         icon.setImageResource(R.drawable.mt_icon_mods);
         if (mod.getThumbnailPath() != null) {
@@ -365,7 +401,6 @@ public class WorkshopModLibraryFragment extends Fragment {
         ((TextView) row.findViewById(R.id.installed_mod_status)).setText(installedStatus(mod));
         row.findViewById(R.id.installed_mod_card).setOnClickListener(v -> showInstalledModDetails(mod));
         row.findViewById(R.id.installed_mod_more_ib).setOnClickListener(v -> showInstalledModMenu(v, mod));
-        installedList.addView(row);
     }
 
     private String installedStatus(InstalledMod mod) {
@@ -521,12 +556,61 @@ public class WorkshopModLibraryFragment extends Fragment {
         });
     }
 
+    private final class InstalledModAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+        private static final int TYPE_HEADER = 0;
+        private static final int TYPE_ITEM = 1;
+        private final View header;
+        private List<InstalledMod> items = Collections.emptyList();
+
+        InstalledModAdapter(View header) {
+            this.header = header;
+        }
+
+        void setItems(List<InstalledMod> nextItems) {
+            items = new ArrayList<>(nextItems);
+            notifyDataSetChanged();
+        }
+
+        @NonNull
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            if (viewType == TYPE_HEADER) return new RecyclerView.ViewHolder(header) { };
+            View row = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_installed_mod, parent, false);
+            return new InstalledModHolder(row);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+            if (getItemViewType(position) == TYPE_ITEM) {
+                bindInstalledMod(holder.itemView, items.get(position - 1));
+            }
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            return position == 0 ? TYPE_HEADER : TYPE_ITEM;
+        }
+
+        @Override
+        public int getItemCount() {
+            return items.size() + 1;
+        }
+    }
+
+    private static final class InstalledModHolder extends RecyclerView.ViewHolder {
+        InstalledModHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
+
     @Override
     public void onDestroyView() {
         installedScanGeneration++;
         MotionAnimations.cancel(list, installedList);
         list = null;
         installedList = null;
+        installedAdapter = null;
         instanceSpinner = null;
         sortSpinner = null;
         installedSearch = null;
@@ -538,6 +622,7 @@ public class WorkshopModLibraryFragment extends Fragment {
         installedSection = null;
         sharedSection = null;
         modeGroup = null;
+        sharedModeGroup = null;
         super.onDestroyView();
     }
 
